@@ -1,35 +1,44 @@
 ESP MANAGER PROJEKTUEBERGABE
 ============================
-Stand: 0.5.1 / 0.5.1-dev
+Stand: 0.5.2 / 0.5.2-dev
 
 ZIELBILD
-Home-Assistant-Add-on zur zentralen Verwaltung von Arduino-C++-basierten ESP-Projekten mit automatischem Agent für WLAN, MQTT, Logs und OTA. Erster späterer Hardwaretest ist der vorhandene Sagemcom/Netz-Niederoesterreich-M-Bus-Zaehler-ESP.
+Home-Assistant-Add-on zur zentralen Verwaltung von Arduino-C++-basierten ESP-Projekten. Die Anwendungslogik bleibt im Benutzerprojekt; der ESPManager-Agent stellt langfristig WLAN, MQTT, Diagnose, Logs und OTA zentral bereit. Erster späterer Hardwaretest bleibt der Sagemcom/Netz-Niederoesterreich-M-Bus-Zaehler-ESP.
 
-AKTUELLER FUNKTIONSUMFANG
+BESTEHENDER FUNKTIONSUMFANG
 - Projektanlage, Editor und geschützte Systemdateien
-- Projekt-Einstellungen
-- Erweiterte PlatformIO-Bibliotheken, Build-Flags und INI-Import
-- Live-Build, Abbruch und Build-Historie
+- Projekt-Einstellungen sowie PlatformIO-Expertenbereich
+- Bibliotheken, Build-Flags und platformio.ini-Import
+- Live-Build, Build-Abbruch und Build-Historie
 - Projektbackup, Export, Import, Duplizieren und Löschen
-- USB/OTA-Prototyp bleibt konzeptionell erhalten, Hardwaretest zurückgestellt
+- Agent-API einschließlich publishSensor zur Kompatibilität vorhandener Projekte
+- USB/OTA-Prototyp, derzeit ohne Hardwaretest
 
-REGRESSION 0.5.0 UND LOESUNG 0.5.1
-1. Bestehende device.cpp verwendete ESPManager.publishSensor(), die Agent-API 0.5.0 hatte die Methode versehentlich entfernt. 0.5.1 stellt die Methode wieder her. Grundregel: öffentliche Agent-Funktionen bei Neugenerierung niemals ungefragt entfernen.
-2. Datei-Löschen war beim Umbau der 0.5.0-UI verloren gegangen. DELETE-Endpunkt und Schaltfläche wurden wieder ergänzt, inklusive Backup vor dem Löschen.
-3. PlatformIO-Felder waren für normale Nutzer zu prominent und unklar. Sie liegen jetzt in einem geschlossenen Expertenbereich mit Beispielen. Normalerweise müssen sie nicht geändert werden.
+PROBLEM UND LOESUNG 0.5.2
+Problem: Eine exportierte Projekt-ZIP konnte ausgewählt und ein Name eingegeben werden, danach gab die Oberfläche weder Erfolg noch Fehler aus.
+Loesung:
+- Benutzeroberfläche prüft die Dateiauswahl.
+- Import läuft in try/catch und zeigt konkrete Meldungen.
+- Ein abgeleiteter neuer Projektname wird vorgeschlagen.
+- Backend prüft leere, ungültige und beschädigte ZIP-Dateien.
+- Backend meldet Namenskonflikte ausdrücklich.
+- Import wird atomar über ein temporäres Verzeichnis durchgeführt.
+- Nur Archive mit espmanager.yaml im ZIP-Hauptverzeichnis werden akzeptiert.
+- Bei Erfolg wird das importierte Projekt automatisch geöffnet.
 
-PLATFORMIO-HINWEIS
-platformio.ini ist die generierte Projektkonfiguration. Bibliotheken sind externe Abhängigkeiten in lib_deps, eine pro Zeile. Build-Flags sind fortgeschrittene Compileroptionen wie -D DEBUG=1. Das Add-on erzeugt seine eigenen ESPMANAGER-Flags automatisch. Normale Nutzer lassen die Expertenfelder unverändert.
+WICHTIGER HINWEIS ZUM IMPORT
+Der Import ist für zuvor durch ESP Manager exportierte Projektarchive gedacht. Ein beliebiges Arduino-ZIP ohne espmanager.yaml ist ein anderer Workflow und muss separat als Arduino-Migration behandelt werden.
 
 ENTWICKLUNGSREGELN
 - Keine bestehende Funktion ungefragt entfernen.
-- Neue Agent-Versionen gegen bestehende Beispielprojekte kompilieren.
-- CHANGELOG.md immer in Wurzel, esp_manager und esp_manager_dev.
-- PROJECT_HANDOVER.txt bei jeder Version aktualisieren.
-- Stable/Dev trennen, main.py kompilieren und ZIP testen.
+- Öffentliche Agent-API kompatibel halten.
+- Jede Version: CHANGELOG.md in Wurzel, esp_manager und esp_manager_dev.
+- Jede Version: PROJECT_HANDOVER.txt vollständig aktualisieren.
+- Stable/Dev getrennt halten und Versionsnummern erhöhen.
+- Python syntaktisch prüfen und ZIP testen.
 
 NAECHSTE SCHRITTE OHNE HARDWARE
-- Automatischer Kompatibilitätstest für Agent-API einschließlich publishSensor.
-- Backup-Liste/Wiederherstellung.
-- Build-Historie verwalten und Release-Notizen.
-- Editor und Fehlersprung verbessern.
+1. Export-Import-Rundlauf in HA testen.
+2. Backup-Liste und Wiederherstellung ergänzen.
+3. Build-Historie verwalten und Release-Notizen ergänzen.
+4. Editor und Compiler-Fehlersprung verbessern.
