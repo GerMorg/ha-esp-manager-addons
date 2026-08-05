@@ -1,111 +1,35 @@
 ESP MANAGER PROJEKTUEBERGABE
 ============================
-Stand: 0.5.0 stable / 0.5.0-dev development
+Stand: 0.5.1 / 0.5.1-dev
 
 ZIELBILD
-Home-Assistant-Add-on mit ESPHome-aehnlicher zentraler Verwaltung fuer ESP-Boards. Die Programmlogik wird in Arduino C++ geschrieben, spaeter optional MicroPython. Der automatisch eingebundene Agent soll WLAN, MQTT, Diagnose, Logs und OTA bereitstellen. Erstes reales Zielgeraet bleibt der vorhandene Sagemcom/Netz-Niederoesterreich-M-Bus-Zaehler-ESP.
+Home-Assistant-Add-on zur zentralen Verwaltung von Arduino-C++-basierten ESP-Projekten mit automatischem Agent für WLAN, MQTT, Logs und OTA. Erster späterer Hardwaretest ist der vorhandene Sagemcom/Netz-Niederoesterreich-M-Bus-Zaehler-ESP.
 
-BEDIENMODELL
-1. Projekt neu anlegen oder ESP-Manager-Projekt-ZIP importieren.
-2. Benutzer bearbeitet nur eigene Dateien unter src/include/eigene lib.
-3. Projektparameter und PlatformIO-Abhaengigkeiten in der UI verwalten.
-4. Build in Home Assistant mit Live-Log starten oder abbrechen.
-5. Erfolgreiche Firmware in der Build-Historie aufbewahren.
-6. Neuer ESP: USB-Erstinstallation. Spaetere Versionen: OTA. Hardwaretests sind aktuell zurueckgestellt.
+AKTUELLER FUNKTIONSUMFANG
+- Projektanlage, Editor und geschützte Systemdateien
+- Projekt-Einstellungen
+- Erweiterte PlatformIO-Bibliotheken, Build-Flags und INI-Import
+- Live-Build, Abbruch und Build-Historie
+- Projektbackup, Export, Import, Duplizieren und Löschen
+- USB/OTA-Prototyp bleibt konzeptionell erhalten, Hardwaretest zurückgestellt
 
-ARCHITEKTUR
-- FastAPI-Webanwendung im HAOS-App-Container
-- Debian/Python-slim-Container, weil Alpine die ESP32-Toolchain nicht ausfuehren konnte
-- PlatformIO kompiliert Arduino-Projekte
-- Stable: Port 8099, /config/esp_manager
-- Dev: Port 8100, /config/esp_manager_dev
-- Projektmetadaten: espmanager.yaml
-- Generiert: platformio.ini, src/main.cpp, lib/ESPManager
-- Benutzerdateien: src/device.cpp und weitere src/include/lib Dateien
+REGRESSION 0.5.0 UND LOESUNG 0.5.1
+1. Bestehende device.cpp verwendete ESPManager.publishSensor(), die Agent-API 0.5.0 hatte die Methode versehentlich entfernt. 0.5.1 stellt die Methode wieder her. Grundregel: öffentliche Agent-Funktionen bei Neugenerierung niemals ungefragt entfernen.
+2. Datei-Löschen war beim Umbau der 0.5.0-UI verloren gegangen. DELETE-Endpunkt und Schaltfläche wurden wieder ergänzt, inklusive Backup vor dem Löschen.
+3. PlatformIO-Felder waren für normale Nutzer zu prominent und unklar. Sie liegen jetzt in einem geschlossenen Expertenbereich mit Beispielen. Normalerweise müssen sie nicht geändert werden.
 
-FUNKTIONEN BIS 0.4.0
-- Projektanlage und Boardwahl
-- Benutzerdateibaum und einfacher Editor
-- Dateien anlegen, speichern, umbenennen, loeschen und hochladen
-- Arduino-ZIP-Import
-- Live-Build-Logs
-- Firmwareerzeugung
-- USB-Erstinstallationsseite
-- MQTT/OTA-Prototyp und Captive Portal im Agent
-
-NEU IN 0.5.0
-- Projekt-Einstellungen: Anzeigename, Board, Firmwareversion, Monitor-Baudrate
-- Bibliotheksliste in PlatformIO-lib_deps
-- Zusätzliche Build-Flags
-- Import einer platformio.ini; erste env-Sektion wird ausgewertet
-- Build abbrechen
-- Gleichzeitigen zweiten Build desselben Projekts verhindern
-- Build-Historie: Version, Zeitpunkt, Groesse, SHA256, Firmwaredownload
-- Projekt-Backup als ZIP
-- Automatisches Backup vor Einstellungen, platformio-Import und Loeschen
-- Projekt exportieren/importieren
-- Projekt duplizieren mit neuem Namen und neuem OTA-Token
-- Projekt loeschen, Firmware und Projektquelle entfernen, vorher Backup erzeugen
-
-DATENSTRUKTUR
-/config/esp_manager/projects/<name>/
-  espmanager.yaml
-  platformio.ini
-  src/
-  include/
-  lib/
-  builds/
-/config/esp_manager/firmware/<name>/<build-id>/
-  firmware.bin
-  manifest.json
-/config/esp_manager/backups/
-  <projekt>-<zeit>-<grund>.zip
-
-BEKANNTE GRENZEN UND RISIKEN
-- Noch kein echter ESP zur Hand, daher USB, Captive Portal, MQTT und OTA in 0.5.0 nicht praktisch validiert.
-- Agent in diesem Entwicklungsstand bleibt ein Prototyp; produktive OTA-Integritaet und Rollback fehlen.
-- Build-Abbruch verwendet terminate; Prozessuntergruppen und eventuell gestartete Kindprozesse koennen je nach PlatformIO-Verhalten weitere Haertung benoetigen.
-- platformio.ini-Import liest nur die erste env-Sektion und nur board, monitor_speed, lib_deps, build_flags.
-- Backupverwaltung hat noch keine eigene Liste/Wiederherstellen-Schaltflaeche.
-- Build-Historie hat noch keine Loeschfunktion oder Markierung einer empfohlenen Version.
-- Editor ohne Syntaxhervorhebung, Zeilennummern und globale Suche.
-- MicroPython nicht implementiert.
-
-GELOESTE PROBLEME
-- Ingress-Buttons: relative API-Pfade.
-- ESP32 Compiler nicht auffindbar: Alpine zu Debian/Python slim gewechselt.
-- Unklare Rollen von main.cpp/device.cpp: Systemdateien schützen, Benutzerdateien separat anzeigen.
-- Unklare Installation: USB-Erstinstallation und OTA sprachlich getrennt.
-- Warten ohne Feedback: asynchrone Build-Jobs mit Live-Log.
-
-NAECHSTE PRIORITAETEN OHNE HARDWARE
-1. Backup-Liste und Wiederherstellung in der UI.
-2. Build-Historie loeschen, Release markieren und Notizen/Changelog pro Firmware.
-3. Monaco-Editor oder vergleichbare Syntaxhervorhebung, Zeilennummern und Fehlersprung.
-4. Projektweite Dateisuche.
-5. API- und Sicherheitstests in den Container-Build integrieren.
-6. Bibliotheksauflösung/Validierung und komfortablere Eingabe.
-7. Vorbereiten einer kleinen Home-Assistant-Custom-Integration fuer Update Entities, sobald Gerätekommunikation praktisch getestet werden kann.
+PLATFORMIO-HINWEIS
+platformio.ini ist die generierte Projektkonfiguration. Bibliotheken sind externe Abhängigkeiten in lib_deps, eine pro Zeile. Build-Flags sind fortgeschrittene Compileroptionen wie -D DEBUG=1. Das Add-on erzeugt seine eigenen ESPMANAGER-Flags automatisch. Normale Nutzer lassen die Expertenfelder unverändert.
 
 ENTWICKLUNGSREGELN
-- Keine vorhandenen Funktionen ungefragt entfernen.
-- Jede Version: PROJECT_HANDOVER.txt vollständig aktualisieren.
-- Jede Version: CHANGELOG.md in Repository-Wurzel, esp_manager und esp_manager_dev ablegen.
-- main.py fuer Stable und Dev mit python3 -m py_compile pruefen.
-- ZIP mit unzip -t pruefen.
-- Stable/Dev-Port und Datenpfade getrennt halten.
-- Version in beiden config.yaml aktualisieren.
+- Keine bestehende Funktion ungefragt entfernen.
+- Neue Agent-Versionen gegen bestehende Beispielprojekte kompilieren.
+- CHANGELOG.md immer in Wurzel, esp_manager und esp_manager_dev.
+- PROJECT_HANDOVER.txt bei jeder Version aktualisieren.
+- Stable/Dev trennen, main.py kompilieren und ZIP testen.
 
-TESTCHECKLISTE 0.5.0 OHNE ESP
-- Add-on installieren/aktualisieren und starten
-- altes Projekt weiterhin sichtbar
-- neues Projekt anlegen
-- Einstellungen speichern und erneut laden
-- Bibliotheken/Flags speichern und Build ausführen
-- platformio.ini importieren
-- Build abbrechen
-- erfolgreichen Build in Historie sehen und Firmware herunterladen
-- Projekt duplizieren
-- Backup erzeugen
-- Projekt exportieren und unter neuem Namen importieren
-- Testprojekt löschen
+NAECHSTE SCHRITTE OHNE HARDWARE
+- Automatischer Kompatibilitätstest für Agent-API einschließlich publishSensor.
+- Backup-Liste/Wiederherstellung.
+- Build-Historie verwalten und Release-Notizen.
+- Editor und Fehlersprung verbessern.
