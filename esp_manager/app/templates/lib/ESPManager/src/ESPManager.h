@@ -22,5 +22,5 @@
 #define ESPMANAGER_OTA_TOKEN ""
 #endif
 #define ESPM_LOG(message) ESPManager.log(String(message))
-class ESPManagerClass { public: void begin(); void loop(); void log(const String&); void publishSensor(const char*,double); void handleCommand(const String&,const String&); private: void connectMqtt(); void status(); unsigned long lastStatus=0,lastRetry=0; };
+class ESPManagerClass{public:void begin();void loop();void log(const String&);private:unsigned long lastStatus=0;};
 extern ESPManagerClass ESPManager;

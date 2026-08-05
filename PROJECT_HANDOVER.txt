@@ -1,60 +1,111 @@
 ESP MANAGER PROJEKTUEBERGABE
 ============================
-Stand: 0.4.0 stable, 0.4.0-dev development.
+Stand: 0.5.0 stable / 0.5.0-dev development
 
 ZIELBILD
-Home-Assistant-Add-on mit ESPHome-aehnlicher zentraler Verwaltung fuer ESP-Boards, aber Programmlogik in Arduino C++ und spaeter optional MicroPython. Der Agent soll WLAN-Provisioning, MQTT, Diagnose, OTA und Logs automatisch bereitstellen. Erstes reales Ziel ist der bestehende Sagemcom/Netz-Niederoesterreich-M-Bus-Zaehlerdecoder.
+Home-Assistant-Add-on mit ESPHome-aehnlicher zentraler Verwaltung fuer ESP-Boards. Die Programmlogik wird in Arduino C++ geschrieben, spaeter optional MicroPython. Der automatisch eingebundene Agent soll WLAN, MQTT, Diagnose, Logs und OTA bereitstellen. Erstes reales Zielgeraet bleibt der vorhandene Sagemcom/Netz-Niederoesterreich-M-Bus-Zaehler-ESP.
 
 BEDIENMODELL
-1. Projekt anlegen oder Arduino-ZIP importieren.
-2. Benutzer bearbeitet nur Dateien unter Mein Programm.
-3. Kompilieren mit PlatformIO und Live-Log.
-4. USB-Erstinstallation fuer einen neuen/leeren ESP oder Wiederherstellung.
-5. Folgende Firmwareversionen ueber WLAN aktualisieren (OTA).
+1. Projekt neu anlegen oder ESP-Manager-Projekt-ZIP importieren.
+2. Benutzer bearbeitet nur eigene Dateien unter src/include/eigene lib.
+3. Projektparameter und PlatformIO-Abhaengigkeiten in der UI verwalten.
+4. Build in Home Assistant mit Live-Log starten oder abbrechen.
+5. Erfolgreiche Firmware in der Build-Historie aufbewahren.
+6. Neuer ESP: USB-Erstinstallation. Spaetere Versionen: OTA. Hardwaretests sind aktuell zurueckgestellt.
 
-DATEIKONZEPT
-Benutzerdateien: src/device.cpp, weitere src/*.cpp, include/*.h und eigene lib-Dateien.
-Systemdateien: src/main.cpp, lib/ESPManager/*, platformio.ini. Sie werden vom Add-on verwaltet, beim Build aktualisiert und sind in der UI verborgen/geschützt.
-Wrapper: main.cpp ruft ESPManager.begin(), setupDevice(), ESPManager.loop() und loopDevice() auf.
+ARCHITEKTUR
+- FastAPI-Webanwendung im HAOS-App-Container
+- Debian/Python-slim-Container, weil Alpine die ESP32-Toolchain nicht ausfuehren konnte
+- PlatformIO kompiliert Arduino-Projekte
+- Stable: Port 8099, /config/esp_manager
+- Dev: Port 8100, /config/esp_manager_dev
+- Projektmetadaten: espmanager.yaml
+- Generiert: platformio.ini, src/main.cpp, lib/ESPManager
+- Benutzerdateien: src/device.cpp und weitere src/include/lib Dateien
 
-AKTUELL IMPLEMENTIERT
-- Stable/Dev Add-on-Kanaele
-- Debian-Container wegen funktionierender PlatformIO ESP32 Toolchain
-- Projektanlage und Boardauswahl
-- Dateibaum und Editor
-- Datei anlegen, speichern, umbenennen, löschen
-- Mehrfachupload fuer C/C++/Header/INO
-- ZIP-Import. Bei INO wird die erste setup()/loop()-Definition automatisch nach setupDevice()/loopDevice() umbenannt. Ergebnis immer manuell prüfen.
-- Live-Build-Jobs und Logs
-- Firmware.bin und SHA256-Manifest
-- USB-Erstinstallation per ESP Web Tools Seite
-- MQTT-Geraeteerkennung und tokenbasierter OTA-Auftrag
-- Captive Portal durch WiFiManager im Agent
+FUNKTIONEN BIS 0.4.0
+- Projektanlage und Boardwahl
+- Benutzerdateibaum und einfacher Editor
+- Dateien anlegen, speichern, umbenennen, loeschen und hochladen
+- Arduino-ZIP-Import
+- Live-Build-Logs
+- Firmwareerzeugung
+- USB-Erstinstallationsseite
+- MQTT/OTA-Prototyp und Captive Portal im Agent
+
+NEU IN 0.5.0
+- Projekt-Einstellungen: Anzeigename, Board, Firmwareversion, Monitor-Baudrate
+- Bibliotheksliste in PlatformIO-lib_deps
+- Zusätzliche Build-Flags
+- Import einer platformio.ini; erste env-Sektion wird ausgewertet
+- Build abbrechen
+- Gleichzeitigen zweiten Build desselben Projekts verhindern
+- Build-Historie: Version, Zeitpunkt, Groesse, SHA256, Firmwaredownload
+- Projekt-Backup als ZIP
+- Automatisches Backup vor Einstellungen, platformio-Import und Loeschen
+- Projekt exportieren/importieren
+- Projekt duplizieren mit neuem Namen und neuem OTA-Token
+- Projekt loeschen, Firmware und Projektquelle entfernen, vorher Backup erzeugen
+
+DATENSTRUKTUR
+/config/esp_manager/projects/<name>/
+  espmanager.yaml
+  platformio.ini
+  src/
+  include/
+  lib/
+  builds/
+/config/esp_manager/firmware/<name>/<build-id>/
+  firmware.bin
+  manifest.json
+/config/esp_manager/backups/
+  <projekt>-<zeit>-<grund>.zip
+
+BEKANNTE GRENZEN UND RISIKEN
+- Noch kein echter ESP zur Hand, daher USB, Captive Portal, MQTT und OTA in 0.5.0 nicht praktisch validiert.
+- Agent in diesem Entwicklungsstand bleibt ein Prototyp; produktive OTA-Integritaet und Rollback fehlen.
+- Build-Abbruch verwendet terminate; Prozessuntergruppen und eventuell gestartete Kindprozesse koennen je nach PlatformIO-Verhalten weitere Haertung benoetigen.
+- platformio.ini-Import liest nur die erste env-Sektion und nur board, monitor_speed, lib_deps, build_flags.
+- Backupverwaltung hat noch keine eigene Liste/Wiederherstellen-Schaltflaeche.
+- Build-Historie hat noch keine Loeschfunktion oder Markierung einer empfohlenen Version.
+- Editor ohne Syntaxhervorhebung, Zeilennummern und globale Suche.
+- MicroPython nicht implementiert.
 
 GELOESTE PROBLEME
-- HA Ingress: relative API-Pfade verwenden.
-- xtensa-esp32-elf-g++ not found: Alpine durch Python slim Bookworm ersetzt.
-- Unklare main.cpp/device.cpp-Rollen: nur Benutzerdateien anzeigen, Systemdateien schützen.
-- Unklare Begriffe: Initial Flash in USB-Erstinstallation umbenannt, Firmware-Aktualisierung als OTA bezeichnet.
+- Ingress-Buttons: relative API-Pfade.
+- ESP32 Compiler nicht auffindbar: Alpine zu Debian/Python slim gewechselt.
+- Unklare Rollen von main.cpp/device.cpp: Systemdateien schützen, Benutzerdateien separat anzeigen.
+- Unklare Installation: USB-Erstinstallation und OTA sprachlich getrennt.
+- Warten ohne Feedback: asynchrone Build-Jobs mit Live-Log.
 
-BEKANNTE GRENZEN
-- OTA-SHA256 wird im Manifest übertragen, vom Agent aber noch nicht explizit gegen den erwarteten Wert geprüft.
-- Kein getestetes ESP32-Rollback/angepasstes Partitionsschema.
-- ZIP-Import ist bewusst konservativ und muss geprüft werden, besonders bei mehreren Dateien, eigenen setup()/loop()-Definitionen und Bibliotheksabhängigkeiten.
-- Editor noch ohne Monaco, Syntaxhervorhebung und Zeilennummern.
-- Keine Build-Abbruchfunktion oder Firmwarehistorie.
-- MicroPython noch nicht implementiert.
+NAECHSTE PRIORITAETEN OHNE HARDWARE
+1. Backup-Liste und Wiederherstellung in der UI.
+2. Build-Historie loeschen, Release markieren und Notizen/Changelog pro Firmware.
+3. Monaco-Editor oder vergleichbare Syntaxhervorhebung, Zeilennummern und Fehlersprung.
+4. Projektweite Dateisuche.
+5. API- und Sicherheitstests in den Container-Build integrieren.
+6. Bibliotheksauflösung/Validierung und komfortablere Eingabe.
+7. Vorbereiten einer kleinen Home-Assistant-Custom-Integration fuer Update Entities, sobald Gerätekommunikation praktisch getestet werden kann.
 
-NAECHSTE PRIORITAETEN
-1. 0.4.0 in HA testen: Dateiverwaltung, Upload, ZIP-Import, Live-Build.
-2. Echten Sagemcom-Code importieren und alle Abhaengigkeiten/Libraries erfassen.
-3. Projekt-Metadateneditor fuer Libraries, Board, Version und Buildflags.
-4. Build abbrechen, Buildhistorie und OTA-Fortschritt.
-5. Sicheres ESP32-Partitions/Rollback-Konzept und echte Integritaetspruefung.
-
-REGELN FUER WEITERENTWICKLUNG
+ENTWICKLUNGSREGELN
 - Keine vorhandenen Funktionen ungefragt entfernen.
-- main.py immer mit python3 -m py_compile pruefen.
-- ZIP immer mit unzip -t pruefen.
-- Stable und Dev getrennt halten: Stable 8099 und /config/esp_manager, Dev 8100 und /config/esp_manager_dev.
-- Bei neuen Versionen config.yaml hochzaehlen.
+- Jede Version: PROJECT_HANDOVER.txt vollständig aktualisieren.
+- Jede Version: CHANGELOG.md in Repository-Wurzel, esp_manager und esp_manager_dev ablegen.
+- main.py fuer Stable und Dev mit python3 -m py_compile pruefen.
+- ZIP mit unzip -t pruefen.
+- Stable/Dev-Port und Datenpfade getrennt halten.
+- Version in beiden config.yaml aktualisieren.
+
+TESTCHECKLISTE 0.5.0 OHNE ESP
+- Add-on installieren/aktualisieren und starten
+- altes Projekt weiterhin sichtbar
+- neues Projekt anlegen
+- Einstellungen speichern und erneut laden
+- Bibliotheken/Flags speichern und Build ausführen
+- platformio.ini importieren
+- Build abbrechen
+- erfolgreichen Build in Historie sehen und Firmware herunterladen
+- Projekt duplizieren
+- Backup erzeugen
+- Projekt exportieren und unter neuem Namen importieren
+- Testprojekt löschen
