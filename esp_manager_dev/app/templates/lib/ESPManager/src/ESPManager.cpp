@@ -9,25 +9,19 @@
 #include <WiFiManager.h>
 #include <PubSubClient.h>
 #include <ArduinoJson.h>
-static WiFiClient wifiClient; static PubSubClient mqttClient(wifiClient); ESPManagerClass ESPManager;
-static String baseTopic(){return String("espmanager/")+ESPMANAGER_DEVICE_ID;}
-static void cb(char*t, byte*p, unsigned int l){String b; for(unsigned int i=0;i<l;i++) b+=(char)p[i]; ESPManager.handleCommand(String(t),b);}
-void ESPManagerClass::begin(){Serial.begin(115200); WiFi.mode(WIFI_STA); if(WiFi.status()!=WL_CONNECTED){WiFiManager wm; wm.setConfigPortalTimeout(180); String ap=String("ESPManager-")+ESPMANAGER_DEVICE_ID; if(!wm.autoConnect(ap.c_str())) ESP.restart();} mqttClient.setServer(ESPMANAGER_MQTT_HOST,ESPMANAGER_MQTT_PORT); mqttClient.setCallback(cb); ensureMqtt(); publishStatus();}
-void ESPManagerClass::loop(){ if(WiFi.status()!=WL_CONNECTED) WiFi.reconnect(); ensureMqtt(); mqttClient.loop(); if(millis()-lastStatus>30000) publishStatus();}
-void ESPManagerClass::ensureMqtt(){ if(mqttClient.connected()||WiFi.status()!=WL_CONNECTED||millis()-lastReconnect<5000)return; lastReconnect=millis(); String id=String("espmanager-")+ESPMANAGER_DEVICE_ID; bool ok=String(ESPMANAGER_MQTT_USER).length()?mqttClient.connect(id.c_str(),ESPMANAGER_MQTT_USER,ESPMANAGER_MQTT_PASS,(baseTopic()+"/availability").c_str(),0,true,"offline"):mqttClient.connect(id.c_str(),(baseTopic()+"/availability").c_str(),0,true,"offline"); if(ok){mqttClient.publish((baseTopic()+"/availability").c_str(),"online",true); mqttClient.subscribe((baseTopic()+"/cmd/#").c_str()); log("MQTT verbunden");}}
-void ESPManagerClass::publishStatus(){lastStatus=millis(); if(!mqttClient.connected())return; JsonDocument d; d["device_id"]=ESPMANAGER_DEVICE_ID; d["firmware_version"]=ESPMANAGER_FW_VERSION; d["ip"]=WiFi.localIP().toString(); d["rssi"]=WiFi.RSSI(); d["uptime"]=millis()/1000; String out; serializeJson(d,out); mqttClient.publish((baseTopic()+"/status").c_str(),out.c_str(),true);}
-void ESPManagerClass::log(const String&m){Serial.println(m); if(mqttClient.connected()) mqttClient.publish((baseTopic()+"/log").c_str(),m.c_str());}
-void ESPManagerClass::publishSensor(const char*key,double value){ if(!mqttClient.connected())return; char buf[32]; snprintf(buf,sizeof(buf),"%.3f",value); mqttClient.publish((baseTopic()+"/sensor/"+key).c_str(),buf,true);}
-void ESPManagerClass::handleCommand(const String&t,const String&p){
-  JsonDocument d; if(deserializeJson(d,p))return;
-  if(String((const char*)(d["token"]|""))!=String(ESPMANAGER_OTA_TOKEN)){log("Command rejected: invalid token"); return;}
-  if(t.endsWith("/cmd/restart")){ESP.restart();}
-  if(t.endsWith("/cmd/ota")){
-    String url=d["url"]|""; if(!url.length())return; log(String("OTA: ")+url);
+static WiFiClient net; static PubSubClient mq(net); ESPManagerClass ESPManager;
+static String base(){return String("espmanager/")+ESPMANAGER_DEVICE_ID;}
+static void callback(char*t,byte*p,unsigned int l){String b;for(unsigned int i=0;i<l;i++)b+=(char)p[i];ESPManager.handleCommand(t,b);}
+void ESPManagerClass::begin(){Serial.begin(115200);WiFi.mode(WIFI_STA);if(WiFi.status()!=WL_CONNECTED){WiFiManager wm;wm.setConfigPortalTimeout(180);String ap=String("ESPManager-")+ESPMANAGER_DEVICE_ID;if(!wm.autoConnect(ap.c_str()))ESP.restart();}mq.setServer(ESPMANAGER_MQTT_HOST,ESPMANAGER_MQTT_PORT);mq.setCallback(callback);connectMqtt();status();}
+void ESPManagerClass::loop(){if(WiFi.status()!=WL_CONNECTED)WiFi.reconnect();connectMqtt();mq.loop();if(millis()-lastStatus>30000)status();}
+void ESPManagerClass::connectMqtt(){if(mq.connected()||WiFi.status()!=WL_CONNECTED||millis()-lastRetry<5000)return;lastRetry=millis();String id=String("espmanager-")+ESPMANAGER_DEVICE_ID;bool ok=String(ESPMANAGER_MQTT_USER).length()?mq.connect(id.c_str(),ESPMANAGER_MQTT_USER,ESPMANAGER_MQTT_PASS,(base()+"/availability").c_str(),0,true,"offline"):mq.connect(id.c_str(),(base()+"/availability").c_str(),0,true,"offline");if(ok){mq.publish((base()+"/availability").c_str(),"online",true);mq.subscribe((base()+"/cmd/#").c_str());}}
+void ESPManagerClass::status(){lastStatus=millis();if(!mq.connected())return;JsonDocument d;d["device_id"]=ESPMANAGER_DEVICE_ID;d["firmware_version"]=ESPMANAGER_FW_VERSION;d["ip"]=WiFi.localIP().toString();d["rssi"]=WiFi.RSSI();d["uptime"]=millis()/1000;String o;serializeJson(d,o);mq.publish((base()+"/status").c_str(),o.c_str(),true);}
+void ESPManagerClass::log(const String&m){Serial.println(m);if(mq.connected())mq.publish((base()+"/log").c_str(),m.c_str());}
+void ESPManagerClass::publishSensor(const char*k,double v){char b[32];snprintf(b,sizeof(b),"%.3f",v);if(mq.connected())mq.publish((base()+"/sensor/"+k).c_str(),b,true);}
+void ESPManagerClass::handleCommand(const String&t,const String&p){JsonDocument d;if(deserializeJson(d,p))return;if(String((const char*)(d["token"]|""))!=String(ESPMANAGER_OTA_TOKEN)){log("Kommando abgelehnt");return;}if(t.endsWith("/restart"))ESP.restart();if(t.endsWith("/ota")){String u=d["url"]|"";if(!u.length())return;
 #ifdef ESP8266
-    ESPhttpUpdate.update(wifiClient,url);
+ESPhttpUpdate.update(net,u);
 #else
-    httpUpdate.update(wifiClient,url);
+httpUpdate.update(net,u);
 #endif
-  }
-}
+}}

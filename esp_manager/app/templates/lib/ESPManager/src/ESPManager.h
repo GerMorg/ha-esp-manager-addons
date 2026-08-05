@@ -18,12 +18,9 @@
 #ifndef ESPMANAGER_MQTT_PASS
 #define ESPMANAGER_MQTT_PASS ""
 #endif
-#ifndef ESPMANAGER_DISCOVERY_PREFIX
-#define ESPMANAGER_DISCOVERY_PREFIX "homeassistant"
-#endif
 #ifndef ESPMANAGER_OTA_TOKEN
 #define ESPMANAGER_OTA_TOKEN ""
 #endif
-#define ESPM_LOG(msg) ESPManager.log(String(msg))
-class ESPManagerClass{public:void begin();void loop();void log(const String &m);void publishSensor(const char *key,double value);void handleCommand(const String&t,const String&p);private:void ensureMqtt();void publishStatus();unsigned long lastStatus=0,lastReconnect=0;};
+#define ESPM_LOG(message) ESPManager.log(String(message))
+class ESPManagerClass { public: void begin(); void loop(); void log(const String&); void publishSensor(const char*,double); void handleCommand(const String&,const String&); private: void connectMqtt(); void status(); unsigned long lastStatus=0,lastRetry=0; };
 extern ESPManagerClass ESPManager;

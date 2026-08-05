@@ -1,20 +1,6 @@
-# ESP Manager Add-ons Repository
+# ESP Manager Add-ons
 
-ESP Manager ist ein Home-Assistant-Add-on zur zentralen Verwaltung von Arduino/PlatformIO-basierten ESP-Projekten.
+- `esp_manager`: Stable 0.4.0
+- `esp_manager_dev`: Entwicklung 0.4.0-dev
 
-## Add-ons
-
-- `esp_manager`: stabilerer Teststand, Version 0.3.0
-- `esp_manager_dev`: Entwicklungskanal, Version 0.3.0-dev
-
-## Aktueller Stand
-
-- Projekte anlegen
-- Code im Browser bearbeiten
-- Live-Build-Logs
-- Firmware erzeugen
-- Browser-Flash vorbereiten
-- MQTT-Geraete erkennen
-- OTA und Restart vorbereiten
-
-Siehe `PROJECT_HANDOVER.txt` fuer Zielbild, bekannte Probleme, Loesungen und naechste Schritte.
+Neu: Benutzerdateibaum, Dateioperationen, Upload/ZIP-Import sowie klare Trennung zwischen USB-Erstinstallation und OTA-Aktualisierung. Details in `PROJECT_HANDOVER.txt`.

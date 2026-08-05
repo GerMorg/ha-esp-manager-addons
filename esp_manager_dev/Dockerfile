@@ -1,10 +1,9 @@
 ARG BUILD_FROM
 FROM ${BUILD_FROM}
-ENV LANG=C.UTF-8
-ENV PLATFORMIO_CORE_DIR=/data/platformio
+ENV LANG=C.UTF-8 PLATFORMIO_CORE_DIR=/data/platformio
 RUN apt-get update && apt-get install -y --no-install-recommends bash git curl ca-certificates build-essential libffi-dev libssl-dev && rm -rf /var/lib/apt/lists/*
 WORKDIR /opt/esp_manager
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
 RUN python3 -m venv venv && . venv/bin/activate && pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt && pip install --no-cache-dir platformio
 COPY app app
 COPY run.sh /run.sh

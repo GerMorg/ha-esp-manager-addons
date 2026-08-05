@@ -1,16 +1,11 @@
 # Changelog
 
-## 0.3.0
-
-- Live-Build-Logs in der Weboberflaeche
-- Build-Jobs mit Status `queued`, `running`, `success`, `failed`, `timeout`
-- Einfacher Projekteditor fuer `src/device.cpp` und `src/main.cpp`
-- MQTT-Geraeteliste, Restart und OTA-Endpunkte wieder integriert
-- Projektuebergabe-Dokumentation `PROJECT_HANDOVER.txt` hinzugefuegt
-
-## 0.2.3
-
-- Add-on-Repository-Layout erstellt
-- Stable- und Dev-Kanal angelegt
-- Debian-basierter PlatformIO-Fix beibehalten
-- Ingress-Button-Fix beibehalten
+## 0.4.0
+- Klare Trennung zwischen USB-Erstinstallation und OTA-Aktualisierung
+- Benutzerdateibaum fuer src, include und lib
+- Systemdateien main.cpp, ESPManager und platformio.ini ausgeblendet und geschützt
+- Dateien anlegen, laden, speichern, umbenennen und löschen
+- C/C++/Header/INO-Dateien hochladen
+- Arduino-Projekte als ZIP importieren
+- Einfache automatische Migration von setup()/loop() in importierten INO-Dateien
+- Bestehende Live-Build-Logs, Firmware-Build, MQTT und OTA beibehalten

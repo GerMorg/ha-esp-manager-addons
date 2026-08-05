@@ -1,246 +1,60 @@
-ESP MANAGER HOME ASSISTANT ADD-ON - PROJEKTUEBERGABE
-=====================================================
+ESP MANAGER PROJEKTUEBERGABE
+============================
+Stand: 0.4.0 stable, 0.4.0-dev development.
 
-Stand: Version 0.3.0 stable / 0.3.0-dev development
-Ziel: ESPHome-aehnliche zentrale Verwaltung fuer ESP-Boards, aber mit Arduino C++ statt YAML-Logik. Spaeter optional MicroPython.
+ZIELBILD
+Home-Assistant-Add-on mit ESPHome-aehnlicher zentraler Verwaltung fuer ESP-Boards, aber Programmlogik in Arduino C++ und spaeter optional MicroPython. Der Agent soll WLAN-Provisioning, MQTT, Diagnose, OTA und Logs automatisch bereitstellen. Erstes reales Ziel ist der bestehende Sagemcom/Netz-Niederoesterreich-M-Bus-Zaehlerdecoder.
 
-1. ZIELBILD
------------
-Der Benutzer moechte ESP-Boards zentral in Home Assistant verwalten. Die eigentliche Programmlogik soll in Arduino C++ geschrieben werden. OTA, MQTT-Status, Logs, WLAN-Provisioning und Home-Assistant-nahe Verwaltung sollen nicht jedes Mal manuell in den Projektcode eingebaut werden muessen.
+BEDIENMODELL
+1. Projekt anlegen oder Arduino-ZIP importieren.
+2. Benutzer bearbeitet nur Dateien unter Mein Programm.
+3. Kompilieren mit PlatformIO und Live-Log.
+4. USB-Erstinstallation fuer einen neuen/leeren ESP oder Wiederherstellung.
+5. Folgende Firmwareversionen ueber WLAN aktualisieren (OTA).
 
-Gewuenschtes Bedienmodell:
-- Home Assistant Add-on oeffnen
-- Projekt anlegen
-- Board waehlen
-- Code in der Weboberflaeche bearbeiten
-- in Home Assistant kompilieren
-- initial per Browser/Web Serial flashen
-- danach per OTA aktualisieren
-- Geraetestatus, Logs und Firmware zentral sehen
+DATEIKONZEPT
+Benutzerdateien: src/device.cpp, weitere src/*.cpp, include/*.h und eigene lib-Dateien.
+Systemdateien: src/main.cpp, lib/ESPManager/*, platformio.ini. Sie werden vom Add-on verwaltet, beim Build aktualisiert und sind in der UI verborgen/geschützt.
+Wrapper: main.cpp ruft ESPManager.begin(), setupDevice(), ESPManager.loop() und loopDevice() auf.
 
-Das erste echte Zielgeraet ist ein ESP mit Sagemcom/Netz-Niederoesterreich-Zaehlerauslesung ueber M-Bus-Wandler. Der funktionierende Arduino-Decoder soll erhalten bleiben und nur in das neue Wrapper-Konzept eingebettet werden.
+AKTUELL IMPLEMENTIERT
+- Stable/Dev Add-on-Kanaele
+- Debian-Container wegen funktionierender PlatformIO ESP32 Toolchain
+- Projektanlage und Boardauswahl
+- Dateibaum und Editor
+- Datei anlegen, speichern, umbenennen, löschen
+- Mehrfachupload fuer C/C++/Header/INO
+- ZIP-Import. Bei INO wird die erste setup()/loop()-Definition automatisch nach setupDevice()/loopDevice() umbenannt. Ergebnis immer manuell prüfen.
+- Live-Build-Jobs und Logs
+- Firmware.bin und SHA256-Manifest
+- USB-Erstinstallation per ESP Web Tools Seite
+- MQTT-Geraeteerkennung und tokenbasierter OTA-Auftrag
+- Captive Portal durch WiFiManager im Agent
 
-2. ARCHITEKTUR
---------------
-Repository-Layout:
+GELOESTE PROBLEME
+- HA Ingress: relative API-Pfade verwenden.
+- xtensa-esp32-elf-g++ not found: Alpine durch Python slim Bookworm ersetzt.
+- Unklare main.cpp/device.cpp-Rollen: nur Benutzerdateien anzeigen, Systemdateien schützen.
+- Unklare Begriffe: Initial Flash in USB-Erstinstallation umbenannt, Firmware-Aktualisierung als OTA bezeichnet.
 
-ha_esp_manager_addons_repo/
-  repository.json
-  README.md
-  UPDATE_WORKFLOW.md
-  CHANGELOG.md
-  PROJECT_HANDOVER.txt
-  esp_manager/
-  esp_manager_dev/
+BEKANNTE GRENZEN
+- OTA-SHA256 wird im Manifest übertragen, vom Agent aber noch nicht explizit gegen den erwarteten Wert geprüft.
+- Kein getestetes ESP32-Rollback/angepasstes Partitionsschema.
+- ZIP-Import ist bewusst konservativ und muss geprüft werden, besonders bei mehreren Dateien, eigenen setup()/loop()-Definitionen und Bibliotheksabhängigkeiten.
+- Editor noch ohne Monaco, Syntaxhervorhebung und Zeilennummern.
+- Keine Build-Abbruchfunktion oder Firmwarehistorie.
+- MicroPython noch nicht implementiert.
 
-Add-ons:
-- esp_manager: stabilerer Teststand
-- esp_manager_dev: Entwicklungskanal
+NAECHSTE PRIORITAETEN
+1. 0.4.0 in HA testen: Dateiverwaltung, Upload, ZIP-Import, Live-Build.
+2. Echten Sagemcom-Code importieren und alle Abhaengigkeiten/Libraries erfassen.
+3. Projekt-Metadateneditor fuer Libraries, Board, Version und Buildflags.
+4. Build abbrechen, Buildhistorie und OTA-Fortschritt.
+5. Sicheres ESP32-Partitions/Rollback-Konzept und echte Integritaetspruefung.
 
-Home-Assistant-Add-on:
-- FastAPI Webserver
-- PlatformIO Build-System im Container
-- Debian/Python-slim Base Image, weil Alpine Probleme mit der ESP32-Toolchain verursachte
-- Web UI mit Projektliste, Geraeteliste, Editor und Live-Build-Log
-- MQTT-Anbindung an Mosquitto
-- Browser-Flash-Seite mit ESP Web Tools
-
-Datenablage in Home Assistant:
-- Projekte: /config/esp_manager/projects/<projektname>/
-- Firmware: /config/esp_manager/firmware/<projektname>/firmware.bin
-- Manifest: /config/esp_manager/firmware/<projektname>/manifest.json
-
-3. WRAPPER-KONZEPT
-------------------
-Neue Projekte arbeiten im Wrapper-Modus.
-
-Benutzer-Code:
-
-void setupDevice() {
-  // eigenes Setup
-}
-
-void loopDevice() {
-  // eigene Logik
-}
-
-Vom Add-on erzeugter Rahmen:
-
-void setup() {
-  ESPManager.begin();
-  setupDevice();
-}
-
-void loop() {
-  ESPManager.loop();
-  loopDevice();
-}
-
-Dadurch bleibt OTA/MQTT/WLAN/Status immer im Agent und Benutzer-Code bleibt auf die eigentliche Anwendung fokussiert.
-
-4. ESPMANAGER AGENT
--------------------
-Der Agent liegt im Template:
-
-esp_manager/app/templates/lib/ESPManager/src/
-
-Funktionen:
-- WLAN-Provisioning mit WiFiManager Captive Portal
-- MQTT-Verbindung
-- Statusmeldungen an espmanager/<device_id>/status
-- Availability an espmanager/<device_id>/availability
-- Logausgabe an espmanager/<device_id>/log
-- Restart-Kommando ueber MQTT
-- OTA-Kommando ueber MQTT
-- einfacher Sensor-Publish als Beispiel
-
-Wichtig: OTA-Kommandos werden nur akzeptiert, wenn der im MQTT-Payload gesendete Token mit ESPMANAGER_OTA_TOKEN uebereinstimmt.
-
-5. MQTT TOPICS
---------------
-Geraet -> Add-on:
-- espmanager/<device_id>/status
-- espmanager/<device_id>/availability
-- espmanager/<device_id>/log
-- espmanager/<device_id>/ota/progress
-
-Add-on -> Geraet:
-- espmanager/<device_id>/cmd/restart
-- espmanager/<device_id>/cmd/ota
-
-OTA-Payload enthaelt:
-- token
-- url
-- sha256
-- size
-- version
-
-6. BEREITS GELOESTE PROBLEME
-----------------------------
-Problem: Lokales Add-on musste deinstalliert und neu installiert werden.
-Loesung: Repository-Layout mit esp_manager und esp_manager_dev erstellt. Zukuenftig Version in config.yaml erhoehen und ueber Add-on Store aktualisieren.
-
-Problem: Button "Anlegen" funktionierte in Home Assistant Ingress nicht.
-Ursache: absolute API-Pfade und unsaubere globale DOM-Variablen.
-Loesung: relative Pfade wie api/projects und explizite Element-Zugriffe.
-
-Problem: Build blieb scheinbar bei "Build laeuft" stehen.
-Ursache: Build war synchron, Log erschien erst am Ende.
-Loesung in 0.3.0: Build-Jobs laufen im Hintergrundthread, die UI pollt /api/builds/<job_id> und zeigt Live-Logs.
-
-Problem: ESP32-Build schlug fehl mit xtensa-esp32-elf-g++: not found.
-Ursache: Alpine-basierter Container war fuer PlatformIO/ESP32-Toolchain ungeeignet.
-Loesung: Wechsel auf docker.io/library/python:3.12-slim-bookworm und apt-Pakete.
-
-Problem: Benutzer moechte Code direkt bearbeiten.
-Loesung in 0.3.0: einfacher Webeditor fuer src/device.cpp und src/main.cpp mit Laden/Speichern.
-
-7. AKTUELLER FUNKTIONSUMFANG 0.3.0
------------------------------------
-- Add-on-Repository mit Stable- und Dev-Kanal
-- Projekt anlegen
-- Board waehlen
-- Arduino/PlatformIO Projekt erzeugen
-- Agent-Library wird beim Build automatisch aktualisiert
-- Live-Build-Logs in der Weboberflaeche
-- Build-Status queued/running/success/failed/timeout
-- Firmware.bin wird nach erfolgreichem Build kopiert
-- Manifest mit sha256, size, version, built_at wird erzeugt
-- Browser-Flash-Seite erzeugt ESP-Web-Tools-Manifest
-- einfacher Editor fuer Projektdateien
-- MQTT-Geraeteliste
-- Restart und OTA ueber MQTT vorbereitet
-
-8. BEKANNTE EINSCHRAENKUNGEN
-----------------------------
-- SHA256 wird serverseitig berechnet, aber der ESP prueft die Firmware noch nicht selbst gegen SHA256.
-- OTA-Rollback/Partitionslayout fuer ESP32 ist noch nicht sauber konfiguriert.
-- Webeditor ist minimal, kein Monaco/VS-Code-Editor.
-- Kein Datei-Browser, nur feste Dateien im Dropdown.
-- Kein Projektimport-Assistent fuer bestehende Arduino-Projekte.
-- Kein Legacy-Modus fuer bestehenden setup()/loop()-Code.
-- Keine MicroPython-Unterstuetzung.
-- Keine echte Benutzer/Rechte-Logik ausser Home-Assistant/Add-on-Zugriff.
-- ESP Web Tools erfordert geeigneten Browser und HTTPS/vertrauenswuerdigen Kontext je nach Umgebung.
-- public_base_url muss zur HA-Installation passen, z. B. http://homeassistant.local:8099 oder IP-Adresse.
-
-9. WICHTIGE DATEIEN
--------------------
-- esp_manager/config.yaml: Add-on-Metadaten und Version
-- esp_manager/Dockerfile: Container-Build
-- esp_manager/build.yaml: Build-Images pro Architektur
-- esp_manager/app/main.py: FastAPI-App, UI, Projekte, Build-Jobs, MQTT, OTA-Endpunkte
-- esp_manager/app/templates/src/main.cpp: Wrapper-main
-- esp_manager/app/templates/src/device.cpp: Beispiel-Usercode
-- esp_manager/app/templates/lib/ESPManager/src/ESPManager.*: Agent-Library
-
-10. UPDATE-WORKFLOW
--------------------
-Bei jeder Aenderung:
-1. Code aendern.
-2. Version in esp_manager_dev/config.yaml erhoehen.
-3. Repository pushen.
-4. In Home Assistant Add-on Store "Nach Updates suchen".
-5. ESP Manager Dev aktualisieren.
-6. Testen.
-7. Wenn stabil, Aenderungen nach esp_manager uebernehmen und dort Version erhoehen.
-
-11. NAECHSTE SINNVOLLE ENTWICKLUNGSSCHRITTE
---------------------------------------------
-Prioritaet 1:
-- Put endpoint und Editor in echter HA-Umgebung testen.
-- Live-Build-Log in HA-Ingress testen.
-- Bestehendes Sagemcom-Projekt importieren und in setupDevice()/loopDevice() migrieren.
-
-Prioritaet 2:
-- Datei-Browser fuer src/include/lib bauen.
-- Projektimport als ZIP Upload.
-- Build abbrechen Button.
-- Build-Historie mit auswählbarer Firmware-Version.
-- OTA-Fortschritt vom ESP sauber anzeigen.
-
-Prioritaet 3:
-- ESP32 Partitionen/Rollback definieren.
-- SHA256-Pruefung auf dem ESP implementieren oder sicheren OTA-Mechanismus verbessern.
-- Legacy-Modus fuer alte Arduino-Projekte mit setup()/loop().
-- Bessere MQTT Discovery fuer Agent-Diagnosesensoren.
-
-12. WICHTIGE ENTWICKLUNGSREGELN
--------------------------------
-- Keine bestehenden Funktionen ungefragt entfernen.
-- Nach Aenderungen immer python3 -m py_compile auf app/main.py ausfuehren.
-- ZIP mit unzip -t pruefen.
-- Bei C++ Templates besonders auf Preprocessor-Direktiven achten: #ifdef muss am Zeilenanfang stehen.
-- Home Assistant Ingress bevorzugt relative URLs in der UI.
-- Bei Buildproblemen zuerst Add-on-Protokoll und /config/esp_manager/projects/<projekt>/builds/last_build_log.txt ansehen.
-
-13. TEST-CHECKLISTE
--------------------
-- Add-on startet.
-- Web UI oeffnet.
-- Projekt kann angelegt werden.
-- src/device.cpp kann geoeffnet und gespeichert werden.
-- Build startet und Log laeuft live.
-- Build endet mit SUCCESS.
-- Firmware Download funktioniert.
-- Initial Flash Seite oeffnet.
-- ESP startet nach Flash und oeffnet Captive Portal, falls kein WLAN bekannt.
-- ESP erscheint nach WLAN-Konfiguration in der Geraeteliste.
-- Restart per UI funktioniert.
-- OTA per UI funktioniert nach erneutem Build.
-
-14. HINWEIS FUER NEUEN COPILOT CHAT
-------------------------------------
-Wenn dieser Code und diese Datei in einen neuen Chat geladen werden, soll die Weiterentwicklung auf Version 0.3.0 aufbauen. Nicht auf fruehere ZIP-Versionen zurueckfallen. Hauptziel bleibt: zentrale Home-Assistant-Verwaltung fuer Arduino-C++-basierte ESPs, mit moeglichst wenig Verwaltungslogik im Benutzer-Code.
-
-15. STABLE/DEV ISOLATION IN 0.3.0
-----------------------------------
-Stable nutzt:
-- Port/Ingress: 8099
-- Daten: /config/esp_manager
-
-Dev nutzt:
-- Port/Ingress: 8100
-- Daten: /config/esp_manager_dev
-
-Damit koennen Stable und Dev besser parallel getestet werden, ohne Projektdateien und HTTP-Port direkt zu kollidieren.
+REGELN FUER WEITERENTWICKLUNG
+- Keine vorhandenen Funktionen ungefragt entfernen.
+- main.py immer mit python3 -m py_compile pruefen.
+- ZIP immer mit unzip -t pruefen.
+- Stable und Dev getrennt halten: Stable 8099 und /config/esp_manager, Dev 8100 und /config/esp_manager_dev.
+- Bei neuen Versionen config.yaml hochzaehlen.
