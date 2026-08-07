@@ -7,6 +7,7 @@ COPY requirements.txt .
 RUN python3 -m venv venv && . venv/bin/activate && pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt && pip install --no-cache-dir platformio
 COPY app app
 RUN python3 app/patch_v052.py && rm app/patch_v052.py
+RUN python3 app/patch_v053.py && rm app/patch_v053.py
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 EXPOSE 8099

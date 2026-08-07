@@ -1,44 +1,50 @@
 ESP MANAGER PROJEKTUEBERGABE
 ============================
-Stand: 0.5.2 / 0.5.2-dev
+Stand: 0.5.3 / 0.5.3-dev
 
 ZIELBILD
-Home-Assistant-Add-on zur zentralen Verwaltung von Arduino-C++-basierten ESP-Projekten. Die Anwendungslogik bleibt im Benutzerprojekt; der ESPManager-Agent stellt langfristig WLAN, MQTT, Diagnose, Logs und OTA zentral bereit. Erster späterer Hardwaretest bleibt der Sagemcom/Netz-Niederoesterreich-M-Bus-Zaehler-ESP.
+Home-Assistant-Add-on für zentral verwaltete Arduino-C++-ESP-Projekte. Benutzerlogik bleibt getrennt, der Agent übernimmt WLAN-Provisioning, MQTT, Status, Logs und OTA. Erstes reales Testboard ist nun ein NodeMCU ESP8266MOD; später folgt der Sagemcom/M-Bus-Zähler-ESP.
 
-BESTEHENDER FUNKTIONSUMFANG
-- Projektanlage, Editor und geschützte Systemdateien
-- Projekt-Einstellungen sowie PlatformIO-Expertenbereich
-- Bibliotheken, Build-Flags und platformio.ini-Import
-- Live-Build, Build-Abbruch und Build-Historie
-- Projektbackup, Export, Import, Duplizieren und Löschen
-- Agent-API einschließlich publishSensor zur Kompatibilität vorhandener Projekte
-- USB/OTA-Prototyp, derzeit ohne Hardwaretest
+BESTEHENDE FUNKTIONEN
+- Projekte, Editor, Dateiverwaltung und geschützte Systemdateien
+- Projektkonfiguration und PlatformIO-Expertenbereich
+- Live-Build, Buildabbruch und Buildhistorie
+- Backup, Export/Import, Duplizieren und Löschen
+- MQTT/OTA-Agent mit kompatibler publishSensor-API
 
-PROBLEM UND LOESUNG 0.5.2
-Problem: Eine exportierte Projekt-ZIP konnte ausgewählt und ein Name eingegeben werden, danach gab die Oberfläche weder Erfolg noch Fehler aus.
-Loesung:
-- Benutzeroberfläche prüft die Dateiauswahl.
-- Import läuft in try/catch und zeigt konkrete Meldungen.
-- Ein abgeleiteter neuer Projektname wird vorgeschlagen.
-- Backend prüft leere, ungültige und beschädigte ZIP-Dateien.
-- Backend meldet Namenskonflikte ausdrücklich.
-- Import wird atomar über ein temporäres Verzeichnis durchgeführt.
-- Nur Archive mit espmanager.yaml im ZIP-Hauptverzeichnis werden akzeptiert.
-- Bei Erfolg wird das importierte Projekt automatisch geöffnet.
+PROBLEME UND LOESUNGEN 0.5.3
+1. Neue Datei anlegen funktionierte nicht sichtbar. UI prüft jetzt Projekt und Pfad, ergänzt bei einfachen Namen `src/`, zeigt Fehler an, aktualisiert die Liste und öffnet die neue Datei.
+2. WLAN musste initial und später änderbar sein. WiFiManager läuft nicht blockierend. Ohne erreichbares bekanntes WLAN öffnet das Gerät `ESPManager-<Gerätename>`; Konfiguration erfolgt per Captive Portal bzw. über 192.168.4.1.
+3. Routerausfall braucht Fallback. Nach 60 Sekunden ohne Verbindung öffnet der Agent erneut den Fallback-AP, während loopDevice() weiterläuft.
+4. WLAN-Wechsel bei funktionierendem Router: Nach jedem Start ist die WiFiManager-Webmaske für zehn Minuten über die lokale Geräte-IP erreichbar. Zusätzlich ist ein token-geschütztes MQTT-Kommando `/cmd/wifi_portal` vorbereitet.
+5. Systembibliotheken des Agenten dürfen nicht vom Expertenfeld abhängen. WiFiManager, PubSubClient und ArduinoJson werden automatisch in lib_deps eingefügt.
 
-WICHTIGER HINWEIS ZUM IMPORT
-Der Import ist für zuvor durch ESP Manager exportierte Projektarchive gedacht. Ein beliebiges Arduino-ZIP ohne espmanager.yaml ist ein anderer Workflow und muss separat als Arduino-Migration behandelt werden.
+NODEMCU-TESTABLAUF
+- Dev-Version aktualisieren.
+- Neues Projekt mit Board `esp12e` anlegen.
+- Build durchführen.
+- USB-Erstinstallation öffnen und NodeMCU ESP8266MOD per USB am Laptop auswählen.
+- Nach Flash/Neustart mit WLAN `ESPManager-<projektname>` verbinden.
+- Falls kein Portal automatisch erscheint, 192.168.4.1 öffnen.
+- Heim-WLAN auswählen, Passwort speichern.
+- Danach sollte der ESP seine lokale IP seriell und per MQTT melden.
+
+SICHERHEIT UND GRENZEN
+- Das Webportal ist nach normalem Start nur zehn Minuten offen; Fallback-AP bleibt bei fehlender Verbindung verfügbar.
+- Fallback-AP hat derzeit noch kein eigenes AP-Passwort. Vor einer Vollversion muss ein gerätespezifisches Portalpasswort eingeführt werden.
+- Hardwareverhalten dieser neuen WLAN-Logik muss am NodeMCU getestet werden.
+- OTA-Integritätsprüfung und Rollback sind noch nicht produktionsreif.
 
 ENTWICKLUNGSREGELN
-- Keine bestehende Funktion ungefragt entfernen.
-- Öffentliche Agent-API kompatibel halten.
-- Jede Version: CHANGELOG.md in Wurzel, esp_manager und esp_manager_dev.
-- Jede Version: PROJECT_HANDOVER.txt vollständig aktualisieren.
-- Stable/Dev getrennt halten und Versionsnummern erhöhen.
-- Python syntaktisch prüfen und ZIP testen.
+- Keine Funktionen ungefragt entfernen.
+- Agent-API und bestehende Testprojekte kompatibel halten.
+- CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
+- PROJECT_HANDOVER.txt bei jeder Version aktualisieren.
+- Stable/Dev trennen, Python prüfen, ZIP testen.
 
-NAECHSTE SCHRITTE OHNE HARDWARE
-1. Export-Import-Rundlauf in HA testen.
-2. Backup-Liste und Wiederherstellung ergänzen.
-3. Build-Historie verwalten und Release-Notizen ergänzen.
-4. Editor und Compiler-Fehlersprung verbessern.
+NAECHSTE SCHRITTE
+1. NodeMCU Build, USB-Flash und WLAN-Captive-Portal testen.
+2. Fallback nach Routerabschaltung testen.
+3. WLAN-Wechsel über lokale Webmaske testen.
+4. Fallback-AP mit individuellem Passwort absichern.
+5. Backup-Wiederherstellung und Build-Releases weiterentwickeln.
