@@ -1,62 +1,59 @@
 ESP MANAGER PROJEKTUEBERGABE
 ============================
-Stand: 0.5.4 / 0.5.4-dev
+Stand: 0.5.5 / 0.5.5-dev
 
 ZIELBILD
-Home-Assistant-Add-on zur zentralen Verwaltung von Arduino-C++-ESP-Projekten. Benutzerlogik bleibt im Projekt, der eingebaute ESPManager-Agent übernimmt WLAN-Provisioning, MQTT-Status, Logs und OTA. Erstes reales Testboard ist ein NodeMCU ESP8266MOD, später folgt der Sagemcom-M-Bus-Zähler-ESP.
+Home-Assistant-Add-on für Arduino-C++-ESP-Projekte mit Projektverwaltung, PlatformIO-Build, USB-Erstinstallation, Statusmonitor, WLAN-Provisioning, MQTT und später sicherem OTA. Verfügbare Testhardware: NodeMCU ESP8266MOD und ESP32-WROOM-32D Entwicklungsplatine.
 
 BISHERIGE FUNKTIONEN
-- Projektanlage, Datei-Editor und geschützte Systemdateien
-- Neue Dateien, Löschen, Export/Import und Duplizieren
-- Projektkonfiguration und PlatformIO-Expertenbereich
-- Live-Build, Abbruch, Build-Historie, Firmware-Artefakte und Backups
-- WLAN-Captive-Portal und Routerausfall-Fallback im Geräte-Agent
-- Agent-API mit publishSensor, MQTT, Logs und OTA
+- Projekt- und Dateiverwaltung, Editor, Backups, Import/Export
+- Projektparameter, Bibliotheken und Build-Flags
+- Live-Build, Abbruch und Buildhistorie
+- USB-&-Status-Seite mit ESP Web Tools, serieller Konsole und MQTT-Status
+- Nicht blockierendes WLAN-Captive-Portal und Fallback
+- MQTT/OTA-Agent mit kompatibler publishSensor-API
 
-NEU IN 0.5.4
-- Projektkarten haben wieder `USB & Status`.
-- NodeMCU 1.0 ESP8266MOD ist als `nodemcuv2` auswählbar.
-- Hardwaretest-Seite bündelt USB-Erstinstallation, seriellen Monitor, WLAN-Anleitung und MQTT-Status.
-- ESP Web Tools erhält ein Manifest für den neuesten erfolgreichen Build.
-- Für ESP8266 wird die einzelne firmware.bin bei Offset 0 geflasht.
-- Serieller Browsermonitor arbeitet mit 115200 Baud und zeigt Agent-Ausgaben.
-- Add-on abonniert Status, Availability, Logs und OTA-Fortschritt über MQTT.
+NEU IN 0.5.5
+Unterstützte Zielprofile:
+- NodeMCU 1.0 ESP8266MOD: board nodemcuv2, ESP8266
+- ESP8266 ESP-12E: board esp12e, ESP8266
+- ESP32 DevKit / WROOM-32: board esp32dev, ESP32
+- ESP32-S2 Saola: board esp32-s2-saola-1, ESP32-S2
+- ESP32-S3 DevKitC-1: board esp32-s3-devkitc-1, ESP32-S3
+- ESP32-C3 DevKitM-1: board esp32-c3-devkitm-1, ESP32-C3
+- ESP32-C6 DevKitC-1: board esp32-c6-devkitc-1, ESP32-C6
 
-HARDWARETESTABLAUF
-1. Dev-Version aktualisieren.
-2. Neues Projekt mit Board `NodeMCU 1.0 ESP8266MOD` anlegen.
-3. Projekt kompilieren und SUCCESS abwarten.
-4. In der Projektkarte `USB & Status` öffnen.
-5. Mit Chrome oder Edge über eine HTTPS-erreichbare Home-Assistant-Oberfläche arbeiten.
-6. NodeMCU per USB am Laptop anschließen und im Installer auswählen.
-7. Nach Installation/Neustart seriellen Monitor verbinden.
-8. Nach `ESPManager-<projektname>` suchen, verbinden und 192.168.4.1 öffnen, falls das Portal nicht automatisch erscheint.
-9. WLAN wählen und Kennwort speichern.
-10. MQTT-Gerätestatus auf derselben Seite beobachten.
+INITIAL-FLASH-ARCHITEKTUR
+- ESP8266: firmware.bin wird als initial_firmware.bin übernommen und bei Offset 0 geflasht.
+- ESP32-Familien: Nach erfolgreichem Build werden bootloader.bin, partitions.bin, boot_app0.bin falls vorhanden und firmware.bin mit PlatformIO-esptool zu initial_firmware.bin zusammengeführt.
+- ESP Web Tools erhält pro Projekt genau die gespeicherte Chipfamilie und schreibt initial_firmware.bin ab Offset 0.
+- firmware.bin bleibt separat für spätere OTA-Anwendungsupdates.
 
-ERWARTETE SERIELLE MELDUNGEN
-- `[ESPManager] Agent startet`
-- Bei fehlendem WLAN: `Fallback-WLAN aktiv ... IP=192.168.4.1`
-- Nach Verbindung: `WLAN verbunden ... IP=...`
-- Bei erfolgreichem Brokerzugriff: `MQTT verbunden`
+WICHTIGE EINSCHRAENKUNG
+"Alle Boards" ist technisch nicht pauschal garantierbar. 0.5.5 deckt die oben aufgeführten Wi-Fi-fähigen Standard-Entwicklungsprofile ab. Sonderboards mit anderer Flashgröße, PSRAM, Octal-Flash, abweichendem Flashmodus oder eigener Partitionierung benötigen ein eigenes Boardprofil und Hardwaretest. ESP32-H2 wird nicht aufgenommen, weil der aktuelle Agent WLAN voraussetzt. Unbekannte Board-IDs dürfen nicht stillschweigend als klassischer ESP32 geflasht werden; dieses Verhalten soll vor 1.0 weiter gehärtet werden.
 
-BEKANNTE GRENZEN
-- Web Serial und ESP Web Tools benötigen einen kompatiblen Browser und sicheren HTTPS-Kontext.
-- NodeMCU-Treiber des USB-UART-Chips muss gegebenenfalls auf dem Laptop vorhanden sein.
-- MQTT-Zugangsdaten müssen in den Add-on-Optionen korrekt sein.
-- Fallback-AP ist derzeit noch nicht mit einem individuellen Passwort abgesichert.
-- OTA-Integritätsprüfung und Rollback sind noch nicht produktionsreif.
-- Hardwareverhalten ist mit dieser Version erstmals praktisch zu testen und noch nicht bestätigt.
+TESTREIHENFOLGE
+1. NodeMCU nodemcuv2 neu anlegen, kompilieren, USB-Flash, seriellen Log und WLAN testen.
+2. ESP32-WROOM-32D als esp32dev neu anlegen, kompilieren und prüfen, dass initial_firmware.bin erstellt wird.
+3. USB-&-Status öffnen und ESP32 flashen. Falls automatische Umschaltung fehlschlägt, BOOT gedrückt halten und kurz EN/RESET betätigen.
+4. Für S2/S3/C3/C6 erst kompilieren und Build-Artefakte prüfen; Hardwareunterstützung gilt erst nach echtem Test als bestätigt.
+
+BEKANNTE RISIKEN
+- Web Serial benötigt unterstützten Browser und HTTPS.
+- Flashgröße ist für die Standardprofile derzeit auf 4 MB ausgelegt.
+- Sondermodule können andere Flash-/PSRAM-Einstellungen benötigen.
+- WLAN-Portal-AP braucht vor Vollversion ein gerätespezifisches Passwort.
+- OTA-Integritätsprüfung und Rollback fehlen noch.
 
 ENTWICKLUNGSREGELN
-- Keine vorhandenen Funktionen ungefragt entfernen.
-- Agent-API kompatibel halten und gegen alte Beispielprojekte testen.
-- CHANGELOG.md in Repository-Wurzel und beiden Add-on-Ordnern pflegen.
-- PROJECT_HANDOVER.txt bei jeder Version vollständig aktualisieren.
+- Keine vorhandenen Funktionen entfernen.
+- Agent-API kompatibel halten.
+- Jede Version: CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
+- Jede Version: PROJECT_HANDOVER.txt vollständig aktualisieren.
 - Stable/Dev getrennt halten, Python prüfen und ZIP testen.
 
-NAECHSTE SCHRITTE NACH HARDWARETEST
-- Flash-Ergebnis und seriellen Startlog auswerten.
-- Captive Portal und Router-Fallback testen.
-- MQTT-Status und spätere OTA-Aktualisierung testen.
-- Fallback-AP absichern und Wiederherstellungsablauf definieren.
+NAECHSTE SCHRITTE
+- NodeMCU und WROOM-32D praktisch testen.
+- Chipprofil aus PlatformIO-Boardmetadaten statt statischer Tabelle validieren.
+- Flashgröße, Flashmodus und PSRAM pro Boardprofil automatisch übernehmen.
+- Fehler bei unbekannten oder inkompatiblen Boards vor dem Flash klar anzeigen.
