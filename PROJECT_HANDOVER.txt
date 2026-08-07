@@ -1,59 +1,42 @@
 ESP MANAGER PROJEKTUEBERGABE
 ============================
-Stand: 0.5.5 / 0.5.5-dev
+Stand: 0.5.6 / 0.5.6-dev
 
 ZIELBILD
-Home-Assistant-Add-on für Arduino-C++-ESP-Projekte mit Projektverwaltung, PlatformIO-Build, USB-Erstinstallation, Statusmonitor, WLAN-Provisioning, MQTT und später sicherem OTA. Verfügbare Testhardware: NodeMCU ESP8266MOD und ESP32-WROOM-32D Entwicklungsplatine.
+Home-Assistant-Add-on für Arduino-C++-ESP-Projekte mit Projektverwaltung, PlatformIO-Build, USB-Erstinstallation, serieller Diagnose, WLAN-Provisioning, MQTT-Status und später sicherem OTA. Verfügbare Testhardware: NodeMCU ESP8266MOD und ESP32-WROOM-32D.
 
-BISHERIGE FUNKTIONEN
+AKTUELLER FUNKTIONSUMFANG
 - Projekt- und Dateiverwaltung, Editor, Backups, Import/Export
 - Projektparameter, Bibliotheken und Build-Flags
 - Live-Build, Abbruch und Buildhistorie
+- Mehrchip-Initial-Images für ESP8266, ESP32, S2, S3, C3 und C6
 - USB-&-Status-Seite mit ESP Web Tools, serieller Konsole und MQTT-Status
-- Nicht blockierendes WLAN-Captive-Portal und Fallback
+- Nicht blockierendes WLAN-Captive-Portal und Router-Fallback
 - MQTT/OTA-Agent mit kompatibler publishSensor-API
 
-NEU IN 0.5.5
-Unterstützte Zielprofile:
-- NodeMCU 1.0 ESP8266MOD: board nodemcuv2, ESP8266
-- ESP8266 ESP-12E: board esp12e, ESP8266
-- ESP32 DevKit / WROOM-32: board esp32dev, ESP32
-- ESP32-S2 Saola: board esp32-s2-saola-1, ESP32-S2
-- ESP32-S3 DevKitC-1: board esp32-s3-devkitc-1, ESP32-S3
-- ESP32-C3 DevKitM-1: board esp32-c3-devkitm-1, ESP32-C3
-- ESP32-C6 DevKitC-1: board esp32-c6-devkitc-1, ESP32-C6
+REGRESSION UND LOESUNG 0.5.6
+Beim Öffnen von `/usb/<projekt>` trat ein HTTP-500-Fehler auf. Ursache war `page.replaceAll(...)` im Python-Endpunkt. `replaceAll()` ist dort keine String-Methode. Der Endpunkt verwendet jetzt `page.replace(...)`, das alle Vorkommen der Projektmarkierung ersetzt.
 
-INITIAL-FLASH-ARCHITEKTUR
-- ESP8266: firmware.bin wird als initial_firmware.bin übernommen und bei Offset 0 geflasht.
-- ESP32-Familien: Nach erfolgreichem Build werden bootloader.bin, partitions.bin, boot_app0.bin falls vorhanden und firmware.bin mit PlatformIO-esptool zu initial_firmware.bin zusammengeführt.
-- ESP Web Tools erhält pro Projekt genau die gespeicherte Chipfamilie und schreibt initial_firmware.bin ab Offset 0.
-- firmware.bin bleibt separat für spätere OTA-Anwendungsupdates.
+TEST NACH UPDATE
+1. Projekt erfolgreich kompilieren.
+2. `USB & Status` öffnen.
+3. Die Hardwaretest-Seite muss ohne Internal Server Error erscheinen.
+4. Installer, seriellen Monitor, WLAN-Anleitung und MQTT-Statusbereich prüfen.
+5. Danach erst das gewünschte Board per USB auswählen und flashen.
 
-WICHTIGE EINSCHRAENKUNG
-"Alle Boards" ist technisch nicht pauschal garantierbar. 0.5.5 deckt die oben aufgeführten Wi-Fi-fähigen Standard-Entwicklungsprofile ab. Sonderboards mit anderer Flashgröße, PSRAM, Octal-Flash, abweichendem Flashmodus oder eigener Partitionierung benötigen ein eigenes Boardprofil und Hardwaretest. ESP32-H2 wird nicht aufgenommen, weil der aktuelle Agent WLAN voraussetzt. Unbekannte Board-IDs dürfen nicht stillschweigend als klassischer ESP32 geflasht werden; dieses Verhalten soll vor 1.0 weiter gehärtet werden.
-
-TESTREIHENFOLGE
-1. NodeMCU nodemcuv2 neu anlegen, kompilieren, USB-Flash, seriellen Log und WLAN testen.
-2. ESP32-WROOM-32D als esp32dev neu anlegen, kompilieren und prüfen, dass initial_firmware.bin erstellt wird.
-3. USB-&-Status öffnen und ESP32 flashen. Falls automatische Umschaltung fehlschlägt, BOOT gedrückt halten und kurz EN/RESET betätigen.
-4. Für S2/S3/C3/C6 erst kompilieren und Build-Artefakte prüfen; Hardwareunterstützung gilt erst nach echtem Test als bestätigt.
-
-BEKANNTE RISIKEN
-- Web Serial benötigt unterstützten Browser und HTTPS.
-- Flashgröße ist für die Standardprofile derzeit auf 4 MB ausgelegt.
-- Sondermodule können andere Flash-/PSRAM-Einstellungen benötigen.
-- WLAN-Portal-AP braucht vor Vollversion ein gerätespezifisches Passwort.
+WICHTIGE GRENZEN
+- Web Serial benötigt einen unterstützten Browser und einen sicheren Kontext.
+- Mehrchip-Unterstützung ist für definierte Standardprofile vorbereitet, aber noch nicht auf jeder Familie praktisch bestätigt.
+- Sonderboards benötigen später dynamische Flashgrößen-, Flashmodus- und PSRAM-Profile.
+- WLAN-Fallback-AP braucht vor 1.0 ein individuelles Passwort.
 - OTA-Integritätsprüfung und Rollback fehlen noch.
 
 ENTWICKLUNGSREGELN
-- Keine vorhandenen Funktionen entfernen.
+- Keine vorhandenen Funktionen ungefragt entfernen.
 - Agent-API kompatibel halten.
-- Jede Version: CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
-- Jede Version: PROJECT_HANDOVER.txt vollständig aktualisieren.
+- CHANGELOG.md in Repository-Wurzel und beiden Add-on-Ordnern pflegen.
+- PROJECT_HANDOVER.txt bei jeder Version vollständig aktualisieren.
 - Stable/Dev getrennt halten, Python prüfen und ZIP testen.
 
-NAECHSTE SCHRITTE
-- NodeMCU und WROOM-32D praktisch testen.
-- Chipprofil aus PlatformIO-Boardmetadaten statt statischer Tabelle validieren.
-- Flashgröße, Flashmodus und PSRAM pro Boardprofil automatisch übernehmen.
-- Fehler bei unbekannten oder inkompatiblen Boards vor dem Flash klar anzeigen.
+NAECHSTER SCHRITT
+Nach erfolgreichem Öffnen der Hardwaretest-Seite NodeMCU und ESP32-WROOM-32D nacheinander flashen und serielle Ausgabe sowie WLAN-Provisioning protokollieren.
