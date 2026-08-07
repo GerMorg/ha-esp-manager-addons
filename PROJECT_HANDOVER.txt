@@ -1,50 +1,62 @@
 ESP MANAGER PROJEKTUEBERGABE
 ============================
-Stand: 0.5.3 / 0.5.3-dev
+Stand: 0.5.4 / 0.5.4-dev
 
 ZIELBILD
-Home-Assistant-Add-on für zentral verwaltete Arduino-C++-ESP-Projekte. Benutzerlogik bleibt getrennt, der Agent übernimmt WLAN-Provisioning, MQTT, Status, Logs und OTA. Erstes reales Testboard ist nun ein NodeMCU ESP8266MOD; später folgt der Sagemcom/M-Bus-Zähler-ESP.
+Home-Assistant-Add-on zur zentralen Verwaltung von Arduino-C++-ESP-Projekten. Benutzerlogik bleibt im Projekt, der eingebaute ESPManager-Agent übernimmt WLAN-Provisioning, MQTT-Status, Logs und OTA. Erstes reales Testboard ist ein NodeMCU ESP8266MOD, später folgt der Sagemcom-M-Bus-Zähler-ESP.
 
-BESTEHENDE FUNKTIONEN
-- Projekte, Editor, Dateiverwaltung und geschützte Systemdateien
+BISHERIGE FUNKTIONEN
+- Projektanlage, Datei-Editor und geschützte Systemdateien
+- Neue Dateien, Löschen, Export/Import und Duplizieren
 - Projektkonfiguration und PlatformIO-Expertenbereich
-- Live-Build, Buildabbruch und Buildhistorie
-- Backup, Export/Import, Duplizieren und Löschen
-- MQTT/OTA-Agent mit kompatibler publishSensor-API
+- Live-Build, Abbruch, Build-Historie, Firmware-Artefakte und Backups
+- WLAN-Captive-Portal und Routerausfall-Fallback im Geräte-Agent
+- Agent-API mit publishSensor, MQTT, Logs und OTA
 
-PROBLEME UND LOESUNGEN 0.5.3
-1. Neue Datei anlegen funktionierte nicht sichtbar. UI prüft jetzt Projekt und Pfad, ergänzt bei einfachen Namen `src/`, zeigt Fehler an, aktualisiert die Liste und öffnet die neue Datei.
-2. WLAN musste initial und später änderbar sein. WiFiManager läuft nicht blockierend. Ohne erreichbares bekanntes WLAN öffnet das Gerät `ESPManager-<Gerätename>`; Konfiguration erfolgt per Captive Portal bzw. über 192.168.4.1.
-3. Routerausfall braucht Fallback. Nach 60 Sekunden ohne Verbindung öffnet der Agent erneut den Fallback-AP, während loopDevice() weiterläuft.
-4. WLAN-Wechsel bei funktionierendem Router: Nach jedem Start ist die WiFiManager-Webmaske für zehn Minuten über die lokale Geräte-IP erreichbar. Zusätzlich ist ein token-geschütztes MQTT-Kommando `/cmd/wifi_portal` vorbereitet.
-5. Systembibliotheken des Agenten dürfen nicht vom Expertenfeld abhängen. WiFiManager, PubSubClient und ArduinoJson werden automatisch in lib_deps eingefügt.
+NEU IN 0.5.4
+- Projektkarten haben wieder `USB & Status`.
+- NodeMCU 1.0 ESP8266MOD ist als `nodemcuv2` auswählbar.
+- Hardwaretest-Seite bündelt USB-Erstinstallation, seriellen Monitor, WLAN-Anleitung und MQTT-Status.
+- ESP Web Tools erhält ein Manifest für den neuesten erfolgreichen Build.
+- Für ESP8266 wird die einzelne firmware.bin bei Offset 0 geflasht.
+- Serieller Browsermonitor arbeitet mit 115200 Baud und zeigt Agent-Ausgaben.
+- Add-on abonniert Status, Availability, Logs und OTA-Fortschritt über MQTT.
 
-NODEMCU-TESTABLAUF
-- Dev-Version aktualisieren.
-- Neues Projekt mit Board `esp12e` anlegen.
-- Build durchführen.
-- USB-Erstinstallation öffnen und NodeMCU ESP8266MOD per USB am Laptop auswählen.
-- Nach Flash/Neustart mit WLAN `ESPManager-<projektname>` verbinden.
-- Falls kein Portal automatisch erscheint, 192.168.4.1 öffnen.
-- Heim-WLAN auswählen, Passwort speichern.
-- Danach sollte der ESP seine lokale IP seriell und per MQTT melden.
+HARDWARETESTABLAUF
+1. Dev-Version aktualisieren.
+2. Neues Projekt mit Board `NodeMCU 1.0 ESP8266MOD` anlegen.
+3. Projekt kompilieren und SUCCESS abwarten.
+4. In der Projektkarte `USB & Status` öffnen.
+5. Mit Chrome oder Edge über eine HTTPS-erreichbare Home-Assistant-Oberfläche arbeiten.
+6. NodeMCU per USB am Laptop anschließen und im Installer auswählen.
+7. Nach Installation/Neustart seriellen Monitor verbinden.
+8. Nach `ESPManager-<projektname>` suchen, verbinden und 192.168.4.1 öffnen, falls das Portal nicht automatisch erscheint.
+9. WLAN wählen und Kennwort speichern.
+10. MQTT-Gerätestatus auf derselben Seite beobachten.
 
-SICHERHEIT UND GRENZEN
-- Das Webportal ist nach normalem Start nur zehn Minuten offen; Fallback-AP bleibt bei fehlender Verbindung verfügbar.
-- Fallback-AP hat derzeit noch kein eigenes AP-Passwort. Vor einer Vollversion muss ein gerätespezifisches Portalpasswort eingeführt werden.
-- Hardwareverhalten dieser neuen WLAN-Logik muss am NodeMCU getestet werden.
+ERWARTETE SERIELLE MELDUNGEN
+- `[ESPManager] Agent startet`
+- Bei fehlendem WLAN: `Fallback-WLAN aktiv ... IP=192.168.4.1`
+- Nach Verbindung: `WLAN verbunden ... IP=...`
+- Bei erfolgreichem Brokerzugriff: `MQTT verbunden`
+
+BEKANNTE GRENZEN
+- Web Serial und ESP Web Tools benötigen einen kompatiblen Browser und sicheren HTTPS-Kontext.
+- NodeMCU-Treiber des USB-UART-Chips muss gegebenenfalls auf dem Laptop vorhanden sein.
+- MQTT-Zugangsdaten müssen in den Add-on-Optionen korrekt sein.
+- Fallback-AP ist derzeit noch nicht mit einem individuellen Passwort abgesichert.
 - OTA-Integritätsprüfung und Rollback sind noch nicht produktionsreif.
+- Hardwareverhalten ist mit dieser Version erstmals praktisch zu testen und noch nicht bestätigt.
 
 ENTWICKLUNGSREGELN
-- Keine Funktionen ungefragt entfernen.
-- Agent-API und bestehende Testprojekte kompatibel halten.
-- CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
-- PROJECT_HANDOVER.txt bei jeder Version aktualisieren.
-- Stable/Dev trennen, Python prüfen, ZIP testen.
+- Keine vorhandenen Funktionen ungefragt entfernen.
+- Agent-API kompatibel halten und gegen alte Beispielprojekte testen.
+- CHANGELOG.md in Repository-Wurzel und beiden Add-on-Ordnern pflegen.
+- PROJECT_HANDOVER.txt bei jeder Version vollständig aktualisieren.
+- Stable/Dev getrennt halten, Python prüfen und ZIP testen.
 
-NAECHSTE SCHRITTE
-1. NodeMCU Build, USB-Flash und WLAN-Captive-Portal testen.
-2. Fallback nach Routerabschaltung testen.
-3. WLAN-Wechsel über lokale Webmaske testen.
-4. Fallback-AP mit individuellem Passwort absichern.
-5. Backup-Wiederherstellung und Build-Releases weiterentwickeln.
+NAECHSTE SCHRITTE NACH HARDWARETEST
+- Flash-Ergebnis und seriellen Startlog auswerten.
+- Captive Portal und Router-Fallback testen.
+- MQTT-Status und spätere OTA-Aktualisierung testen.
+- Fallback-AP absichern und Wiederherstellungsablauf definieren.

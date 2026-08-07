@@ -1,13 +1,12 @@
 # Changelog
 
-## 0.5.3
-- Neue Dateien können wieder zuverlässig angelegt werden; fehlende Projektwahl, leerer Pfad und API-Fehler werden verständlich angezeigt.
-- Dateipfade ohne Ordner werden automatisch unter `src/` angelegt.
-- Neue Datei wird nach dem Anlegen automatisch geöffnet.
-- WLAN-Erstkonfiguration über Fallback-Access-Point `ESPManager-<Gerätename>` vorbereitet.
-- WLAN-Konfigurationsmaske bei bestehender Verbindung zehn Minuten nach Neustart über die lokale Geräte-IP erreichbar.
-- Nach 60 Sekunden WLAN-Ausfall startet automatisch ein nicht blockierender Fallback-Access-Point.
-- Das Geräteprogramm kann während des Fallback-Portals weiterlaufen.
-- WLAN-Portal kann später token-geschützt per MQTT-Kommando geöffnet werden.
-- MQTT, Status, Logs, OTA und `publishSensor()` im Agent erhalten.
-- Agent-Bibliotheken WiFiManager, PubSubClient und ArduinoJson werden automatisch verwaltet.
+## 0.5.4
+- USB-Erstinstallation und Hardwaretest-Seite wiederhergestellt.
+- NodeMCU 1.0 ESP8266MOD als eigene Boardauswahl (`nodemcuv2`) ergänzt.
+- ESP-Web-Tools-Manifest verwendet automatisch den neuesten erfolgreichen Build.
+- ESP8266-Firmware wird für USB-Flash bei Offset 0 bereitgestellt.
+- Serieller Browser-Statusmonitor mit 115200 Baud, Verbinden, Trennen und Leeren.
+- MQTT-Gerätestatus mit IP, SSID, RSSI, Uptime, Heap und Portalstatus vorbereitet.
+- MQTT-Statussammlung im Add-on wiederhergestellt.
+- Schrittweise WLAN-Ersteinrichtung direkt auf der Hardwaretest-Seite erklärt.
+- Bestehende Projekte, Builds, Importe, Dateien und Agent-Funktionen bleiben erhalten.

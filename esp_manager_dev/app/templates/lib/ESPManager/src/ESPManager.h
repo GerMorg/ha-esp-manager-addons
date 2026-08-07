@@ -22,23 +22,5 @@
 #define ESPMANAGER_OTA_TOKEN ""
 #endif
 #define ESPM_LOG(message) ESPManager.log(String(message))
-class ESPManagerClass {
-public:
-  void begin();
-  void loop();
-  void log(const String &message);
-  void publishSensor(const char *key, double value);
-  void openWifiPortal();
-  void handleCommand(const String &topic, const String &payload);
-private:
-  void ensureMqtt();
-  void publishStatus();
-  void startFallbackPortal();
-  unsigned long lastStatus = 0;
-  unsigned long lastMqttRetry = 0;
-  unsigned long disconnectedSince = 0;
-  unsigned long webPortalUntil = 0;
-  bool configPortalActive = false;
-  bool webPortalActive = false;
-};
+class ESPManagerClass{public:void begin();void loop();void log(const String&);void publishSensor(const char*,double);void openWifiPortal();void handleCommand(const String&,const String&);private:void ensureMqtt();void publishStatus();void startFallbackPortal();unsigned long lastStatus=0,lastMqttRetry=0,disconnectedSince=0,webPortalUntil=0;bool configPortalActive=false,webPortalActive=false;};
 extern ESPManagerClass ESPManager;
