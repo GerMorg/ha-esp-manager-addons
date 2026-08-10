@@ -1,7 +1,8 @@
 # Changelog
 
-## 0.5.6
-- Internal Server Error auf der Seite `USB & Status` behoben.
-- Fälschlich verwendetes JavaScript-`replaceAll()` im Python-Endpunkt durch Python-`replace()` ersetzt.
-- USB-Hardwaretest-Seite kann dadurch wieder als HTML ausgeliefert werden.
-- Mehrchip-Flash, serieller Monitor, MQTT-Status und alle bisherigen Funktionen bleiben unverändert erhalten.
+## 0.5.7
+- ESP-Web-Tools-Manifestpfad unter Home-Assistant-Ingress korrigiert.
+- `USB & Status` öffnet Projekte nun mit abschließendem Schrägstrich, damit `manifest.json` relativ zum Projekt aufgelöst wird.
+- Anzeige `Install undefined` und Hängen bei `Preparing installation` durch falschen Manifestpfad behoben.
+- Sichtbare Manifest-Vorprüfung ergänzt: Projektname, Version und erkannte Chipfamilie werden vor dem Flash angezeigt.
+- Bestehender serieller Monitor, Mehrchip-Initial-Images und MQTT-Status bleiben erhalten.
