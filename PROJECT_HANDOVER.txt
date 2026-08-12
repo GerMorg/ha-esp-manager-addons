@@ -1,40 +1,50 @@
-ESP MANAGER PROJEKTUEBERGABE - VERSION 0.7.1
+ESP MANAGER PROJEKTUEBERGABE - VERSION 0.7.2
 =============================================
 
 BESTÄTIGTER STAND
-- ESP32 per USB geflasht.
-- WLAN und MQTT verbunden.
-- Statusdaten regelmäßig im ESP Manager sichtbar.
-- OTA-Backend erzeugte erfolgreich Auftrag, Token-URL und SHA256.
-- Auf dem ESP geschah nach dem Auftrag nichts.
+- USB-Flash, serieller Monitor, WLAN-Provisioning und MQTT funktionieren.
+- Geräteübersicht zeigt regelmäßige Statusdaten.
+- OTA-Kommando erreicht den ESP und wird bis `validating` verarbeitet.
+- Firmware-URL mit Token ist im Browser aus dem LAN erreichbar.
+- OTA blieb dennoch bei 0 Prozent stehen.
 
-URSACHE
-PubSubClient verarbeitet standardmäßig MQTT-Pakete nur bis 256 Bytes. Das OTA-Kommando enthält Topic, JSON, lange Firmware-URL, Token, SHA256, Build-ID und Version und überschreitet diese Grenze. Zu große eingehende Pakete werden nicht an den Callback übergeben. Deshalb konnte das Backend Erfolg melden, während der ESP keinerlei OTA-Status ausgab.
+URSACHE DES OTA-HÄNGERS
+Der Agent verwendete dieselbe WiFiClient-Instanz `net` sowohl als Transport für die dauerhaft aktive PubSubClient-MQTT-Verbindung als auch für HTTPUpdate. Beim Start des HTTP-Downloads wurde damit die bereits vom MQTT-Client belegte Netzwerkverbindung wiederverwendet. 0.7.2 trennt die Transporte:
+- `net` ausschließlich für MQTT.
+- `otaNet` ausschließlich für HTTPUpdate.
 
-LÖSUNG 0.7.1
-- ESP-Agent setzt `mq.setBufferSize(2048)` vor MQTT-Verbindung und Callback.
-- Backend serialisiert das Kommando kompakt.
-- Backend berechnet `command_bytes`, meldet den Wert und lehnt Kommandos über 1536 Bytes ab.
-- Nach erfolgreicher JSON- und Tokenprüfung publiziert der ESP sofort OTA-Status `received` mit empfangener Payloadgröße.
-- Danach folgen weiterhin validating, started, progress, finished, failed oder no_update.
+OTA-TEST NACH 0.7.2
+Die Änderung liegt im ESP-Agenten und muss zunächst einmal per USB installiert werden.
+1. 0.7.2 einspielen und Dev-App aktualisieren.
+2. Projekt neu kompilieren.
+3. 0.7.2 einmal per USB flashen.
+4. Firmwareversion und Blinkintervall ändern.
+5. Neu kompilieren und per OTA aktualisieren.
+6. Erwartet: received, validating, started, progress, finished und Neustart.
 
-WICHTIG FÜR DEN TEST
-Der größere MQTT-Puffer ist Teil des Geräte-Agenten. Deshalb muss Version 0.7.1 zuerst einmal per USB auf den ESP installiert werden. Erst danach können lange OTA-Kommandos zuverlässig empfangen werden.
+BUILD-AUFBEWAHRUNG
+- Jeder neue erfolgreiche Build erhält `pinned: false`.
+- Automatisch bleiben die fünf neuesten nicht angehefteten Builds erhalten.
+- Angeheftete Builds werden niemals automatisch entfernt.
+- Manuelles Löschen eines angehefteten Builds wird abgelehnt.
+- Manuelle Bereinigung behält ebenfalls fünf nicht angeheftete Builds.
 
-TESTABLAUF
-1. Repository-Overlay 0.7.1 einspielen und Dev-App aktualisieren.
-2. public_base_url auf eine vom ESP erreichbare Adresse setzen, zum Beispiel `http://<HA-LAN-IP>:8100`.
-3. Projektversion erhöhen und neu kompilieren.
-4. Diesen 0.7.1-Agenten einmal per USB flashen.
-5. Danach erneut eine höhere Projektversion bauen.
-6. OTA starten.
-7. Erwarteter erster Status: `received - MQTT-Kommando empfangen, Bytes=...`.
-8. Danach validating, started und progress beobachten.
-9. Nach finished startet der ESP neu und meldet die neue firmware_version.
+GERÄT VERGESSEN
+- Entfernt das Gerät aus dem aktuellen Speicher.
+- Löscht retained Status-, Availability- und OTA-Fortschrittsthemen.
+- Ein weiterhin aktives Gerät kann mit seiner nächsten Statusmeldung erneut erscheinen. Das ist beabsichtigt und wird in der UI angekündigt.
+
+MQTT-BENUTZEREMPFEHLUNG
+Ein gemeinsamer, ausschließlich für ESP-Manager-Geräte verwendeter MQTT-Benutzer ist für den aktuellen Stand sinnvoll. Ein Benutzer pro ESP wird erst mit projektbezogener Zugangsdatenverwaltung und Topic-ACLs sinnvoll.
+
+BEKANNTE GRENZEN
+- OTA 0.7.2 muss praktisch bestätigt werden.
+- Geräteseitige SHA256-Neuberechnung und Rollback fehlen weiterhin.
+- Aktive Geräte erscheinen nach dem Vergessen erneut.
+- Automatische Aufbewahrung ist derzeit fest auf fünf nicht angeheftete Builds eingestellt.
 
 ENTWICKLUNGSREGELN
+- Netzwerkclients verschiedener Protokolle nicht teilen.
 - Keine vorhandenen Funktionen entfernen.
-- MQTT-Payloadgrößen bei neuen Kommandos berücksichtigen und diagnostizieren.
-- Haupt- und Hardwareseiten-JavaScript prüfen.
 - CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
 - PROJECT_HANDOVER.txt bei jeder Version aktualisieren.
