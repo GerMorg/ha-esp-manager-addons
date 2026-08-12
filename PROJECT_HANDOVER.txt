@@ -1,50 +1,47 @@
-ESP MANAGER PROJEKTUEBERGABE - VERSION 0.7.2
+ESP MANAGER PROJEKTUEBERGABE - VERSION 0.7.3
 =============================================
 
-BESTÄTIGTER STAND
-- USB-Flash, serieller Monitor, WLAN-Provisioning und MQTT funktionieren.
-- Geräteübersicht zeigt regelmäßige Statusdaten.
-- OTA-Kommando erreicht den ESP und wird bis `validating` verarbeitet.
-- Firmware-URL mit Token ist im Browser aus dem LAN erreichbar.
-- OTA blieb dennoch bei 0 Prozent stehen.
+BESTÄTIGTER HARDWARESTATUS
+- USB-Flash funktioniert.
+- WLAN und MQTT funktionieren.
+- Gerätestatus wird regelmäßig angezeigt.
+- OTA lädt und installiert die neue Firmware erfolgreich.
+- Das neue Blinkintervall wird nach OTA ausgeführt und das Gerät meldet sich wieder online.
+- Die Oberfläche blieb bisher bei 99 Prozent stehen.
 
-URSACHE DES OTA-HÄNGERS
-Der Agent verwendete dieselbe WiFiClient-Instanz `net` sowohl als Transport für die dauerhaft aktive PubSubClient-MQTT-Verbindung als auch für HTTPUpdate. Beim Start des HTTP-Downloads wurde damit die bereits vom MQTT-Client belegte Netzwerkverbindung wiederverwendet. 0.7.2 trennt die Transporte:
-- `net` ausschließlich für MQTT.
-- `otaNet` ausschließlich für HTTPUpdate.
+URSACHE DER 99-PROZENT-ANZEIGE
+Der Fortschrittscallback kann zuletzt einen Wert knapp unter 100 melden. Direkt nach erfolgreichem Schreiben startet HTTPUpdate standardmäßig neu. Die abschließende MQTT-Meldung kann dadurch verloren gehen, obwohl die neue Firmware bereits korrekt installiert wurde.
 
-OTA-TEST NACH 0.7.2
-Die Änderung liegt im ESP-Agenten und muss zunächst einmal per USB installiert werden.
-1. 0.7.2 einspielen und Dev-App aktualisieren.
-2. Projekt neu kompilieren.
-3. 0.7.2 einmal per USB flashen.
-4. Firmwareversion und Blinkintervall ändern.
-5. Neu kompilieren und per OTA aktualisieren.
-6. Erwartet: received, validating, started, progress, finished und Neustart.
+LÖSUNG 0.7.3
+1. HTTPUpdate erhält `rebootOnUpdate(false)`.
+2. Bei HTTP_UPDATE_OK sendet der Agent explizit `finished` mit 100 Prozent.
+3. Der Agent ruft MQTT noch kurz weiter auf, damit die Meldung übertragen werden kann.
+4. Danach startet der Agent kontrolliert mit ESP.restart().
+5. Das Backend speichert beim Auftrag Zielversion und Ziel-Build im Gerätestatus.
+6. Nach dem Neustart vergleicht der ESP Manager die neue gemeldete firmware_version mit der Zielversion.
+7. Bei Übereinstimmung wird unabhängig von einer verlorenen finished-Meldung `confirmed`, 100 Prozent und Erfolg gesetzt.
+8. Nach drei Minuten ohne Bestätigung zeigt die UI eine Zeitüberschreitung.
 
-BUILD-AUFBEWAHRUNG
-- Jeder neue erfolgreiche Build erhält `pinned: false`.
-- Automatisch bleiben die fünf neuesten nicht angehefteten Builds erhalten.
-- Angeheftete Builds werden niemals automatisch entfernt.
-- Manuelles Löschen eines angehefteten Builds wird abgelehnt.
-- Manuelle Bereinigung behält ebenfalls fünf nicht angeheftete Builds.
+TESTABLAUF
+Die Agentänderung muss zunächst einmal auf das Gerät gelangen. Da 0.7.2-OTA bereits praktisch funktioniert, kann 0.7.3 voraussichtlich per OTA installiert werden.
+1. 0.7.3 einspielen und Dev-App aktualisieren.
+2. Projektversion erhöhen und neu bauen.
+3. 0.7.3 per OTA installieren.
+4. Danach erneut Version und Blinkintervall ändern und einen weiteren OTA-Test durchführen.
+5. Erwartet: finished oder spätestens nach Wiederanmeldung confirmed mit 100 Prozent.
+6. Gerätestatus muss die neue firmware_version zeigen.
 
-GERÄT VERGESSEN
-- Entfernt das Gerät aus dem aktuellen Speicher.
-- Löscht retained Status-, Availability- und OTA-Fortschrittsthemen.
-- Ein weiterhin aktives Gerät kann mit seiner nächsten Statusmeldung erneut erscheinen. Das ist beabsichtigt und wird in der UI angekündigt.
-
-MQTT-BENUTZEREMPFEHLUNG
-Ein gemeinsamer, ausschließlich für ESP-Manager-Geräte verwendeter MQTT-Benutzer ist für den aktuellen Stand sinnvoll. Ein Benutzer pro ESP wird erst mit projektbezogener Zugangsdatenverwaltung und Topic-ACLs sinnvoll.
-
-BEKANNTE GRENZEN
-- OTA 0.7.2 muss praktisch bestätigt werden.
-- Geräteseitige SHA256-Neuberechnung und Rollback fehlen weiterhin.
-- Aktive Geräte erscheinen nach dem Vergessen erneut.
-- Automatische Aufbewahrung ist derzeit fest auf fünf nicht angeheftete Builds eingestellt.
+NÄCHSTE SCHRITTE
+1. OTA-Aufträge persistent speichern, damit ein Add-on-Neustart die Zielversion nicht verliert.
+2. Boot-Bestätigung und Rollback-Konzept entwickeln.
+3. Geräteseitige SHA256-Neuberechnung ergänzen.
+4. Geräte-Detailseite mit Verlauf von Version, Neustarts, Signalstärke und OTA-Ergebnissen.
+5. Aufbewahrungszahl für Builds konfigurierbar machen.
+6. Gemeinsamen MQTT-Gerätebenutzer beibehalten; projektbezogene Zugangsdaten und Topic-ACLs erst später ergänzen.
+7. Danach Sagemcom/M-Bus-Anwendung importieren und auf der bestätigten Infrastruktur testen.
 
 ENTWICKLUNGSREGELN
-- Netzwerkclients verschiedener Protokolle nicht teilen.
-- Keine vorhandenen Funktionen entfernen.
+- Erfolgreiches OTA nicht nur aus dem letzten Fortschrittswert ableiten, sondern durch Firmwareversion nach Neustart bestätigen.
+- Keine vorhandenen Funktionen ungefragt entfernen.
 - CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
-- PROJECT_HANDOVER.txt bei jeder Version aktualisieren.
+- PROJECT_HANDOVER.txt bei jeder Version vollständig aktualisieren.

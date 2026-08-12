@@ -1,11 +1,10 @@
 # Changelog
 
-## 0.7.2
-- OTA-Download verwendet einen eigenen WiFiClient statt der aktiven MQTT-Verbindung.
-- Behebt das Hängen bei `validating` beziehungsweise 0 %, obwohl die Firmware-URL erreichbar ist.
-- Geräte können aus der Übersicht vergessen werden; retained Statusdaten werden entfernt.
-- Einzelne Builds können gelöscht werden.
-- Builds können angeheftet und damit vor automatischer Bereinigung geschützt werden.
-- Schaltfläche zum Behalten der letzten fünf nicht angehefteten Builds.
-- Nach erfolgreichem Build erfolgt automatische Bereinigung auf fünf nicht angeheftete Builds.
-- Alle bisherigen USB-, MQTT-, OTA-, Status- und Projektfunktionen bleiben erhalten.
+## 0.7.3
+- OTA-Abschluss wird nach dem Neustart anhand der gemeldeten Firmwareversion bestätigt.
+- Zielversion und Ziel-Build werden beim OTA-Auftrag im Gerätestatus hinterlegt.
+- Meldet das Gerät danach dieselbe Firmwareversion, setzt der ESP Manager den Zustand auf `confirmed` und 100 Prozent.
+- HTTPUpdate startet nicht mehr unmittelbar selbst neu.
+- Agent sendet `finished`, verarbeitet MQTT kurz weiter und startet anschließend kontrolliert neu.
+- OTA-Zeitüberschreitung nach drei Minuten ergänzt.
+- Bestehende OTA-, Build-, Geräte-, USB- und Projektfunktionen bleiben erhalten.
