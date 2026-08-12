@@ -1,89 +1,52 @@
 ESP MANAGER PROJEKTUEBERGABE
 ============================
-Stand: 0.6.0 / 0.6.0-dev
+Stand: 0.6.1 / 0.6.1-dev
 
 ZIELBILD
-Home-Assistant-Add-on zur zentralen Verwaltung von Arduino-C++-ESP-Projekten. Der Benutzer bearbeitet seine Programmlogik, während der ESPManager-Agent WLAN-Provisioning, Router-Fallback, MQTT-Status, Logs und OTA-Grundlagen bereitstellt. Verfügbare Testhardware: ESP32-WROOM-32D und NodeMCU ESP8266MOD. Späteres reales Anwendungsziel: Sagemcom/Netz-Niederoesterreich-M-Bus-Zähler.
+Home-Assistant-Add-on zur zentralen Verwaltung von Arduino-C++-ESP-Projekten mit PlatformIO-Build, USB-Erstinstallation, serieller Diagnose, WLAN-Provisioning, MQTT-Status und später sicherem OTA. Testhardware: ESP32-WROOM-32D und NodeMCU ESP8266MOD. Späteres Zielprojekt: Sagemcom/M-Bus-Zähler.
 
 ERREICHTER HARDWARE-MEILENSTEIN
-- Sichere HA/Tailscale-Seite und Web Serial funktionierten.
-- ESP32 konnte über ESP Web Tools mit dem erzeugten Initial-Image geflasht werden.
-- Serieller Monitor funktionierte.
-- ESPManager-Agent startete und WLAN konnte über das Captive Portal eingerichtet werden.
-- Danach zeigte der ESP `DNS Failed for core-mosquitto`.
+- ESP32 erfolgreich per Browser geflasht.
+- Serieller Monitor bestätigt.
+- WLAN per Captive Portal konfiguriert.
+- MQTT-DNS-Problem erkannt: `core-mosquitto` ist nur add-on-intern erreichbar.
 
-URSACHE DES MQTT-FEHLERS
-`core-mosquitto` ist der interne Add-on-/Containername, den der ESP im normalen Heimnetz nicht per DNS auflösen kann. Der Add-on-Prozess darf diesen internen Namen weiterverwenden; Firmware benötigt hingegen einen im LAN erreichbaren Hostnamen oder die LAN-IP von Home Assistant.
+0.6.0 ARCHITEKTUR
+- Historische Patchkette entfernt und vollständige saubere Codebasis erstellt.
+- Interne MQTT-Konfiguration und ESP-erreichbare Geräte-MQTT-Konfiguration getrennt.
+- Stable: `/config/esp_manager`, Port 8099.
+- Dev: `/config/esp_manager_dev`, Port 8100.
 
-LOESUNG 0.6.0
-Getrennte Konfiguration:
-- mqtt_host / mqtt_port / mqtt_username / mqtt_password: Add-on-intern, typischerweise core-mosquitto.
-- device_mqtt_host / device_mqtt_port / device_mqtt_username / device_mqtt_password: in Firmware eingebettet und vom ESP im Heimnetz erreichbar.
-Standard für device_mqtt_host ist homeassistant.local. Falls mDNS im WLAN nicht funktioniert, muss die LAN-IP des Home-Assistant-Hosts eingetragen werden. Nach Änderung ist ein neuer Firmware-Build erforderlich.
+REGRESSION UND LÖSUNG 0.6.1
+Beim Erzeugen der großen HTML/f-String-Oberfläche wurden JavaScript-Ausdrücke wie `.join('\n')` zur Laufzeit mit echten Zeilenumbrüchen innerhalb eines JavaScript-Stringliterals ausgegeben. Das JavaScript brach bereits beim Laden ab. Deshalb blieben Projektliste und Schaltflächen ohne Funktion, obwohl die Backend-API und der Dev-Datenpfad vorhanden waren.
 
-WICHTIG ZU MQTT-ZUGANGSDATEN
-Für ESP-Geräte sollte im Mosquitto-Add-on ein zusätzlicher Login verwendet und in den device_mqtt-Feldern eingetragen werden. Leere Zugangsdaten funktionieren nur, wenn der Broker anonyme Verbindungen erlaubt.
+0.6.1 gibt in JavaScript nun ein echtes `\\n` aus. Neben `python3 -m py_compile` wird das von `ui_html()` tatsächlich gerenderte JavaScript extrahiert und mit `node --check` validiert. Vorhandene Projekte wurden nicht absichtlich gelöscht und sollten aus `/config/esp_manager_dev/projects` wieder erscheinen.
 
-SAUBERE ARCHITEKTUR 0.6.0
-- Keine patch_v052 bis patch_v058 mehr erforderlich.
-- Vollständige main.py je Add-on.
-- Stable: Port 8099, /config/esp_manager.
-- Dev: Port 8100, /config/esp_manager_dev.
-- Projektdaten: projects/<name>/espmanager.yaml, src, include, lib.
-- Builds: firmware/<name>/<build-id>/firmware.bin, initial_firmware.bin, manifest.json.
-- Backups: backups/*.zip.
-
-FUNKTIONEN
+AKTUELLER FUNKTIONSUMFANG
 - Projekt anlegen, öffnen, konfigurieren, duplizieren, sichern, exportieren, importieren und löschen.
 - Benutzerdateien anlegen, laden, speichern und löschen.
-- Systemdateien main.cpp, ESPManager-Agent und platformio.ini automatisch verwalten.
-- PlatformIO-Bibliotheken und Build-Flags im Expertenbereich.
-- Live-Build, Abbruch, Buildhistorie und SHA256.
-- USB-&-Status-Seite ohne Ingress-Redirectproblem.
-- ESP-Web-Tools-Manifest und Mehrchip-Initial-Image.
-- Serieller Monitor und MQTT-Gerätestatus.
-- WLAN Captive Portal, zehnminütige lokale Maske und Routerausfall-Fallback.
-- MQTT-Agent mit Status, Availability, Logs, Sensorpublish, Restart, WLAN-Portal und OTA-Grundlage.
+- Automatisch verwaltete Systemdateien und ESPManager-Agent.
+- Live-Build, Abbruch, Historie, OTA- und Initial-Firmware.
+- Mehrchip-Profile für ESP8266, ESP32/WROOM-32, S2, S3, C3 und C6.
+- USB-&-Status-Seite, serieller Monitor, WLAN-Captive-Portal und MQTT-Gerätestatus.
+- Getrennte Geräte-MQTT-Optionen.
 
-UNTERSTÜTZTE STANDARDPROFILE
-- nodemcuv2, esp12e
-- esp32dev / ESP32-WROOM-32
-- esp32-s2-saola-1
-- esp32-s3-devkitc-1
-- esp32-c3-devkitm-1
-- esp32-c6-devkitc-1
-Sonderplatinen mit anderer Flashgröße, PSRAM, Octal-Flash oder eigener Partitionierung brauchen später dynamische Boardprofile und Hardwaretests.
-
-TESTABLAUF 0.6.0
-1. In den Add-on-Optionen device_mqtt_host auf homeassistant.local oder besser die feste HA-LAN-IP setzen.
-2. Einen eigenen MQTT-Gerätebenutzer und Kennwort eintragen.
-3. Add-on neu starten.
-4. Projekt erneut kompilieren, da MQTT-Daten beim Build eingebettet werden.
-5. Firmware erneut per USB installieren.
-6. Seriell prüfen: MQTT-Ziel, WLAN-IP und `MQTT verbunden`.
-7. MQTT-Status auf der Hardwareseite prüfen.
-8. Danach OTA-Ablauf implementieren und testen.
+TEST NACH UPDATE
+1. Dev-App auf 0.6.1-dev aktualisieren.
+2. Oberfläche öffnen. Altes Projekt muss wieder in der Liste erscheinen.
+3. Neues Testprojekt anlegen.
+4. Bestehendes Projekt öffnen, Build durchführen und USB-&-Status prüfen.
+5. Geräte-MQTT-Host in den Add-on-Optionen auf die HA-LAN-IP oder `homeassistant.local` setzen, Zugangsdaten eintragen, neu bauen und flashen.
 
 BEKANNTE GRENZEN
-- MQTT-Konfiguration wird derzeit beim Build eingebettet; Änderung erfordert Neubau.
-- Geräte-MQTT-Kommunikation ist nach dem DNS-Fix noch praktisch zu bestätigen.
-- Fallback-AP hat noch kein individuelles Passwort.
-- OTA-Integritätsprüfung und Rollback sind nicht produktionsreif.
-- Flashgröße ist bei Initial-Images derzeit auf 4 MB ausgelegt.
-- Buildabbruch und Import sollten weiter automatisiert getestet werden.
-
-NÄCHSTE AUSBAUSTUFE
-1. MQTT-Verbindung am ESP praktisch bestätigen.
-2. OTA-Auftrag, Fortschritt, SHA256-Prüfung und Fehlerstatus vervollständigen.
-3. Fallback-AP absichern.
-4. Backup-Liste und Wiederherstellung in der UI.
-5. Build-Releases, Notizen und eine als stabil markierte Firmware.
-6. Sagemcom-Anwendung importieren und schrittweise validieren.
+- Geräte-MQTT nach der Hosttrennung ist noch praktisch zu bestätigen.
+- Fallback-AP noch ohne individuelles Passwort.
+- OTA-Integritätsprüfung und Rollback fehlen.
+- Initial-Images verwenden derzeit Standard-4-MB-Profile.
 
 ENTWICKLUNGSREGELN
 - Keine vorhandenen Funktionen ungefragt entfernen.
-- Agent-API kompatibel halten.
-- Jede Version vollständig testen, soweit ohne Hardware möglich.
-- CHANGELOG.md in Wurzel, esp_manager und esp_manager_dev.
-- PROJECT_HANDOVER.txt bei jeder Version vollständig aktualisieren.
-- Stable/Dev getrennt halten.
+- Python und das gerenderte JavaScript prüfen.
+- CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
+- PROJECT_HANDOVER.txt bei jeder Version aktualisieren.
+- Stable/Dev und Datenpfade getrennt halten.
