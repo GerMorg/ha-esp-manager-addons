@@ -1,77 +1,40 @@
-ESP MANAGER PROJEKTUEBERGABE - VERSION 0.7.0
+ESP MANAGER PROJEKTUEBERGABE - VERSION 0.7.1
 =============================================
 
-BASIS UND BESTÄTIGTER STAND
-- Vollständige Basis 0.6.2, danach Patches 0.6.3 und 0.6.4.
-- ESP32 USB-Browserflash bestätigt.
-- Serieller Monitor und sauberes Trennen bestätigt beziehungsweise in 0.6.3 korrigiert.
-- WLAN-Captive-Portal bestätigt.
-- MQTT-Verbindung des ESP bestätigt.
-- MQTT-Geräteübersicht und regelmäßige Statusdaten bestätigt.
+BESTÄTIGTER STAND
+- ESP32 per USB geflasht.
+- WLAN und MQTT verbunden.
+- Statusdaten regelmäßig im ESP Manager sichtbar.
+- OTA-Backend erzeugte erfolgreich Auftrag, Token-URL und SHA256.
+- Auf dem ESP geschah nach dem Auftrag nichts.
 
-ZIEL DER AUSBAUSTUFE
-OTA-Firmwareaktualisierung mit Gerätezuordnung, Buildauswahl, Token, Integritätskontrolle, Fortschritt, Fehlerstatus und anschließendem Neustart. Zusätzlich wird der fehlerhafte Zurück-Link ingress-sicher ersetzt.
+URSACHE
+PubSubClient verarbeitet standardmäßig MQTT-Pakete nur bis 256 Bytes. Das OTA-Kommando enthält Topic, JSON, lange Firmware-URL, Token, SHA256, Build-ID und Version und überschreitet diese Grenze. Zu große eingehende Pakete werden nicht an den Callback übergeben. Deshalb konnte das Backend Erfolg melden, während der ESP keinerlei OTA-Status ausgab.
 
-PROJEKT-GERÄTE-ZUORDNUNG
-- espmanager.yaml erhält optional `device_id`.
-- Auswahl eines Geräts auf der Hardwareseite speichert die Zuordnung.
-- Beim erneuten Öffnen wird das zugeordnete Gerät bevorzugt.
-- Ist nur ein Gerät erkannt, bleibt die automatische Auswahl erhalten.
+LÖSUNG 0.7.1
+- ESP-Agent setzt `mq.setBufferSize(2048)` vor MQTT-Verbindung und Callback.
+- Backend serialisiert das Kommando kompakt.
+- Backend berechnet `command_bytes`, meldet den Wert und lehnt Kommandos über 1536 Bytes ab.
+- Nach erfolgreicher JSON- und Tokenprüfung publiziert der ESP sofort OTA-Status `received` mit empfangener Payloadgröße.
+- Danach folgen weiterhin validating, started, progress, finished, failed oder no_update.
 
-OTA-WORKFLOW
-1. Benutzer wählt ein online erkanntes Gerät.
-2. Benutzer wählt einen erfolgreichen Build aus der Historie.
-3. Backend liest firmware.bin und vergleicht den aktuellen SHA256-Wert mit manifest.json.
-4. Backend erzeugt eine token-geschützte Download-URL aus public_base_url.
-5. MQTT-Kommando geht mit QoS 1 an `espmanager/<device>/cmd/ota` und enthält URL, Version, Build-ID, Dateigröße und SHA256.
-6. Agent prüft den OTA-Token.
-7. HTTPUpdate meldet Start, Fortschritt, Ende und Fehler über Callbacks.
-8. Agent publiziert JSON auf `espmanager/<device>/ota/progress` und gibt dasselbe seriell aus.
-9. Hardwareseite aktualisiert Fortschrittsbalken, Status und OTA-Protokoll.
-10. Nach erfolgreichem Update führt HTTPUpdate den vorgesehenen Neustart aus.
+WICHTIG FÜR DEN TEST
+Der größere MQTT-Puffer ist Teil des Geräte-Agenten. Deshalb muss Version 0.7.1 zuerst einmal per USB auf den ESP installiert werden. Erst danach können lange OTA-Kommandos zuverlässig empfangen werden.
 
-INTEGRITÄT UND SICHERHEIT
-- SHA256 wird serverseitig direkt vor OTA-Auftrag und Firmwareauslieferung erneut gegen das Buildmanifest geprüft.
-- Firmwaredownload benötigt den projektspezifischen OTA-Token.
-- Zusätzlich liefert der Server `x-MD5`, den die HTTPUpdate-Implementierung für ihre Downloadprüfung verwenden kann.
-- Die über MQTT mitgesendete SHA256 wird am Gerät protokolliert. Eine eigenständige geräteseitige SHA256-Neuberechnung ist in 0.7.0 noch nicht implementiert und bleibt eine Härtungsaufgabe.
-- public_base_url muss aus dem WLAN des ESP erreichbar sein. Für Dev typischerweise `http://<HA-LAN-IP>:8100`, für Stable Port 8099.
-
-ZURÜCK-NAVIGATION
-Die Hardwareseite berechnet den Add-on-Basispfad aus dem tatsächlichen Ingress-Pfad vor `/usb/`. Der Zurück-Button navigiert direkt zu diesem Basispfad, nicht mehr über `../..`.
-
-AUTOMATISCHE PRÜFUNGEN
-- Patchskripte mit py_compile geprüft.
-- Patch gegen synthetische 0.6-Basis angewendet.
-- Ergebnis-main.py syntaktisch geprüft.
-- Gerendertes Hardwareseiten-JavaScript mit node --check geprüft.
-- OTA-Backend mit simuliertem Build, SHA256 und Fake-MQTT-Client geprüft.
-- MQTT-Zieltopic und Kommandodaten validiert.
-- Agent-Patch auf vorhandene OTA-Struktur angewendet und Callback-Einbau geprüft.
-- ZIP-Integrität geprüft.
-
-BEKANNTE GRENZEN
-- OTA muss jetzt praktisch am ESP32 getestet werden.
-- Geräte-seitige SHA256-Neuberechnung fehlt noch; vorhanden sind serverseitiges SHA256 und HTTPUpdate-Prüfung über x-MD5.
-- Rollback und Boot-Bestätigung fehlen weiterhin.
-- public_base_url und Port müssen wirklich vom ESP erreichbar sein.
-- Sonderboards und abweichende Partitionstabellen benötigen weitere Hardwaretests.
-
-TESTABLAUF 0.7.0
-1. public_base_url in ESP Manager Dev auf `http://<HA-LAN-IP>:8100` setzen.
-2. Add-on neu starten.
-3. Projekt-Firmwareversion erhöhen, zum Beispiel von 0.1.0 auf 0.1.1.
-4. Projekt neu kompilieren.
-5. Hardwareseite öffnen und korrektes Gerät auswählen.
-6. Neuen Build wählen und OTA starten.
-7. Fortschritt beobachten.
-8. Nach Neustart prüfen, ob firmware_version im MQTT-Status aktualisiert wurde.
-9. Bei Fehler seriellen OTA-Status und OTA-Protokoll sichern.
+TESTABLAUF
+1. Repository-Overlay 0.7.1 einspielen und Dev-App aktualisieren.
+2. public_base_url auf eine vom ESP erreichbare Adresse setzen, zum Beispiel `http://<HA-LAN-IP>:8100`.
+3. Projektversion erhöhen und neu kompilieren.
+4. Diesen 0.7.1-Agenten einmal per USB flashen.
+5. Danach erneut eine höhere Projektversion bauen.
+6. OTA starten.
+7. Erwarteter erster Status: `received - MQTT-Kommando empfangen, Bytes=...`.
+8. Danach validating, started und progress beobachten.
+9. Nach finished startet der ESP neu und meldet die neue firmware_version.
 
 ENTWICKLUNGSREGELN
-- Keine vorhandenen Funktionen ungefragt entfernen.
-- Agent-API kompatibel halten.
-- HA-Ingress-Pfade aus realem location.pathname ableiten.
-- Haupt- und Hardwareseiten-JavaScript gerendert prüfen.
+- Keine vorhandenen Funktionen entfernen.
+- MQTT-Payloadgrößen bei neuen Kommandos berücksichtigen und diagnostizieren.
+- Haupt- und Hardwareseiten-JavaScript prüfen.
 - CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
-- PROJECT_HANDOVER.txt bei jeder Version vollständig aktualisieren.
+- PROJECT_HANDOVER.txt bei jeder Version aktualisieren.

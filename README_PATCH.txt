@@ -1,5 +1,5 @@
-ESP Manager 0.7.0 OTA-Ausbaustufe
+ESP Manager 0.7.1 OTA-MQTT-Puffer-Fix
 
-Overlay für das bestehende Repository 0.6.4. Inhalt dieses Ordners in den Repository-Hauptordner kopieren und vorhandene Dateien ersetzen. Bestehende vollständige Dateien einschließlich app/main.py sowie patch_v063.py und patch_v064.py nicht löschen.
+Overlay für das Repository 0.7.0. Frühere vollständige Dateien und patch_v063.py, patch_v064.py sowie patch_v070.py müssen erhalten bleiben.
 
-Wichtig: public_base_url muss vom ESP erreichbar sein, für Dev beispielsweise http://192.168.x.x:8100.
+Wichtig: 0.7.1 muss zunächst einmal per USB geflasht werden, weil die Änderung den MQTT-Puffer im ESP-Agenten betrifft.
