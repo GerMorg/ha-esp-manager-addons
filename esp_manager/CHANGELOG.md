@@ -1,11 +1,10 @@
 # Changelog
 
-## 0.6.2
-- Hardwaretest-Seite vollständig geprüft und repariert.
-- Zweiten JavaScript-Syntaxfehler in der seriellen Fehlerausgabe behoben.
-- Dadurch läuft `checkManifest()` wieder und die Anzeige bleibt nicht mehr bei `Prüfe Manifest ...` stehen.
-- ESP-Web-Tools erhält den Manifestpfad erst nach erfolgreicher Initialisierung der Hardwareseite.
-- Implizite globale DOM-Variablen auf der Hardwareseite durch `document.getElementById()` ersetzt.
-- Automatische Prüfungen jetzt für Hauptseite und Hardwareseite.
-- Manifest-Workflow mit simuliertem Projekt, Buildhistorie und Initial-Firmware validiert.
-- Projektliste, Projektanlage und Datenpfade aus 0.6.1 bleiben erhalten.
+## 0.6.3
+- MQTT-Status 5 verständlich als nicht autorisierte Anmeldung dokumentiert.
+- Serielle Agentmeldung nennt bei Status 5 jetzt ausdrücklich Geräte-Benutzer und Passwort.
+- Seriellen Browsermonitor ohne TextDecoderStream-Pipeline neu implementiert.
+- Beim Trennen wird der Reader abgebrochen, seine Sperre im Leseloop freigegeben und erst danach der Port geschlossen.
+- Erneutes Verbinden nach dem Trennen vorbereitet.
+- Verbindungs- und Trennschaltflächen zeigen ihren Zustand an.
+- Manifestprüfung, USB-Flash und alle bisherigen Funktionen bleiben erhalten.

@@ -1,69 +1,30 @@
-ESP MANAGER PROJEKTUEBERGABE
-============================
-Stand: 0.6.2 / 0.6.2-dev
+ESP MANAGER PROJEKTUEBERGABE - ERGAENZUNG 0.6.3
+================================================
 
-ZIELBILD
-Home-Assistant-Add-on zur zentralen Verwaltung von Arduino-C++-ESP-Projekten mit PlatformIO-Build, USB-Erstinstallation, serieller Diagnose, WLAN-Provisioning, MQTT-Status und später sicherem OTA. Testhardware: ESP32-WROOM-32D und NodeMCU ESP8266MOD. Zielanwendung: Sagemcom/M-Bus-Zähler.
+Basis: vollständiges Repository 0.6.2. Dieser Patch wird beim Container-Build auf dessen saubere main.py und Agent-Templates angewendet.
 
-ERREICHTER HARDWARE-MEILENSTEIN
-- Sichere HA/Tailscale-Verbindung und Web Serial funktionieren.
-- ESP32 wurde mit einem erzeugten Initial-Image erfolgreich geflasht.
+HARDWARESTATUS
+- ESP32-Browserflash funktioniert.
 - Serieller Monitor funktioniert.
-- WLAN wurde über das Captive Portal eingerichtet.
-- MQTT-DNS-Problem erkannt: `core-mosquitto` ist add-on-intern und nicht vom ESP-LAN erreichbar.
+- WLAN-Captive-Portal funktioniert.
+- MQTT-Broker ist erreichbar, antwortet aber mit PubSubClient-Status 5.
 
-SAUBERE 0.6-ARCHITEKTUR
-- Keine historische Patchkette mehr im Repository.
-- Stable: `/config/esp_manager`, Port 8099.
-- Dev: `/config/esp_manager_dev`, Port 8100.
-- Interner MQTT-Host und Geräte-MQTT-Host getrennt.
-- Projekte, Dateien, Backups, Builds, Initial-Firmware und OTA-Firmware werden getrennt gespeichert.
+MQTT STATUS 5
+Status 5 bedeutet, dass der Broker die Verbindung nicht autorisiert hat. Der Host/DNS-Fehler ist damit überwunden. Zu prüfen sind jetzt ausschließlich die für die Firmware eingebetteten Werte:
+- device_mqtt_username
+- device_mqtt_password
+Diese müssen zu einem im Mosquitto-Add-on erlaubten Geräte-Login passen. Danach Add-on neu starten, Projekt neu kompilieren und Firmware neu flashen, weil die Werte als Build-Flags eingebettet werden.
 
-GELERNTE REGRESSIONEN
-1. Öffentliche Agent-Funktionen wie `publishSensor()` dürfen bei Neugenerierung nicht entfernt werden.
-2. HA-Ingress erfordert relative beziehungsweise aus dem realen Seitenpfad erzeugte URLs.
-3. Slash-Redirects dürfen für Ingress-Seiten nicht vorausgesetzt werden.
-4. Python-Syntaxprüfung reicht bei serverseitig erzeugtem HTML/JavaScript nicht. Das tatsächlich gerenderte JavaScript muss geprüft werden.
-5. Hauptseite und Hardwareseite sind getrennte JavaScript-Dokumente und müssen beide geprüft werden.
-6. Projekt- und Dev-Datenpfade dürfen bei Versionswechseln nicht geändert werden.
-
-URSACHE DES 0.6.2-FEHLERS
-Die Hauptseite war seit 0.6.1 repariert, die separat erzeugte Hardwareseite enthielt aber weiterhin einen Python-String `\n`, der beim Rendern zu einem echten Zeilenumbruch mitten in einem JavaScript-Stringliteral wurde. Das gesamte Hardwareseiten-JavaScript konnte deshalb nicht geparst werden. `checkManifest()` lief nie, die Anzeige blieb bei `Prüfe Manifest ...`, und der Installer hatte keinen gültigen Manifestpfad. Das führte erneut zu `Preparing installation`.
-
-LÖSUNG 0.6.2
-- Serielle Fehlerausgabe rendert ein echtes JavaScript-`\\n`.
-- Hardwareseite verwendet explizite DOM-Lookups.
-- Gerendertes JavaScript von Haupt- und Hardwareseite wird mit `node --check` geprüft.
-- Simulierter Workflow prüft Projektliste, Buildmanifest, Chipfamilie und Pfad `initial_firmware.bin`.
-
-TESTABLAUF 0.6.2
-1. Dev-App aktualisieren.
-2. Altes Projekt muss weiterhin sichtbar sein.
-3. Projekt neu kompilieren.
-4. `USB & Status` öffnen.
-5. Anzeige muss von `Prüfe Manifest ...` zu `Bereit: <Name> <Version> / <Chipfamilie>` wechseln.
-6. Erst danach Connect/Install verwenden.
-7. Nach Flash seriellen Monitor neu verbinden.
-8. Für MQTT in den Add-on-Optionen `device_mqtt_host` auf die HA-LAN-IP oder `homeassistant.local` setzen und Gerätezugangsdaten eintragen; anschließend neu bauen und flashen.
-
-AKTUELLER FUNKTIONSUMFANG
-- Projekt anlegen, öffnen, konfigurieren, duplizieren, sichern, exportieren, importieren und löschen.
-- Dateien anlegen, laden, speichern und löschen.
-- Live-Build, Abbruch, Historie, OTA- und Initial-Firmware.
-- Standardprofile für ESP8266, ESP32/WROOM-32, S2, S3, C3 und C6.
-- USB-&-Status-Seite, serieller Monitor, Captive Portal, Router-Fallback und MQTT-Status.
-
-BEKANNTE GRENZEN
-- Geräte-MQTT nach Hosttrennung noch praktisch zu bestätigen.
-- Fallback-AP noch ohne individuelles Passwort.
-- OTA-Integritätsprüfung und Rollback fehlen.
-- Initial-Images verwenden Standard-4-MB-Profile.
+SERIELLE TRENNUNG
+Die bisherige Hardwareseite verwendete TextDecoderStream und pipeTo. Dadurch blieb der zugrunde liegende Port trotz gestoppter Ausgabe gesperrt. 0.6.3 liest Bytes direkt aus port.readable, dekodiert sie mit TextDecoder und verwaltet den Reader explizit. Beim Trennen:
+1. keepReading wird false.
+2. reader.cancel() beendet den wartenden read()-Aufruf.
+3. Der Leseloop führt reader.releaseLock() in finally aus.
+4. Erst danach erfolgt port.close().
+5. Zustände werden auf null gesetzt und Verbinden wieder freigegeben.
 
 ENTWICKLUNGSREGELN
-- Keine vorhandenen Funktionen ungefragt entfernen.
-- Agent-API kompatibel halten.
-- Python sowie gerendertes JavaScript beider Seiten prüfen.
-- Manifest-Workflow automatisiert prüfen.
+- Keine vorhandenen Funktionen entfernen.
+- Haupt- und Hardwareseiten-JavaScript gerendert testen.
 - CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
-- PROJECT_HANDOVER.txt bei jeder Version vollständig aktualisieren.
-- Stable/Dev und Datenpfade getrennt halten.
+- PROJECT_HANDOVER.txt bei jeder Version aktualisieren.
