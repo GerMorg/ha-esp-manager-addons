@@ -1,10 +1,11 @@
 # Changelog
 
-## 0.6.3
-- MQTT-Status 5 verständlich als nicht autorisierte Anmeldung dokumentiert.
-- Serielle Agentmeldung nennt bei Status 5 jetzt ausdrücklich Geräte-Benutzer und Passwort.
-- Seriellen Browsermonitor ohne TextDecoderStream-Pipeline neu implementiert.
-- Beim Trennen wird der Reader abgebrochen, seine Sperre im Leseloop freigegeben und erst danach der Port geschlossen.
-- Erneutes Verbinden nach dem Trennen vorbereitet.
-- Verbindungs- und Trennschaltflächen zeigen ihren Zustand an.
-- Manifestprüfung, USB-Flash und alle bisherigen Funktionen bleiben erhalten.
+## 0.6.4
+- MQTT-Statusmonitor unter Home-Assistant-Ingress korrigiert.
+- API-Basispfad wird aus dem tatsächlichen Ingress-Pfad der Hardwareseite ermittelt; kein versehentliches Abrufen der Home-Assistant-API mehr.
+- Neuer MQTT-Verbindungsstatus des ESP-Manager-Add-ons.
+- Liste aller über MQTT erkannten ESP-Geräte.
+- Geräteauswahl im Statusmonitor ergänzt.
+- Projektname wird als bevorzugte Geräte-ID verwendet; bei nur einem erkannten Gerät wird dieses automatisch gewählt.
+- Statusanzeige enthält das gewählte Gerät statt einer fest verdrahteten, möglicherweise falschen Geräte-ID.
+- Serielles Trennen aus 0.6.3 und alle bisherigen Funktionen bleiben erhalten.

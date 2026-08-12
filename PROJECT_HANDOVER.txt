@@ -1,30 +1,41 @@
-ESP MANAGER PROJEKTUEBERGABE - ERGAENZUNG 0.6.3
+ESP MANAGER PROJEKTUEBERGABE - ERGAENZUNG 0.6.4
 ================================================
 
-Basis: vollständiges Repository 0.6.2. Dieser Patch wird beim Container-Build auf dessen saubere main.py und Agent-Templates angewendet.
+BASIS
+Vollständiges Repository 0.6.2 plus Patch 0.6.3. 0.6.4 wird als Overlay eingespielt und beim Container-Build nach patch_v063.py angewendet.
 
-HARDWARESTATUS
+BESTÄTIGTER HARDWARESTATUS
 - ESP32-Browserflash funktioniert.
 - Serieller Monitor funktioniert.
 - WLAN-Captive-Portal funktioniert.
-- MQTT-Broker ist erreichbar, antwortet aber mit PubSubClient-Status 5.
+- ESP meldet seriell `MQTT verbunden`.
+- Damit sind WLAN, Broker-Erreichbarkeit und Geräte-Anmeldedaten praktisch bestätigt.
 
-MQTT STATUS 5
-Status 5 bedeutet, dass der Broker die Verbindung nicht autorisiert hat. Der Host/DNS-Fehler ist damit überwunden. Zu prüfen sind jetzt ausschließlich die für die Firmware eingebetteten Werte:
-- device_mqtt_username
-- device_mqtt_password
-Diese müssen zu einem im Mosquitto-Add-on erlaubten Geräte-Login passen. Danach Add-on neu starten, Projekt neu kompilieren und Firmware neu flashen, weil die Werte als Build-Flags eingebettet werden.
+PROBLEM DES MQTT-STATUSMONITORS
+Die Hardwareseite rief den Gerätestatus über einen relativen Pfad wie `../../api/devices/<projekt>` ab. Unter Home-Assistant-Ingress konnte dieser Pfad aus dem Add-on-Präfix herauslaufen und die Home-Assistant-API statt der ESP-Manager-API treffen. Das erklärt `503 Service Unavailable`. Zusätzlich war die Geräte-ID fest an den Projektnamen gebunden, ohne Auswahlmöglichkeit.
 
-SERIELLE TRENNUNG
-Die bisherige Hardwareseite verwendete TextDecoderStream und pipeTo. Dadurch blieb der zugrunde liegende Port trotz gestoppter Ausgabe gesperrt. 0.6.3 liest Bytes direkt aus port.readable, dekodiert sie mit TextDecoder und verwaltet den Reader explizit. Beim Trennen:
-1. keepReading wird false.
-2. reader.cancel() beendet den wartenden read()-Aufruf.
-3. Der Leseloop führt reader.releaseLock() in finally aus.
-4. Erst danach erfolgt port.close().
-5. Zustände werden auf null gesetzt und Verbinden wieder freigegeben.
+LÖSUNG 0.6.4
+- Die Hardwareseite ermittelt den Add-on-Basispfad aus dem Teil vor `/usb/` in `location.pathname`.
+- Alle Status-API-Aufrufe verwenden diesen Basispfad.
+- `/api/mqtt/status` zeigt, ob das Add-on selbst mit MQTT verbunden ist und wie viele Geräte erkannt wurden.
+- `/api/devices` füllt eine Auswahlliste.
+- Das Gerät mit derselben ID wie das Projekt wird bevorzugt.
+- Falls genau ein Gerät erkannt wurde, wird es automatisch gewählt.
+- Andernfalls kann der Benutzer ein Gerät auswählen.
+
+WICHTIGE MQTT-ZUORDNUNG
+Die Firmware veröffentlicht auf `espmanager/<device_id>/...`. device_id entspricht aktuell dem Projektnamen beim Build. Bei duplizierten oder umbenannten Projekten muss der zuletzt geflashte Gerätename in der Auswahl verwendet werden.
+
+NÄCHSTER SCHRITT
+Nach Bestätigung des Statusmonitors:
+1. OTA-Endpunkt und Schaltfläche wieder sauber integrieren.
+2. OTA-Fortschritt und Fehlerstatus anzeigen.
+3. SHA256-Prüfung und sichere Firmwarefreigabe ergänzen.
+4. Geräte dauerhaft einem Projekt zuordnen.
 
 ENTWICKLUNGSREGELN
-- Keine vorhandenen Funktionen entfernen.
-- Haupt- und Hardwareseiten-JavaScript gerendert testen.
+- Keine bestehenden Funktionen ungefragt entfernen.
+- HA-Ingress-Pfade immer aus dem tatsächlichen Seitenpfad ableiten.
+- Haupt- und Hardwareseiten-JavaScript gerendert prüfen.
 - CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
 - PROJECT_HANDOVER.txt bei jeder Version aktualisieren.
