@@ -1,41 +1,77 @@
-ESP MANAGER PROJEKTUEBERGABE - ERGAENZUNG 0.6.4
-================================================
+ESP MANAGER PROJEKTUEBERGABE - VERSION 0.7.0
+=============================================
 
-BASIS
-Vollständiges Repository 0.6.2 plus Patch 0.6.3. 0.6.4 wird als Overlay eingespielt und beim Container-Build nach patch_v063.py angewendet.
+BASIS UND BESTÄTIGTER STAND
+- Vollständige Basis 0.6.2, danach Patches 0.6.3 und 0.6.4.
+- ESP32 USB-Browserflash bestätigt.
+- Serieller Monitor und sauberes Trennen bestätigt beziehungsweise in 0.6.3 korrigiert.
+- WLAN-Captive-Portal bestätigt.
+- MQTT-Verbindung des ESP bestätigt.
+- MQTT-Geräteübersicht und regelmäßige Statusdaten bestätigt.
 
-BESTÄTIGTER HARDWARESTATUS
-- ESP32-Browserflash funktioniert.
-- Serieller Monitor funktioniert.
-- WLAN-Captive-Portal funktioniert.
-- ESP meldet seriell `MQTT verbunden`.
-- Damit sind WLAN, Broker-Erreichbarkeit und Geräte-Anmeldedaten praktisch bestätigt.
+ZIEL DER AUSBAUSTUFE
+OTA-Firmwareaktualisierung mit Gerätezuordnung, Buildauswahl, Token, Integritätskontrolle, Fortschritt, Fehlerstatus und anschließendem Neustart. Zusätzlich wird der fehlerhafte Zurück-Link ingress-sicher ersetzt.
 
-PROBLEM DES MQTT-STATUSMONITORS
-Die Hardwareseite rief den Gerätestatus über einen relativen Pfad wie `../../api/devices/<projekt>` ab. Unter Home-Assistant-Ingress konnte dieser Pfad aus dem Add-on-Präfix herauslaufen und die Home-Assistant-API statt der ESP-Manager-API treffen. Das erklärt `503 Service Unavailable`. Zusätzlich war die Geräte-ID fest an den Projektnamen gebunden, ohne Auswahlmöglichkeit.
+PROJEKT-GERÄTE-ZUORDNUNG
+- espmanager.yaml erhält optional `device_id`.
+- Auswahl eines Geräts auf der Hardwareseite speichert die Zuordnung.
+- Beim erneuten Öffnen wird das zugeordnete Gerät bevorzugt.
+- Ist nur ein Gerät erkannt, bleibt die automatische Auswahl erhalten.
 
-LÖSUNG 0.6.4
-- Die Hardwareseite ermittelt den Add-on-Basispfad aus dem Teil vor `/usb/` in `location.pathname`.
-- Alle Status-API-Aufrufe verwenden diesen Basispfad.
-- `/api/mqtt/status` zeigt, ob das Add-on selbst mit MQTT verbunden ist und wie viele Geräte erkannt wurden.
-- `/api/devices` füllt eine Auswahlliste.
-- Das Gerät mit derselben ID wie das Projekt wird bevorzugt.
-- Falls genau ein Gerät erkannt wurde, wird es automatisch gewählt.
-- Andernfalls kann der Benutzer ein Gerät auswählen.
+OTA-WORKFLOW
+1. Benutzer wählt ein online erkanntes Gerät.
+2. Benutzer wählt einen erfolgreichen Build aus der Historie.
+3. Backend liest firmware.bin und vergleicht den aktuellen SHA256-Wert mit manifest.json.
+4. Backend erzeugt eine token-geschützte Download-URL aus public_base_url.
+5. MQTT-Kommando geht mit QoS 1 an `espmanager/<device>/cmd/ota` und enthält URL, Version, Build-ID, Dateigröße und SHA256.
+6. Agent prüft den OTA-Token.
+7. HTTPUpdate meldet Start, Fortschritt, Ende und Fehler über Callbacks.
+8. Agent publiziert JSON auf `espmanager/<device>/ota/progress` und gibt dasselbe seriell aus.
+9. Hardwareseite aktualisiert Fortschrittsbalken, Status und OTA-Protokoll.
+10. Nach erfolgreichem Update führt HTTPUpdate den vorgesehenen Neustart aus.
 
-WICHTIGE MQTT-ZUORDNUNG
-Die Firmware veröffentlicht auf `espmanager/<device_id>/...`. device_id entspricht aktuell dem Projektnamen beim Build. Bei duplizierten oder umbenannten Projekten muss der zuletzt geflashte Gerätename in der Auswahl verwendet werden.
+INTEGRITÄT UND SICHERHEIT
+- SHA256 wird serverseitig direkt vor OTA-Auftrag und Firmwareauslieferung erneut gegen das Buildmanifest geprüft.
+- Firmwaredownload benötigt den projektspezifischen OTA-Token.
+- Zusätzlich liefert der Server `x-MD5`, den die HTTPUpdate-Implementierung für ihre Downloadprüfung verwenden kann.
+- Die über MQTT mitgesendete SHA256 wird am Gerät protokolliert. Eine eigenständige geräteseitige SHA256-Neuberechnung ist in 0.7.0 noch nicht implementiert und bleibt eine Härtungsaufgabe.
+- public_base_url muss aus dem WLAN des ESP erreichbar sein. Für Dev typischerweise `http://<HA-LAN-IP>:8100`, für Stable Port 8099.
 
-NÄCHSTER SCHRITT
-Nach Bestätigung des Statusmonitors:
-1. OTA-Endpunkt und Schaltfläche wieder sauber integrieren.
-2. OTA-Fortschritt und Fehlerstatus anzeigen.
-3. SHA256-Prüfung und sichere Firmwarefreigabe ergänzen.
-4. Geräte dauerhaft einem Projekt zuordnen.
+ZURÜCK-NAVIGATION
+Die Hardwareseite berechnet den Add-on-Basispfad aus dem tatsächlichen Ingress-Pfad vor `/usb/`. Der Zurück-Button navigiert direkt zu diesem Basispfad, nicht mehr über `../..`.
+
+AUTOMATISCHE PRÜFUNGEN
+- Patchskripte mit py_compile geprüft.
+- Patch gegen synthetische 0.6-Basis angewendet.
+- Ergebnis-main.py syntaktisch geprüft.
+- Gerendertes Hardwareseiten-JavaScript mit node --check geprüft.
+- OTA-Backend mit simuliertem Build, SHA256 und Fake-MQTT-Client geprüft.
+- MQTT-Zieltopic und Kommandodaten validiert.
+- Agent-Patch auf vorhandene OTA-Struktur angewendet und Callback-Einbau geprüft.
+- ZIP-Integrität geprüft.
+
+BEKANNTE GRENZEN
+- OTA muss jetzt praktisch am ESP32 getestet werden.
+- Geräte-seitige SHA256-Neuberechnung fehlt noch; vorhanden sind serverseitiges SHA256 und HTTPUpdate-Prüfung über x-MD5.
+- Rollback und Boot-Bestätigung fehlen weiterhin.
+- public_base_url und Port müssen wirklich vom ESP erreichbar sein.
+- Sonderboards und abweichende Partitionstabellen benötigen weitere Hardwaretests.
+
+TESTABLAUF 0.7.0
+1. public_base_url in ESP Manager Dev auf `http://<HA-LAN-IP>:8100` setzen.
+2. Add-on neu starten.
+3. Projekt-Firmwareversion erhöhen, zum Beispiel von 0.1.0 auf 0.1.1.
+4. Projekt neu kompilieren.
+5. Hardwareseite öffnen und korrektes Gerät auswählen.
+6. Neuen Build wählen und OTA starten.
+7. Fortschritt beobachten.
+8. Nach Neustart prüfen, ob firmware_version im MQTT-Status aktualisiert wurde.
+9. Bei Fehler seriellen OTA-Status und OTA-Protokoll sichern.
 
 ENTWICKLUNGSREGELN
-- Keine bestehenden Funktionen ungefragt entfernen.
-- HA-Ingress-Pfade immer aus dem tatsächlichen Seitenpfad ableiten.
+- Keine vorhandenen Funktionen ungefragt entfernen.
+- Agent-API kompatibel halten.
+- HA-Ingress-Pfade aus realem location.pathname ableiten.
 - Haupt- und Hardwareseiten-JavaScript gerendert prüfen.
 - CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
-- PROJECT_HANDOVER.txt bei jeder Version aktualisieren.
+- PROJECT_HANDOVER.txt bei jeder Version vollständig aktualisieren.

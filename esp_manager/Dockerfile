@@ -8,6 +8,7 @@ RUN python3 -m venv venv && . venv/bin/activate && pip install --no-cache-dir --
 COPY app app
 RUN python3 app/patch_v063.py && rm app/patch_v063.py
 RUN python3 app/patch_v064.py && rm app/patch_v064.py
+RUN python3 app/patch_v070.py && rm app/patch_v070.py
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 EXPOSE 8099

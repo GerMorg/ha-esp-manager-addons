@@ -1,11 +1,15 @@
 # Changelog
 
-## 0.6.4
-- MQTT-Statusmonitor unter Home-Assistant-Ingress korrigiert.
-- API-Basispfad wird aus dem tatsächlichen Ingress-Pfad der Hardwareseite ermittelt; kein versehentliches Abrufen der Home-Assistant-API mehr.
-- Neuer MQTT-Verbindungsstatus des ESP-Manager-Add-ons.
-- Liste aller über MQTT erkannten ESP-Geräte.
-- Geräteauswahl im Statusmonitor ergänzt.
-- Projektname wird als bevorzugte Geräte-ID verwendet; bei nur einem erkannten Gerät wird dieses automatisch gewählt.
-- Statusanzeige enthält das gewählte Gerät statt einer fest verdrahteten, möglicherweise falschen Geräte-ID.
-- Serielles Trennen aus 0.6.3 und alle bisherigen Funktionen bleiben erhalten.
+## 0.7.0
+- Ingress-sicheren Zurück-Button auf der Hardwareseite ergänzt.
+- Erkannte Geräte können dauerhaft einem Projekt zugeordnet werden.
+- Erfolgreiche Builds sind für OTA auswählbar, einschließlich älterer Builds.
+- OTA-Auftrag wird token-geschützt per MQTT an das ausgewählte Gerät gesendet.
+- Firmwaredownload ist projektspezifisch token-geschützt.
+- SHA256 des Build-Artefakts wird vor Auftrag und vor Download erneut geprüft.
+- Firmwaredownload liefert zusätzlich einen `x-MD5`-Header für die Integritätsprüfung durch HTTPUpdate.
+- OTA-Zustände: validating, started, progress, finished, failed und no_update.
+- Fortschritt und Fehler werden seriell und über MQTT veröffentlicht.
+- Hardwareseite zeigt OTA-Fortschrittsbalken, Status und Protokoll.
+- Erfolgreiches HTTPUpdate startet den ESP anschließend neu.
+- USB-Flash, serieller Monitor, MQTT-Geräteliste und Projektfunktionen bleiben erhalten.
