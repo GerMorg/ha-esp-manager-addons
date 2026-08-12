@@ -1,6 +1,6 @@
 name: ESP Manager Dev
 description: Arduino and PlatformIO ESP device manager
-version: 0.5.8-dev
+version: 0.6.0-dev
 slug: esp_manager_dev
 init: false
 arch: [amd64, aarch64, armv7]
@@ -18,14 +18,20 @@ options:
   mqtt_port: 1883
   mqtt_username: ""
   mqtt_password: ""
-  discovery_prefix: homeassistant
+  device_mqtt_host: homeassistant.local
+  device_mqtt_port: 1883
+  device_mqtt_username: ""
+  device_mqtt_password: ""
   public_base_url: http://homeassistant.local:8100
 schema:
   mqtt_host: str
   mqtt_port: port
   mqtt_username: str?
   mqtt_password: password?
-  discovery_prefix: str
+  device_mqtt_host: str
+  device_mqtt_port: port
+  device_mqtt_username: str?
+  device_mqtt_password: password?
   public_base_url: str
 ports:
   8100/tcp: 8100

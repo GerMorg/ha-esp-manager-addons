@@ -7,7 +7,7 @@
 #define ESPMANAGER_FW_VERSION "0.0.0"
 #endif
 #ifndef ESPMANAGER_MQTT_HOST
-#define ESPMANAGER_MQTT_HOST "core-mosquitto"
+#define ESPMANAGER_MQTT_HOST "homeassistant.local"
 #endif
 #ifndef ESPMANAGER_MQTT_PORT
 #define ESPMANAGER_MQTT_PORT 1883
@@ -22,5 +22,14 @@
 #define ESPMANAGER_OTA_TOKEN ""
 #endif
 #define ESPM_LOG(message) ESPManager.log(String(message))
-class ESPManagerClass{public:void begin();void loop();void log(const String&);void publishSensor(const char*,double);void openWifiPortal();void handleCommand(const String&,const String&);private:void ensureMqtt();void publishStatus();void startFallbackPortal();unsigned long lastStatus=0,lastMqttRetry=0,disconnectedSince=0,webPortalUntil=0;bool configPortalActive=false,webPortalActive=false;};
+class ESPManagerClass {
+public:
+  void begin(); void loop(); void log(const String&);
+  void publishSensor(const char*,double); void openWifiPortal();
+  void handleCommand(const String&,const String&);
+private:
+  void ensureMqtt(); void publishStatus(); void startFallbackPortal();
+  unsigned long lastStatus=0,lastMqttRetry=0,disconnectedSince=0,webPortalUntil=0;
+  bool configPortalActive=false,webPortalActive=false;
+};
 extern ESPManagerClass ESPManager;

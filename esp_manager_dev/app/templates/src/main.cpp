@@ -1,4 +1,4 @@
-// AUTOMATISCH VOM ESP MANAGER VERWALTET. NICHT BEARBEITEN.
+// AUTOMATISCH VERWALTET. NICHT BEARBEITEN.
 #include <Arduino.h>
 #include <ESPManager.h>
 extern void setupDevice();

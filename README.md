@@ -1,8 +1,10 @@
-# ESP Manager Add-ons
+# ESP Manager Add-ons 0.6.0
 
-- `esp_manager`: Stable 0.5.0
-- `esp_manager_dev`: Entwicklung 0.5.0-dev
+Saubere zusammengeführte Version ohne historische Patchskripte.
 
-Version 0.5.0 ergänzt Projektkonfiguration, Bibliotheken, Build-Flags, platformio.ini-Import, Build-Abbruch, Build-Historie, Backups sowie Projekt-Export/Import/Duplizieren/Löschen.
+- `esp_manager`: Stable 0.6.0
+- `esp_manager_dev`: Dev 0.6.0-dev
 
-Siehe `PROJECT_HANDOVER.txt` für das vollständige Zielbild und die offenen Punkte.
+Wichtig: `device_mqtt_host` muss aus dem WLAN des ESP erreichbar sein. Verwende `homeassistant.local` oder die feste LAN-IP des Home-Assistant-Hosts, nicht `core-mosquitto`.
+
+Details stehen in `PROJECT_HANDOVER.txt`.
