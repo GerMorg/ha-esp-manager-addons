@@ -1,37 +1,36 @@
 ESP MANAGER PROJEKTUEBERGABE
 ============================
-Stand: 0.5.7 / 0.5.7-dev
+Stand: 0.5.8 / 0.5.8-dev
 
 ZIELBILD
-Home-Assistant-Add-on für Arduino-C++-ESP-Projekte mit PlatformIO-Build, USB-Erstinstallation, serieller Diagnose, WLAN-Provisioning, MQTT-Status und später sicherem OTA. Aktuelle Testhardware: ESP32-WROOM-32D und NodeMCU ESP8266MOD.
+Home-Assistant-Add-on für Arduino-C++-ESP-Projekte mit PlatformIO-Build, USB-Erstinstallation, serieller Diagnose, WLAN-Provisioning, MQTT-Status und später sicherem OTA. Testhardware: ESP32-WROOM-32D und NodeMCU ESP8266MOD.
 
 AKTUELLER FUNKTIONSUMFANG
 - Projekt-/Dateiverwaltung, Editor, Backups, Import/Export
-- Live-Build, Buildabbruch, Buildhistorie und Mehrchip-Initial-Images
+- Live-Build, Abbruch, Buildhistorie und Mehrchip-Initial-Images
 - USB-&-Status-Seite mit ESP Web Tools, serieller Konsole, WLAN-Anleitung und MQTT-Status
 - WLAN-Captive-Portal/Fallback und MQTT/OTA-Agent
 
-HARDWAREBEFUND VOR 0.5.7
-Der serielle Monitor zeigte eine bereits vorhandene ESP32-AT-Firmware mit Bootloader von 2019, SoftAP/STA und einer alten OTA-Partitionierung. Damit war bewiesen, dass USB/Web Serial funktioniert, aber die ESP-Manager-Firmware noch nicht geschrieben worden war. ESP Web Tools zeigte `Install undefined` und blieb bei `Preparing installation`.
+HARDWAREBEFUNDE
+- Web Serial funktioniert über die sichere Tailscale/HA-Verbindung.
+- Vor erfolgreichem ESP-Manager-Flash lief auf dem ESP32 eine ältere AT-Firmware.
+- 0.5.7 korrigierte den Manifestpfad, führte aber durch die Slash-Route unter Home-Assistant-Ingress zu einem 307-Redirect, der die Hardwareseite nicht zuverlässig öffnete.
 
-URSACHE UND LOESUNG 0.5.7
-Die Hardwareseite war unter `/usb/<projekt>` ohne abschließenden Schrägstrich erreichbar. Der relative Pfad `manifest.json` wurde dadurch als `/usb/manifest.json` statt `/usb/<projekt>/manifest.json` aufgelöst. Die Projektlinks und Route enden jetzt mit `/`. Zusätzlich lädt die Seite das Manifest vorab und zeigt `Bereit: <Name> <Version> / <Chipfamilie>` oder einen konkreten Manifestfehler.
+URSACHE UND LOESUNG 0.5.8
+FastAPI leitete `/usb/<projekt>` automatisch auf `/usb/<projekt>/` um. Unter HA-Ingress war dieser Redirect problematisch. Beide Pfadvarianten werden nun direkt von derselben Funktion bedient. Die Manifest-URL wird im Browser aus `location.pathname` erzeugt und funktioniert deshalb unabhängig vom abschließenden Slash und vom Ingress-Präfix.
 
-TESTABLAUF
-1. Dev-Version 0.5.7 installieren.
-2. Projekt neu kompilieren; SUCCESS abwarten.
-3. `USB & Status` öffnen.
-4. Vor dem Installer muss `Bereit: ... / ESP32` bzw. die passende Familie erscheinen.
-5. Erst dann Install starten und den USB-Port auswählen.
-6. Nach erfolgreichem Flash seriellen Monitor neu verbinden oder Reset drücken.
-7. Erwartet wird `[ESPManager] Agent startet`, nicht mehr der alte ESP-IDF-AT-Bootlog als laufende Anwendung.
-8. Danach Fallback-WLAN `ESPManager-<projekt>` und MQTT-Status testen.
-
-WICHTIG
-Der Boot-ROM-Starttext eines ESP32 kann weiterhin erscheinen. Entscheidend ist, welche Anwendung danach startet. Vor dem erfolgreichen Flash liefen AT-Firmware und SoftAP; nach dem Flash muss der ESPManager-Agent loggen.
+TEST NACH UPDATE
+1. Dev-App auf 0.5.8 aktualisieren.
+2. Projekt erfolgreich kompilieren.
+3. `USB & Status` öffnen. Im App-Protokoll muss der GET-Aufruf direkt mit 200 enden, nicht mit 307.
+4. Manifeststatus muss `Bereit: <Name> <Version> / <Chipfamilie>` anzeigen.
+5. Install starten und USB-Port auswählen.
+6. Nach Flash/Reset seriellen Monitor neu verbinden.
+7. Erwartet wird `[ESPManager] Agent startet`.
 
 ENTWICKLUNGSREGELN
-- Keine Funktionen ungefragt entfernen.
+- Keine vorhandenen Funktionen ungefragt entfernen.
+- Agent-API kompatibel halten.
 - CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
 - PROJECT_HANDOVER.txt bei jeder Version aktualisieren.
 - Stable/Dev trennen, Python prüfen und ZIP testen.

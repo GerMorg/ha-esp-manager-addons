@@ -1,8 +1,9 @@
 # Changelog
 
-## 0.5.7
-- ESP-Web-Tools-Manifestpfad unter Home-Assistant-Ingress korrigiert.
-- `USB & Status` öffnet Projekte nun mit abschließendem Schrägstrich, damit `manifest.json` relativ zum Projekt aufgelöst wird.
-- Anzeige `Install undefined` und Hängen bei `Preparing installation` durch falschen Manifestpfad behoben.
-- Sichtbare Manifest-Vorprüfung ergänzt: Projektname, Version und erkannte Chipfamilie werden vor dem Flash angezeigt.
-- Bestehender serieller Monitor, Mehrchip-Initial-Images und MQTT-Status bleiben erhalten.
+## 0.5.8
+- Home-Assistant-Ingress-Problem mit `307 Temporary Redirect` auf `USB & Status` behoben.
+- Hardwaretest-Seite ist nun sowohl unter `/usb/<projekt>` als auch `/usb/<projekt>/` direkt erreichbar.
+- Kein automatischer Slash-Redirect mehr erforderlich.
+- Manifest-URL wird im Browser aus dem tatsächlichen Seitenpfad gebildet.
+- Installer erhält den vollständigen Ingress-kompatiblen Manifestpfad dynamisch.
+- Mehrchip-Flash, serieller Monitor, WLAN-Anleitung und MQTT-Status bleiben erhalten.
