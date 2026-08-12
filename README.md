@@ -1,5 +1,5 @@
-# ESP Manager 0.6.1
+# ESP Manager 0.6.2
 
-Korrektur der sauberen 0.6-Codebasis. Projektliste und Projektanlage funktionieren wieder.
+Korrektur und vollständige Prüfung des USB-/Manifest-Workflows.
 
-Wichtig für ESP-Geräte: `device_mqtt_host` muss aus dem WLAN erreichbar sein. Verwende die LAN-IP von Home Assistant oder `homeassistant.local`, nicht `core-mosquitto`.
+Nach dem Öffnen von `USB & Status` muss vor dem Flashen `Bereit: <Name> <Version> / <Chipfamilie>` erscheinen.

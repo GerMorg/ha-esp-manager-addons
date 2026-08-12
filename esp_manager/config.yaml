@@ -1,6 +1,6 @@
 name: ESP Manager
 description: Arduino and PlatformIO ESP device manager
-version: 0.6.1
+version: 0.6.2
 slug: esp_manager
 init: false
 arch: [amd64, aarch64, armv7]

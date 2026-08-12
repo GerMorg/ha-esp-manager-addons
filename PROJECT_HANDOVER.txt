@@ -1,52 +1,69 @@
 ESP MANAGER PROJEKTUEBERGABE
 ============================
-Stand: 0.6.1 / 0.6.1-dev
+Stand: 0.6.2 / 0.6.2-dev
 
 ZIELBILD
-Home-Assistant-Add-on zur zentralen Verwaltung von Arduino-C++-ESP-Projekten mit PlatformIO-Build, USB-Erstinstallation, serieller Diagnose, WLAN-Provisioning, MQTT-Status und später sicherem OTA. Testhardware: ESP32-WROOM-32D und NodeMCU ESP8266MOD. Späteres Zielprojekt: Sagemcom/M-Bus-Zähler.
+Home-Assistant-Add-on zur zentralen Verwaltung von Arduino-C++-ESP-Projekten mit PlatformIO-Build, USB-Erstinstallation, serieller Diagnose, WLAN-Provisioning, MQTT-Status und später sicherem OTA. Testhardware: ESP32-WROOM-32D und NodeMCU ESP8266MOD. Zielanwendung: Sagemcom/M-Bus-Zähler.
 
 ERREICHTER HARDWARE-MEILENSTEIN
-- ESP32 erfolgreich per Browser geflasht.
-- Serieller Monitor bestätigt.
-- WLAN per Captive Portal konfiguriert.
-- MQTT-DNS-Problem erkannt: `core-mosquitto` ist nur add-on-intern erreichbar.
+- Sichere HA/Tailscale-Verbindung und Web Serial funktionieren.
+- ESP32 wurde mit einem erzeugten Initial-Image erfolgreich geflasht.
+- Serieller Monitor funktioniert.
+- WLAN wurde über das Captive Portal eingerichtet.
+- MQTT-DNS-Problem erkannt: `core-mosquitto` ist add-on-intern und nicht vom ESP-LAN erreichbar.
 
-0.6.0 ARCHITEKTUR
-- Historische Patchkette entfernt und vollständige saubere Codebasis erstellt.
-- Interne MQTT-Konfiguration und ESP-erreichbare Geräte-MQTT-Konfiguration getrennt.
+SAUBERE 0.6-ARCHITEKTUR
+- Keine historische Patchkette mehr im Repository.
 - Stable: `/config/esp_manager`, Port 8099.
 - Dev: `/config/esp_manager_dev`, Port 8100.
+- Interner MQTT-Host und Geräte-MQTT-Host getrennt.
+- Projekte, Dateien, Backups, Builds, Initial-Firmware und OTA-Firmware werden getrennt gespeichert.
 
-REGRESSION UND LÖSUNG 0.6.1
-Beim Erzeugen der großen HTML/f-String-Oberfläche wurden JavaScript-Ausdrücke wie `.join('\n')` zur Laufzeit mit echten Zeilenumbrüchen innerhalb eines JavaScript-Stringliterals ausgegeben. Das JavaScript brach bereits beim Laden ab. Deshalb blieben Projektliste und Schaltflächen ohne Funktion, obwohl die Backend-API und der Dev-Datenpfad vorhanden waren.
+GELERNTE REGRESSIONEN
+1. Öffentliche Agent-Funktionen wie `publishSensor()` dürfen bei Neugenerierung nicht entfernt werden.
+2. HA-Ingress erfordert relative beziehungsweise aus dem realen Seitenpfad erzeugte URLs.
+3. Slash-Redirects dürfen für Ingress-Seiten nicht vorausgesetzt werden.
+4. Python-Syntaxprüfung reicht bei serverseitig erzeugtem HTML/JavaScript nicht. Das tatsächlich gerenderte JavaScript muss geprüft werden.
+5. Hauptseite und Hardwareseite sind getrennte JavaScript-Dokumente und müssen beide geprüft werden.
+6. Projekt- und Dev-Datenpfade dürfen bei Versionswechseln nicht geändert werden.
 
-0.6.1 gibt in JavaScript nun ein echtes `\\n` aus. Neben `python3 -m py_compile` wird das von `ui_html()` tatsächlich gerenderte JavaScript extrahiert und mit `node --check` validiert. Vorhandene Projekte wurden nicht absichtlich gelöscht und sollten aus `/config/esp_manager_dev/projects` wieder erscheinen.
+URSACHE DES 0.6.2-FEHLERS
+Die Hauptseite war seit 0.6.1 repariert, die separat erzeugte Hardwareseite enthielt aber weiterhin einen Python-String `\n`, der beim Rendern zu einem echten Zeilenumbruch mitten in einem JavaScript-Stringliteral wurde. Das gesamte Hardwareseiten-JavaScript konnte deshalb nicht geparst werden. `checkManifest()` lief nie, die Anzeige blieb bei `Prüfe Manifest ...`, und der Installer hatte keinen gültigen Manifestpfad. Das führte erneut zu `Preparing installation`.
+
+LÖSUNG 0.6.2
+- Serielle Fehlerausgabe rendert ein echtes JavaScript-`\\n`.
+- Hardwareseite verwendet explizite DOM-Lookups.
+- Gerendertes JavaScript von Haupt- und Hardwareseite wird mit `node --check` geprüft.
+- Simulierter Workflow prüft Projektliste, Buildmanifest, Chipfamilie und Pfad `initial_firmware.bin`.
+
+TESTABLAUF 0.6.2
+1. Dev-App aktualisieren.
+2. Altes Projekt muss weiterhin sichtbar sein.
+3. Projekt neu kompilieren.
+4. `USB & Status` öffnen.
+5. Anzeige muss von `Prüfe Manifest ...` zu `Bereit: <Name> <Version> / <Chipfamilie>` wechseln.
+6. Erst danach Connect/Install verwenden.
+7. Nach Flash seriellen Monitor neu verbinden.
+8. Für MQTT in den Add-on-Optionen `device_mqtt_host` auf die HA-LAN-IP oder `homeassistant.local` setzen und Gerätezugangsdaten eintragen; anschließend neu bauen und flashen.
 
 AKTUELLER FUNKTIONSUMFANG
 - Projekt anlegen, öffnen, konfigurieren, duplizieren, sichern, exportieren, importieren und löschen.
-- Benutzerdateien anlegen, laden, speichern und löschen.
-- Automatisch verwaltete Systemdateien und ESPManager-Agent.
+- Dateien anlegen, laden, speichern und löschen.
 - Live-Build, Abbruch, Historie, OTA- und Initial-Firmware.
-- Mehrchip-Profile für ESP8266, ESP32/WROOM-32, S2, S3, C3 und C6.
-- USB-&-Status-Seite, serieller Monitor, WLAN-Captive-Portal und MQTT-Gerätestatus.
-- Getrennte Geräte-MQTT-Optionen.
-
-TEST NACH UPDATE
-1. Dev-App auf 0.6.1-dev aktualisieren.
-2. Oberfläche öffnen. Altes Projekt muss wieder in der Liste erscheinen.
-3. Neues Testprojekt anlegen.
-4. Bestehendes Projekt öffnen, Build durchführen und USB-&-Status prüfen.
-5. Geräte-MQTT-Host in den Add-on-Optionen auf die HA-LAN-IP oder `homeassistant.local` setzen, Zugangsdaten eintragen, neu bauen und flashen.
+- Standardprofile für ESP8266, ESP32/WROOM-32, S2, S3, C3 und C6.
+- USB-&-Status-Seite, serieller Monitor, Captive Portal, Router-Fallback und MQTT-Status.
 
 BEKANNTE GRENZEN
-- Geräte-MQTT nach der Hosttrennung ist noch praktisch zu bestätigen.
+- Geräte-MQTT nach Hosttrennung noch praktisch zu bestätigen.
 - Fallback-AP noch ohne individuelles Passwort.
 - OTA-Integritätsprüfung und Rollback fehlen.
-- Initial-Images verwenden derzeit Standard-4-MB-Profile.
+- Initial-Images verwenden Standard-4-MB-Profile.
 
 ENTWICKLUNGSREGELN
 - Keine vorhandenen Funktionen ungefragt entfernen.
-- Python und das gerenderte JavaScript prüfen.
+- Agent-API kompatibel halten.
+- Python sowie gerendertes JavaScript beider Seiten prüfen.
+- Manifest-Workflow automatisiert prüfen.
 - CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
-- PROJECT_HANDOVER.txt bei jeder Version aktualisieren.
+- PROJECT_HANDOVER.txt bei jeder Version vollständig aktualisieren.
 - Stable/Dev und Datenpfade getrennt halten.
