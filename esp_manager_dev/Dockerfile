@@ -13,6 +13,7 @@ RUN python3 app/patch_v071.py && rm app/patch_v071.py
 RUN python3 app/patch_v072.py && rm app/patch_v072.py
 RUN python3 app/patch_v073.py && rm app/patch_v073.py
 RUN python3 app/patch_v080.py && rm app/patch_v080.py
+RUN python3 app/patch_v081.py && rm app/patch_v081.py
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 EXPOSE 8100

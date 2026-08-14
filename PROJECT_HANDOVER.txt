@@ -1,69 +1,52 @@
 ESP MANAGER PROJEKTUEBERGABE
 ============================
 Stable: 0.7.3
-Dev: 0.8.0-dev
+Dev: 0.8.1-dev
 
-STABLE-ENTSCHEIDUNG
-Version 0.7.3 ist die stabile Referenz. Weitere Entwicklung erfolgt ausschließlich in esp_manager_dev. Stable wird erst nach bestätigten Hardwaretests gezielt aktualisiert.
+BESTÄTIGTER TESTSTAND 0.8.0
+- Grundfunktionen erfolgreich.
+- Manuelles Anheften und Löschen von Builds erfolgreich.
+- Manuelle Bereinigung auf die letzten fünf Builds erfolgreich.
+- Automatische Bereinigung auf konfiguriertes Limit noch nicht eindeutig bestätigt.
+- OTA erfolgreich; Gerät meldet Firmware 0.8.0 und ist online.
+- Vor Add-on-Neustart blieb ota_result auf pending, obwohl Ziel- und Ist-Version identisch waren.
+- Nach Add-on-Neustart gingen die nicht-retained OTA-Zielfelder aus DEVICES verloren.
+- Retained finished-Meldung wurde bei jedem UI-Poll erneut ins OTA-Protokoll geschrieben.
 
-BESTÄTIGTER STABLE-FUNKTIONSUMFANG
-- Projekt- und Dateiverwaltung
-- PlatformIO-Build und Buildhistorie
-- USB-Erstinstallation für definierte ESP-Profile
-- Serieller Monitor
-- WLAN-Captive-Portal und Router-Fallback
-- MQTT-Verbindung, Geräteübersicht und regelmäßiger Status
-- OTA-Auftrag, Download, Installation, Neustart und Versionsbestätigung
-- Buildlöschung, Anheften und automatische Aufbewahrung
-- Gerät aus Übersicht vergessen
-
-DEV 0.8.0
-1. OTA-Aufträge persistent:
-   - Datei `/config/esp_manager_dev/ota_jobs.json`
-   - Zielversion, Build, SHA256, Zeit und Zustand bleiben bei Neustart erhalten.
-2. Geräteverlauf:
-   - Datei `/config/esp_manager_dev/device_history.jsonl`
-   - Speichert Statusereignisse und OTA-Ereignisse.
-   - Begrenzung auf die letzten 2000 Datensätze insgesamt.
-3. Neue APIs:
-   - `/api/ota/jobs`
-   - `/api/devices/<device_id>/history`
+URSACHEN UND KORREKTUREN 0.8.1
+1. OTA-Persistenz:
+   - OTA_JOBS wurde zwar geladen, aber beim Wiederaufbau von DEVICES nicht zurück in den Geräteeintrag übernommen.
+   - 0.8.1 übernimmt Zielversion, Build, Zeitpunkt und Zustand aus OTA_JOBS bei jeder Statusmeldung.
+2. Statusverarbeitung:
+   - Verlaufsschreibfehler konnten im gemeinsamen try-Block dazu führen, dass ein bereits korrekt geparster Status zusätzlich als raw_status erschien und die Bestätigung nicht abgeschlossen wurde.
+   - Parsing, Verlauf und Persistenz sind nun getrennt fehlertolerant.
+3. OTA-Protokoll:
+   - Retained ota_progress ist absichtlich bei jeder Abfrage identisch.
+   - Die UI protokolliert nur noch Änderungen.
 4. Build-Aufbewahrung:
-   - Add-on-Option `build_retention`, zulässig 1 bis 50.
-   - Angeheftete Builds bleiben weiterhin geschützt.
-5. ESP32-Bootbestätigung:
-   - Prüft nach erfolgreicher WLAN-/MQTT-Verbindung, ob eine OTA-App auf Bestätigung wartet.
-   - Ruft dann `esp_ota_mark_app_valid_cancel_rollback()` auf.
-   - Automatisches Rollback selbst funktioniert nur, wenn es im verwendeten ESP32-Bootloader aktiviert ist.
+   - Nach jedem erfolgreichen Build wird das aktive build_retention-Limit angewendet.
+   - Das Buildprotokoll zeigt Anzahl gelöschter Builds und verwendetes Limit.
+   - `/api/projects/<projekt>/builds/retention` zeigt configured, total, pinned und normal.
 
-SICHERHEIT UND INTEGRITÄT
-- Server prüft SHA256 vor OTA-Auftrag und Auslieferung.
-- HTTPUpdate prüft die Übertragung zusätzlich über x-MD5.
-- Eine unabhängige geräteseitige SHA256-Neuberechnung bleibt offen.
-- ESP8266 besitzt nicht denselben ESP32-Rollbackmechanismus; dort gelten weiterhin die Sicherheitsmechanismen des ESP8266-Core.
+TESTPLAN 0.8.1
+1. Stable 0.7.3 unverändert lassen.
+2. Dev-App aktualisieren.
+3. Auf Hardwareseite prüfen: OTA muss nach neuer Statusmeldung als confirmed/100 Prozent erscheinen.
+4. Dev-App neu starten; Bestätigung muss nach der nächsten Gerätestatusmeldung wiederhergestellt werden.
+5. OTA-Protokoll beobachten; identische finished/confirmed-Zeilen dürfen nicht weiter anwachsen.
+6. build_retention auf 3 setzen, Dev-App neu starten und vier neue nicht angeheftete Builds erzeugen.
+7. Im letzten Buildprotokoll muss `Build-Aufbewahrung: ... Limit=3` stehen.
+8. Angeheftete Builds zählen nicht zum normalen Limit und bleiben zusätzlich erhalten.
 
-TESTPLAN DEV 0.8.0
-1. Stable 0.7.3 nicht verändern.
-2. Dev-Overlay einspielen und Dev-App aktualisieren.
-3. build_retention testweise auf 3 setzen und mehrere Builds erstellen.
-4. Prüfen, dass angeheftete Builds erhalten bleiben.
-5. OTA auf neue Version durchführen.
-6. Dev-App während oder nach OTA neu starten.
-7. `/api/ota/jobs` und Geräteverlauf prüfen.
-8. Seriell prüfen, ob bei passender ESP32-Konfiguration `OTA-Boot bestätigt` erscheint.
-9. Erst nach erfolgreichen Tests über eine neue Stable-Version entscheiden.
-
-NÄCHSTE SCHRITTE
-- Geräte-Detailseite für Verlauf und OTA-Aufträge in der UI.
-- OTA-Aufträge mit eindeutiger Job-ID statt nur pro Gerät.
-- Rollback-fähige ESP32-Partitionierung und Bootloaderkonfiguration explizit testen.
-- Geräteseitige SHA256-Prüfung.
-- Konfigurierbare Verlaufslänge.
-- Anschließend Sagemcom/M-Bus-Projekt in Dev importieren.
+NÄCHSTE SCHRITTE NACH BESTÄTIGUNG
+- Geräteverlauf und OTA-Jobs in einer sichtbaren Detailseite darstellen.
+- OTA-Job-ID statt nur eines Jobs pro Gerät.
+- Rollbackfähige Partitionierung praktisch testen.
+- Smartmeter-Projekt mit Wrapper zunächst per USB testen.
 
 ENTWICKLUNGSREGELN
 - Stable 0.7.3 bleibt eingefroren.
 - Keine Funktionen ungefragt entfernen.
-- Änderungen zuerst in Dev und auf Hardware testen.
+- Änderungen zuerst in Dev testen.
 - CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
-- PROJECT_HANDOVER.txt bei jeder Version vollständig aktualisieren.
+- PROJECT_HANDOVER.txt bei jeder Version aktualisieren.
