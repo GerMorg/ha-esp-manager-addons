@@ -1,2 +1,3 @@
 {"id":"dec-0001","status":"active","decision":"Stable 0.7.3 bleibt eingefroren."}
-{"id":"dec-0002","status":"active","decision":"Hardware-JavaScript wird inline ausgeliefert, damit relative Static-Pfade unter Ingress nicht brechen."}
+{"id":"dec-0002","status":"active","decision":"WLAN-Neustartgrenze ist wifi_recovery_restart_after seit Ausfallbeginn; Standard 15 Minuten."}
+{"id":"dec-0003","status":"active","decision":"Eine Minute vor Neustart wird das Portal geschlossen und nur STA-Recovery versucht."}

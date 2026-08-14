@@ -1,3 +1,1 @@
-{"id":"inc-0001","status":"closed","title":"Manifestprüfung hing","cause":"Relativer ../../static-Pfad konnte unter Ingress brechen","prevention":"Inline-Runtime, Pfad aus location.pathname, sichtbarer Fehler und Retry"}
-{"id":"inc-0002","status":"closed","title":"Ausgaben liefen aus Karten","prevention":"pre-wrap, anywhere und break-word"}
-{"id":"inc-0003","status":"closed","title":"Gerätedetails nicht einklappbar","prevention":"Details plus Einklappen-Button und UI-Test"}
+{"id":"inc-0001","status":"open-for-hardware-validation","title":"ESP blieb nach Routerrückkehr im Fallback-Portal","observed":"Fallback-AP aktiv, keine selbstständige WLAN-Rückkehr, Reset stellte Verbindung her","prevention":"Portal nur einmal starten, AP_STA verwenden, parallele WiFi.begin-Versuche, Portal bei Erfolg stoppen, letzte reine STA-Phase und kontrollierter Neustart"}

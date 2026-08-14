@@ -1,3 +1,5 @@
-# ESP Manager Dev 0.10.1
+# ESP Manager Dev 0.10.2 WLAN-Recovery
 
-Sauberes Dev-Update mit vollständig überarbeiteter Hardwareseite. Beim Einspielen `esp_manager_dev` vollständig ersetzen und `project_memory` in den Repository-Stamm kopieren. Der vorhandene Stable-Ordner `esp_manager` 0.7.3 bleibt unverändert.
+Overlay für das bestehende 0.10.1-Repository. Die enthaltenen Dateien ersetzen die gleichnamigen Dateien. Danach Projekt neu bauen und die neue Agent-Firmware per USB oder OTA installieren.
+
+Der kontrollierte Neustart erfolgt nach `wifi_recovery_restart_after` seit Beginn des Ausfalls. Standard sind 900000 ms, also 15 Minuten. Eine Minute davor wird das Fallback-Portal geschlossen und ausschließlich im STA-Modus weiter verbunden.

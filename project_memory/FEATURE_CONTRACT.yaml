@@ -1,5 +1,4 @@
 schema_version: 1
 required:
-  hardware_page: [manifest_check_retry, usb_flash, serial_monitor, mqtt_status, device_status, device_history, ota, forget_device]
-  ui: [responsive, output_wrap, collapsible_device_details]
+  wifi_recovery: [retry_saved_credentials, portal_once, ap_sta_parallel, periodic_retry, stop_portal_on_success, disable_softap_on_success, mqtt_reconnect, final_sta_window, controlled_restart, serial_diagnostics]
   agent_api: [begin, loop, log, publishSensor, handleCommand]

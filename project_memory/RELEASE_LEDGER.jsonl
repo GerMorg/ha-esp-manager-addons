@@ -1,2 +1,2 @@
 {"version":"0.7.3","channel":"stable","status":"frozen"}
-{"version":"0.10.1-dev","channel":"dev","status":"generated","purpose":"Hardwareseite, Textumbruch, einklappbare Gerätedetails"}
+{"version":"0.10.2-dev","channel":"dev","status":"generated","purpose":"WLAN-Recovery-Zustandsmaschine","hardware_validation":"pending"}

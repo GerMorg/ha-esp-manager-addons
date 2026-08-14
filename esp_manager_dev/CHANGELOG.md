@@ -1,9 +1,9 @@
 # Changelog
 
-## 0.10.1-dev
-- Hardwareseite als Vier-Schritt-Ablauf neu aufgebaut.
-- Manifestprüfung ingress-sicher mit Retry und Fehleranzeige.
-- USB, Serial, MQTT, Verlauf und OTA vollständig integriert.
-- Ausgaben umbrechen lange Texte.
-- Gerätedetails sind einklappbar.
-- Stable 0.7.3 unverändert.
+## 0.10.2-dev
+- WLAN-Recovery als explizite Zustandsmaschine.
+- Fallback-Portal wird nur einmal gestartet.
+- STA-Verbindungsversuche laufen parallel zum Portal alle `wifi_reconnect_interval` Millisekunden.
+- Bei erfolgreicher Verbindung werden Portal und SoftAP beendet, STA-Modus und MQTT wiederhergestellt.
+- Standard-Neustart nach 15 Minuten Gesamtausfall; letzte Minute nur STA-Verbindungsversuche.
+- Serielle Meldungen für alle Zustandswechsel.

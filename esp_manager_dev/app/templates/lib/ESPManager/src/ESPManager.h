@@ -28,4 +28,14 @@
 #define ESPMANAGER_WIFI_RECOVERY_RESTART_AFTER 900000UL
 #endif
 #define ESPM_LOG(x) ESPManager.log(String(x))
-class ESPManagerClass{public:void begin();void loop();void log(const String&);void publishSensor(const char*,double);void handleCommand(const String&,const String&);private:unsigned long lastStatus=0,lastMqtt=0,lostAt=0,lastWifi=0;void mqttConnect();void status();};extern ESPManagerClass ESPManager;
+class ESPManagerClass {
+public:
+  void begin(); void loop(); void log(const String&); void publishSensor(const char*,double); void handleCommand(const String&,const String&);
+private:
+  enum WifiRecoveryState : uint8_t { WIFI_OK, WIFI_RETRY, WIFI_PORTAL, WIFI_FINAL_RETRY };
+  WifiRecoveryState wifiState=WIFI_RETRY;
+  unsigned long lastStatus=0,lastMqtt=0,wifiLostAt=0,lastWifiRetry=0,finalRetryAt=0;
+  bool portalActive=false;
+  void mqttConnect(); void status(); void beginWifiRecovery(); void startFallbackPortal(); void stopFallbackPortal(); void tryWifiReconnect(const char*); void wifiRecovered();
+};
+extern ESPManagerClass ESPManager;

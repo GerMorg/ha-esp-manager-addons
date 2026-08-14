@@ -2,10 +2,9 @@ schema_version: 1
 project_id: esp-manager
 repository: https://github.com/GerMorg/ha-esp-manager-addons.git
 stable: {version: 0.7.3, frozen: true}
-dev: {version: 0.10.1-dev}
+dev: {version: 0.10.2-dev}
 invariants:
   - Keine bestehende Funktion ohne Zustimmung entfernen.
   - project_memory vollständig mitführen und nur erweitern.
-  - Hardwareseite unter beiden Slash-Varianten ohne Redirect.
-  - Ingress-Pfade aus location.pathname ableiten.
-  - Ausgabefenster müssen lange Texte umbrechen.
+  - Fallback-Portal darf aktive STA-Wiederverbindung nicht verhindern.
+  - Kontrollierter Neustart folgt wifi_recovery_restart_after seit Ausfallbeginn.

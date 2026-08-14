@@ -1,3 +1,5 @@
 schema_version: 1
-automated: [python_compile, main_js, hardware_js, ui_contract, project_file_lifecycle, hardware_page_routes, zip_integrity]
-hardware: {usb_esp32: confirmed, serial: confirmed, mqtt: confirmed, ota: confirmed, hardware_page_0_10_1: pending, wifi_long_outage_recovery: pending}
+automated: [wifi_state_machine_contract, portal_single_start, parallel_sta_retry, clean_portal_shutdown, restart_timing]
+hardware:
+  wifi_recovery_0_10_1: failed
+  wifi_recovery_0_10_2: pending
