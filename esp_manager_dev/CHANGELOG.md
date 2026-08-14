@@ -3,10 +3,8 @@
 ## Stable 0.7.3
 - Unverändert.
 
-## Dev 0.8.3
-- Frische Statusmeldungen gelten als maßgeblicher Online-Nachweis.
-- Availability ist nicht länger zwingend erforderlich, da sie nach dem Löschen retained Topics fehlen kann, obwohl das Gerät weiter Status sendet.
-- Offline wird nach Ablauf von `device_offline_after` erkannt.
-- Hauptseiten-Geräteanzeige als vollständige Funktion ersetzt, damit grüner/roter Punkt tatsächlich dargestellt wird.
-- Hardwareseite erhält dieselbe Online-/Offline-Bewertung über die API.
-- Funktionierende Geistergeräte-Löschung aus 0.8.2 bleibt erhalten.
+## Dev 0.8.3.1
+- Startfehler von 0.8.3 behoben.
+- JavaScript-Ausdrücke der Gerätekarte werden innerhalb des Python-f-Strings korrekt mit doppelten geschweiften Klammern erzeugt.
+- Docker-Build prüft die fertig gepatchte `app/main.py` zusätzlich mit `py_compile`.
+- Online-/Offline-Logik und Geistergeräte-Löschung aus 0.8.3 bleiben erhalten.
