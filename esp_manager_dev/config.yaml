@@ -1,6 +1,6 @@
 name: ESP Manager Dev
 description: Arduino and PlatformIO ESP device manager development branch
-version: 0.8.1-dev
+version: 0.8.2-dev
 slug: esp_manager_dev
 init: false
 arch: [amd64, aarch64, armv7]
@@ -24,6 +24,7 @@ options:
   device_mqtt_password: ""
   public_base_url: http://homeassistant.local:8100
   build_retention: 5
+  device_offline_after: 75
 schema:
   mqtt_host: str
   mqtt_port: port
@@ -35,5 +36,6 @@ schema:
   device_mqtt_password: password?
   public_base_url: str
   build_retention: int(1,50)
+  device_offline_after: int(35,600)
 ports:
   8100/tcp: 8100

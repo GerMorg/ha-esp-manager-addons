@@ -1,52 +1,51 @@
 ESP MANAGER PROJEKTUEBERGABE
 ============================
 Stable: 0.7.3
-Dev: 0.8.1-dev
+Dev: 0.8.2-dev
 
-BESTÄTIGTER TESTSTAND 0.8.0
-- Grundfunktionen erfolgreich.
-- Manuelles Anheften und Löschen von Builds erfolgreich.
-- Manuelle Bereinigung auf die letzten fünf Builds erfolgreich.
-- Automatische Bereinigung auf konfiguriertes Limit noch nicht eindeutig bestätigt.
-- OTA erfolgreich; Gerät meldet Firmware 0.8.0 und ist online.
-- Vor Add-on-Neustart blieb ota_result auf pending, obwohl Ziel- und Ist-Version identisch waren.
-- Nach Add-on-Neustart gingen die nicht-retained OTA-Zielfelder aus DEVICES verloren.
-- Retained finished-Meldung wurde bei jedem UI-Poll erneut ins OTA-Protokoll geschrieben.
+BESTÄTIGTER TESTSTAND 0.8.1
+- Build-Aufbewahrung funktioniert.
+- OTA funktioniert.
+- Abschluss wird als confirmed mit 100 Prozent erkannt.
+- Fertigmeldung wird nicht mehr wiederholt.
+- Geräteübersicht zeigte keinen verständlichen Online-/Offline-Zustand.
+- Nach Gerät löschen blieb der Name in Listen erhalten.
 
-URSACHEN UND KORREKTUREN 0.8.1
-1. OTA-Persistenz:
-   - OTA_JOBS wurde zwar geladen, aber beim Wiederaufbau von DEVICES nicht zurück in den Geräteeintrag übernommen.
-   - 0.8.1 übernimmt Zielversion, Build, Zeitpunkt und Zustand aus OTA_JOBS bei jeder Statusmeldung.
-2. Statusverarbeitung:
-   - Verlaufsschreibfehler konnten im gemeinsamen try-Block dazu führen, dass ein bereits korrekt geparster Status zusätzlich als raw_status erschien und die Bestätigung nicht abgeschlossen wurde.
-   - Parsing, Verlauf und Persistenz sind nun getrennt fehlertolerant.
-3. OTA-Protokoll:
-   - Retained ota_progress ist absichtlich bei jeder Abfrage identisch.
-   - Die UI protokolliert nur noch Änderungen.
-4. Build-Aufbewahrung:
-   - Nach jedem erfolgreichen Build wird das aktive build_retention-Limit angewendet.
-   - Das Buildprotokoll zeigt Anzahl gelöschter Builds und verwendetes Limit.
-   - `/api/projects/<projekt>/builds/retention` zeigt configured, total, pinned und normal.
+URSACHE DER PHANTOMGERÄTE
+Beim Löschen wurden retained MQTT-Themen mit leerer Payload veröffentlicht. Der bisherige MQTT-Handler erzeugte DEVICES jedoch bereits vor Prüfung der Payload mit setdefault(). Dadurch konnte gerade die Löschmeldung das Gerät sofort wieder als leeren Eintrag anlegen. Zusätzlich blieben OTA_JOBS und Projektzuordnung bestehen.
 
-TESTPLAN 0.8.1
-1. Stable 0.7.3 unverändert lassen.
-2. Dev-App aktualisieren.
-3. Auf Hardwareseite prüfen: OTA muss nach neuer Statusmeldung als confirmed/100 Prozent erscheinen.
-4. Dev-App neu starten; Bestätigung muss nach der nächsten Gerätestatusmeldung wiederhergestellt werden.
-5. OTA-Protokoll beobachten; identische finished/confirmed-Zeilen dürfen nicht weiter anwachsen.
-6. build_retention auf 3 setzen, Dev-App neu starten und vier neue nicht angeheftete Builds erzeugen.
-7. Im letzten Buildprotokoll muss `Build-Aufbewahrung: ... Limit=3` stehen.
-8. Angeheftete Builds zählen nicht zum normalen Limit und bleiben zusätzlich erhalten.
+LÖSUNG 0.8.2
+- Leere MQTT-Payloads werden vor setdefault verarbeitet und erzeugen kein Gerät.
+- Gerät löschen entfernt DEVICES-Eintrag, persistenten OTA-Job, retained Status/Availability/OTA-Fortschritt und Projektzuordnung.
+- Die UI leert Auswahl und Detailstatus sofort.
+- Ein eingeschaltetes Gerät darf später wieder erscheinen, sobald es eine neue echte Statusmeldung sendet.
+
+ONLINE-/OFFLINE-LOGIK
+- Availability muss `online` sein.
+- Letzte Statusmeldung darf nicht älter als `device_offline_after` sein.
+- Standardwert 75 Sekunden bei Statusintervall von ungefähr 30 Sekunden.
+- Ergebnisfelder: online, presence und last_seen_age.
+- Übersicht: grüner Punkt für online, roter Punkt für offline.
+
+TESTPLAN 0.8.2
+1. Stable 0.7.3 nicht aktualisieren.
+2. Dev-App auf 0.8.2 aktualisieren.
+3. Eingeschaltetes Gerät muss grün als Online erscheinen.
+4. Gerät ausschalten; nach Ablauf von device_offline_after muss es rot als Offline erscheinen.
+5. Gerät wieder einschalten; es muss grün werden.
+6. Gerät ausschalten und anschließend löschen; der Name muss aus Übersicht und Auswahl verschwinden.
+7. Dev-App neu starten; gelöschtes ausgeschaltetes Gerät darf nicht wieder erscheinen.
+8. Gerät einschalten; mit neuer Statusmeldung darf es wieder aufgenommen werden.
 
 NÄCHSTE SCHRITTE NACH BESTÄTIGUNG
-- Geräteverlauf und OTA-Jobs in einer sichtbaren Detailseite darstellen.
-- OTA-Job-ID statt nur eines Jobs pro Gerät.
-- Rollbackfähige Partitionierung praktisch testen.
-- Smartmeter-Projekt mit Wrapper zunächst per USB testen.
+- Gerätekarten anklickbar machen und Verlauf anzeigen.
+- OTA-Jobs mit eigener Job-ID und Historie.
+- Smartmeter-Code in Dev-Projekt kompilieren und zunächst per USB testen.
+- Rollbackfähige Partitionierung praktisch prüfen.
 
 ENTWICKLUNGSREGELN
 - Stable 0.7.3 bleibt eingefroren.
+- MQTT-Löschpayloads vor Geräteerzeugung behandeln.
 - Keine Funktionen ungefragt entfernen.
-- Änderungen zuerst in Dev testen.
 - CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
 - PROJECT_HANDOVER.txt bei jeder Version aktualisieren.
