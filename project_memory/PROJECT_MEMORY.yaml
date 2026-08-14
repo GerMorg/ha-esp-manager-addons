@@ -2,7 +2,7 @@ schema_version: 1
 project_id: esp-manager
 repository: https://github.com/GerMorg/ha-esp-manager-addons.git
 stable: {version: 0.7.3, frozen: true, port: 8099, data_path: /config/esp_manager}
-dev: {version: 0.10.0-dev, port: 8100, data_path: /config/esp_manager_dev}
+dev: {version: 0.10.0.1-dev, port: 8100, data_path: /config/esp_manager_dev}
 north_star: Zentrale Home-Assistant-Verwaltung von Arduino-C++-ESP-Projekten mit Wrapper, USB, WLAN, MQTT und OTA.
 invariants:
   - Keine bestehende Funktion ohne ausdrückliche Zustimmung entfernen.

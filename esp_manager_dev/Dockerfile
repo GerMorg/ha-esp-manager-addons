@@ -9,7 +9,7 @@ COPY app app
 COPY tests tests
 RUN python3 -m py_compile app/*.py
 RUN node --check app/static/app.js && node --check app/static/hardware.js
-RUN . venv/bin/activate && pytest -q
+RUN . venv/bin/activate && pytest -q tests/test_contract.py
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 EXPOSE 8100

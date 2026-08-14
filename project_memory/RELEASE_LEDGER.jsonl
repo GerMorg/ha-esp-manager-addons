@@ -1,2 +1,3 @@
 {"version":"0.7.3","channel":"stable","status":"frozen","verified":["usb","serial","wifi","mqtt","ota"]}
 {"version":"0.10.0-dev","channel":"dev","status":"generated","purpose":"Vollständige UI und saubere modulare Basis mit Projektgedächtnis"}
+{"version":"0.10.0.1-dev","channel":"dev","status":"build-fix","purpose":"Alte test_smoke.py kann Contract-Build nicht mehr blockieren","tests":["python_compile","main_js","hardware_js","test_contract"]}

@@ -1,10 +1,10 @@
 ESP MANAGER PROJEKTÜBERGABE
 ===========================
 Stable: 0.7.3, unverändert
-Dev: 0.10.0-dev
+Dev: 0.10.0.1-dev
 
-Diese Version stellt eine saubere modulare Dev-Basis her. Vollständige Projekt-, Datei-, Import-/Export-, Build-, Geräte-, USB-, Serial-, WLAN- und OTA-Workflows sind wieder in API und Oberfläche angelegt. Das kanonische Projektgedächtnis liegt in project_memory und ist gegenüber dieser Kurzfassung maßgeblich.
+0.10.0 scheiterte beim Docker-Test, weil im GitHub-Arbeitsbaum eine alte tests/test_smoke.py erhalten blieb. Diese importierte die früheren, in der modularen Oberfläche nicht mehr vorhandenen Python-Konstanten APP_JS und HARDWARE.
 
-Installation: vorhandenen Ordner esp_manager_dev vollständig ersetzen; project_memory in den Repository-Stamm kopieren; esp_manager Stable nicht verändern.
+0.10.0.1 führt im Docker-Build ausdrücklich nur tests/test_contract.py aus. Zusätzlich begrenzt pytest.ini die Sammlung auf diese kanonische Testsuite. Das schützt auch dann, wenn ein Overlay alte Testdateien nicht entfernt.
 
-Hardware offen: WLAN-Wiederverbindung nach mehrminütigem Ausfall und Smartmeter-Wrapper praktisch testen.
+Das kanonische und append-only Projektgedächtnis liegt unter project_memory. Stable 0.7.3 bleibt unverändert.
