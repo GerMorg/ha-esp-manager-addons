@@ -1,5 +1,3 @@
-# ESP Manager Dev 0.9.0 clean
+# ESP Manager Dev 0.9.0.1 clean
 
-Vollständiger Ersatz ausschließlich für den Ordner `esp_manager_dev`. Stable 0.7.3 bleibt unverändert.
-
-Keine Patchkette mehr. Der Image-Build prüft Python, ausgeliefertes JavaScript und zentrale API-Workflows automatisch.
+Build-Fix für die saubere 0.9-Codebasis. Der Docker-Testschritt erhält einen expliziten Python-Paketpfad.

@@ -9,7 +9,7 @@ COPY app app
 COPY tests tests
 RUN python3 -m py_compile app/main.py
 RUN python3 tests/extract_js.py && node --check /tmp/app.js && node --check /tmp/hardware.js
-RUN . venv/bin/activate && pytest -q
+RUN . venv/bin/activate && PYTHONPATH=/opt/esp_manager pytest -q
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 EXPOSE 8100

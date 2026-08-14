@@ -15,7 +15,7 @@ def options():
   try:d.update(json.loads(OPTFILE.read_text()))
   except Exception:pass
  return d
-OPT=options();app=FastAPI(title='ESP Manager Dev 0.9.0');JOBS={};PROCS={};DEVICES={};MQTT=None
+OPT=options();app=FastAPI(title='ESP Manager Dev 0.9.0.1');JOBS={};PROCS={};DEVICES={};MQTT=None
 OTA_FILE=ROOT/'ota_jobs.json';HISTORY_FILE=ROOT/'device_history.jsonl'
 def load_json(p,default):
  try:return json.loads(p.read_text()) if p.exists() else default
@@ -237,7 +237,7 @@ def initial(project):
  bs=builds(project)
  if not bs:raise HTTPException(404,'Zuerst kompilieren')
  return FileResponse(bs[0]['_dir']/'initial_firmware.bin')
-UI='''<!doctype html><html><head><meta charset="utf-8"><title>ESP Manager Dev</title><style>body{font-family:system-ui;background:#111827;color:#e5e7eb;margin:20px}.card{background:#1f2937;padding:14px;margin:10px;border-radius:12px}.item{padding:8px;border-bottom:1px solid #374151}button,input,select,textarea{margin:3px;padding:7px}textarea,pre{background:#030712;color:#eee;width:100%;box-sizing:border-box}textarea{height:260px}</style></head><body><h1>ESP Manager Dev 0.9.0 clean</h1><div class="card"><input id="pn" placeholder="Projekt"><select id="pb"><option>esp32dev</option><option>nodemcuv2</option></select><button onclick="createP()">Anlegen</button></div><div class="card"><h2>Projekte</h2><div id="projects"></div></div><div class="card"><h2>Geräte</h2><div id="devices"></div><div id="detail"></div><pre id="hist"></pre></div><div class="card"><h2 id="title">Projekt</h2><input id="ver" placeholder="Version"><button onclick="saveP()">Speichern</button><button onclick="buildP()">Build</button><a id="usb">USB, OTA & Status</a><div id="files"></div><textarea id="editor"></textarea><button onclick="saveF()">Datei speichern</button><pre id="log"></pre></div><script src="app.js"></script></body></html>'''
+UI='''<!doctype html><html><head><meta charset="utf-8"><title>ESP Manager Dev</title><style>body{font-family:system-ui;background:#111827;color:#e5e7eb;margin:20px}.card{background:#1f2937;padding:14px;margin:10px;border-radius:12px}.item{padding:8px;border-bottom:1px solid #374151}button,input,select,textarea{margin:3px;padding:7px}textarea,pre{background:#030712;color:#eee;width:100%;box-sizing:border-box}textarea{height:260px}</style></head><body><h1>ESP Manager Dev 0.9.0.1 clean</h1><div class="card"><input id="pn" placeholder="Projekt"><select id="pb"><option>esp32dev</option><option>nodemcuv2</option></select><button onclick="createP()">Anlegen</button></div><div class="card"><h2>Projekte</h2><div id="projects"></div></div><div class="card"><h2>Geräte</h2><div id="devices"></div><div id="detail"></div><pre id="hist"></pre></div><div class="card"><h2 id="title">Projekt</h2><input id="ver" placeholder="Version"><button onclick="saveP()">Speichern</button><button onclick="buildP()">Build</button><a id="usb">USB, OTA & Status</a><div id="files"></div><textarea id="editor"></textarea><button onclick="saveF()">Datei speichern</button><pre id="log"></pre></div><script src="app.js"></script></body></html>'''
 @app.get('/',response_class=HTMLResponse)
 def root():return HTMLResponse(UI)
 @app.get('/app.js',response_class=PlainTextResponse)
