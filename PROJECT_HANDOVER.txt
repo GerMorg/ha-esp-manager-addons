@@ -1,20 +1,32 @@
 ESP MANAGER PROJEKTUEBERGABE
 ============================
 Stable: 0.7.3
-Dev: 0.8.2.1-dev
+Dev: 0.8.3-dev
 
-BUILD-FEHLER 0.8.2
-Supervisor-Ausgabe:
-`main device card renderer missing`
+BESTÄTIGTER TESTSTAND
+- Build 0.8.2.1 funktioniert.
+- Geistergerät wird korrekt entfernt.
+- `last_seen` wird durch Statusmeldungen regelmäßig aktualisiert.
+- Gerät wurde trotzdem immer als offline bewertet.
+- Hauptübersicht zeigte keinen farbigen Statuspunkt.
 
 URSACHE
-patch_v082.py erwartete für die Gerätekarte einen exakt formatierten JavaScript-Text. Die bestehende main.py enthielt nach den vorherigen Patches eine abweichende Formatierung. Der Patch brach deshalb absichtlich mit SystemExit ab, obwohl die Backend- und Hardwareseitenänderungen unabhängig davon anwendbar waren.
+0.8.2 verlangte gleichzeitig `availability == online` und eine frische Statusmeldung. Beim Löschen eines Geräts wurde das retained Availability-Topic absichtlich geleert. Ein weiterhin verbundener ESP publiziert Availability erst bei einer neuen MQTT-Verbindung erneut, sendet aber bereits regelmäßig gültige Statusmeldungen. Deshalb war `last_seen` frisch, Availability jedoch leer und das Gerät wurde fälschlich offline bewertet.
 
-LÖSUNG
-patch_v0821.py verändert vor dem Ausführen von patch_v082.py dessen strikte Abbruchbedingung. Wenn nur das optionale Hauptseiten-Fragment nicht gefunden wird, wird ein Hinweis ausgegeben und der restliche Patch weiter angewendet.
+LÖSUNG 0.8.3
+- Eine Statusmeldung innerhalb `device_offline_after` gilt als Online-Nachweis.
+- Nach Ablauf wird das Gerät Offline.
+- Availability wird weiterhin als Diagnosefeld `availability_state` ausgegeben, entscheidet aber nicht mehr allein über den Zustand.
+- Die Hauptseitenfunktion `refreshDevices()` wird vollständig ersetzt, statt ein instabiles Textfragment zu suchen.
+- Anzeige: grüner Punkt Online, roter Punkt Offline, Sekunden seit letzter Meldung.
 
-TEST
-1. Nur Dev aktualisieren.
-2. Docker-Build muss die Schritte patch_v0821.py und patch_v082.py erfolgreich abschließen.
-3. Danach Online-/Offline-Logik und Gerät löschen testen.
-4. Stable 0.7.3 bleibt unverändert.
+TESTPLAN
+1. Dev aktualisieren, Stable 0.7.3 nicht verändern.
+2. Eingeschaltetes Gerät muss innerhalb der nächsten Statusmeldung grün Online werden.
+3. Gerät ausschalten und länger als `device_offline_after` warten; danach rot Offline.
+4. Wieder einschalten; nächste Statusmeldung muss den Zustand auf Online setzen.
+5. Löschen bleibt separat bestätigt.
+
+NÄCHSTE SCHRITTE
+- Nach Bestätigung Geräte-Detailseite und Verlauf sichtbar machen.
+- Danach Smartmeter-Projekt kompilieren und per USB testen.
