@@ -1,3 +1,3 @@
-# ESP Manager Dev 0.9.0.1 clean
+# ESP Manager Add-ons
 
-Build-Fix für die saubere 0.9-Codebasis. Der Docker-Testschritt erhält einen expliziten Python-Paketpfad.
+Dieses Paket ist ein sauberes Dev-Update. Der vorhandene Ordner `esp_manager` Stable 0.7.3 bleibt beim Einspielen unverändert. Ersetze `esp_manager_dev` vollständig und kopiere `project_memory` in den Repository-Stamm.

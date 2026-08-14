@@ -1,15 +1,15 @@
 ARG BUILD_FROM=python:3.12-slim-bookworm
 FROM ${BUILD_FROM}
-ENV LANG=C.UTF-8 PLATFORMIO_CORE_DIR=/data/platformio
+ENV LANG=C.UTF-8 PLATFORMIO_CORE_DIR=/data/platformio PYTHONPATH=/opt/esp_manager
 RUN apt-get update && apt-get install -y --no-install-recommends bash git curl ca-certificates build-essential libffi-dev libssl-dev nodejs && rm -rf /var/lib/apt/lists/*
 WORKDIR /opt/esp_manager
 COPY requirements.txt .
-RUN python3 -m venv venv && . venv/bin/activate && pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt && pip install --no-cache-dir platformio
+RUN python3 -m venv venv && . venv/bin/activate && pip install --no-cache-dir -r requirements.txt platformio
 COPY app app
 COPY tests tests
-RUN python3 -m py_compile app/main.py
-RUN python3 tests/extract_js.py && node --check /tmp/app.js && node --check /tmp/hardware.js
-RUN . venv/bin/activate && PYTHONPATH=/opt/esp_manager pytest -q
+RUN python3 -m py_compile app/*.py
+RUN node --check app/static/app.js && node --check app/static/hardware.js
+RUN . venv/bin/activate && pytest -q
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 EXPOSE 8100

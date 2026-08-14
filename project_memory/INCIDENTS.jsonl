@@ -1,0 +1,4 @@
+{"id":"inc-0001","status":"closed","title":"Funktionen bei Neugenerierung verloren","prevention":"FEATURE_CONTRACT plus UI/API-Tests"}
+{"id":"inc-0002","status":"closed","title":"Ungültiges gerendertes JavaScript","prevention":"node --check für beide ausgelieferten Dateien"}
+{"id":"inc-0003","status":"closed","title":"OTA bei 0 Prozent","prevention":"getrennte WiFiClient für MQTT und HTTPUpdate"}
+{"id":"inc-0004","status":"closed","title":"Phantomgerät nach Löschen","prevention":"leere retained Payload vor Geräteerzeugung behandeln"}

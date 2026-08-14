@@ -1,25 +1,10 @@
 ESP MANAGER PROJEKTÜBERGABE
 ===========================
-Stable: 0.7.3
-Dev: 0.9.0.1-dev clean
+Stable: 0.7.3, unverändert
+Dev: 0.10.0-dev
 
-FEHLER 0.9.0
-Der Docker-Build erreichte erfolgreich Python- und JavaScript-Prüfung, scheiterte aber beim pytest-Import:
-`ModuleNotFoundError: No module named 'app'`.
+Diese Version stellt eine saubere modulare Dev-Basis her. Vollständige Projekt-, Datei-, Import-/Export-, Build-, Geräte-, USB-, Serial-, WLAN- und OTA-Workflows sind wieder in API und Oberfläche angelegt. Das kanonische Projektgedächtnis liegt in project_memory und ist gegenüber dieser Kurzfassung maßgeblich.
 
-URSACHE
-pytest startete im Container zwar unter `/opt/esp_manager`, der Python-Suchpfad enthielt das Projektverzeichnis in dieser Buildumgebung jedoch nicht zuverlässig.
+Installation: vorhandenen Ordner esp_manager_dev vollständig ersetzen; project_memory in den Repository-Stamm kopieren; esp_manager Stable nicht verändern.
 
-LÖSUNG 0.9.0.1
-Der Dockerfile-Testschritt verwendet explizit:
-`PYTHONPATH=/opt/esp_manager pytest -q`
-
-PRÜFUNGEN
-- main.py kompilieren
-- tatsächlich ausgeliefertes Hauptseiten-JavaScript prüfen
-- tatsächlich ausgeliefertes Hardwareseiten-JavaScript prüfen
-- FastAPI-Smoke-Tests mit explizitem Python-Paketpfad
-- ZIP-Integrität
-
-INSTALLATION
-Nur `esp_manager_dev` ersetzen. Stable 0.7.3 nicht verändern.
+Hardware offen: WLAN-Wiederverbindung nach mehrminütigem Ausfall und Smartmeter-Wrapper praktisch testen.

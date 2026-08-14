@@ -1,10 +1,9 @@
 # Changelog
 
-## Stable 0.7.3
-- Unverändert.
-
-## Dev 0.9.0.1 clean
-- Docker-Testfehler behoben: pytest erhält explizit `PYTHONPATH=/opt/esp_manager`.
-- Dadurch ist das im Container kopierte Python-Paket `app` während der Tests importierbar.
-- Saubere 0.9-Codebasis ohne Patchkette bleibt erhalten.
-- Python-, JavaScript- und API-Tests bleiben verpflichtende Docker-Buildschritte.
+## 0.10.0-dev
+- Saubere modulare Dev-Codebasis ohne Patchkette.
+- Vollständige Projekt- und Dateiverwaltung wiederhergestellt.
+- ESP-Manager-ZIP-, Arduino-ZIP- und PlatformIO-Import vorhanden.
+- Buildverwaltung, USB, Serial, Geräte, OTA und WLAN-Recovery integriert.
+- Maschinenlesbares `project_memory` und vertragliche Regressionstests aufgenommen.
+- Stable 0.7.3 bleibt unverändert.

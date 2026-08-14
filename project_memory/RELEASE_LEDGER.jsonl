@@ -1,0 +1,2 @@
+{"version":"0.7.3","channel":"stable","status":"frozen","verified":["usb","serial","wifi","mqtt","ota"]}
+{"version":"0.10.0-dev","channel":"dev","status":"generated","purpose":"Vollständige UI und saubere modulare Basis mit Projektgedächtnis"}

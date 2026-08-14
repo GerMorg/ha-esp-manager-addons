@@ -1,7 +1,7 @@
 #pragma once
 #include <Arduino.h>
 #ifndef ESPMANAGER_DEVICE_ID
-#define ESPMANAGER_DEVICE_ID "espmanager_device"
+#define ESPMANAGER_DEVICE_ID "device"
 #endif
 #ifndef ESPMANAGER_FW_VERSION
 #define ESPMANAGER_FW_VERSION "0.0.0"
@@ -27,13 +27,5 @@
 #ifndef ESPMANAGER_WIFI_RECOVERY_RESTART_AFTER
 #define ESPMANAGER_WIFI_RECOVERY_RESTART_AFTER 900000UL
 #endif
-#define ESPM_LOG(message) ESPManager.log(String(message))
-class ESPManagerClass {
-public:
- void begin(); void loop(); void log(const String&); void publishSensor(const char*,double); void openWifiPortal(); void handleCommand(const String&,const String&);
-private:
- void ensureMqtt(); void publishStatus(); void startFallbackPortal();
- unsigned long lastStatus=0,lastMqttRetry=0,disconnectedSince=0,lastWifiRetry=0,webPortalUntil=0;
- bool configPortalActive=false,webPortalActive=false;
-};
-extern ESPManagerClass ESPManager;
+#define ESPM_LOG(x) ESPManager.log(String(x))
+class ESPManagerClass{public:void begin();void loop();void log(const String&);void publishSensor(const char*,double);void handleCommand(const String&,const String&);private:unsigned long lastStatus=0,lastMqtt=0,lostAt=0,lastWifi=0;void mqttConnect();void status();};extern ESPManagerClass ESPManager;

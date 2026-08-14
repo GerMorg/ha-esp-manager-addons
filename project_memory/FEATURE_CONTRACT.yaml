@@ -1,0 +1,11 @@
+schema_version: 1
+required:
+  project: [create, open, settings, duplicate, backup, export, import_espmanager_zip, import_arduino_zip, platformio_import, delete]
+  file: [list, create, open, save, rename, delete_with_backup, multi_upload, protect_system_files]
+  build: [start, live_log, cancel, parallel_guard, history, download, pin, delete, retention, sha256]
+  usb: [both_route_variants, manifest, multichip_initial_image]
+  serial: [connect, cancel_reader, release_lock, close_port]
+  device: [list, online_offline, details, history, delete_retained]
+  ota: [build_selection, token, sha256, mqtt_buffer_2048, separate_client, progress, persistence, version_confirmation]
+  wifi: [captive_portal, fallback, active_reconnect, recovery_restart]
+  agent_api: [begin, loop, log, publishSensor, handleCommand]

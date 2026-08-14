@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "files": {
+    "DECISIONS.jsonl": "ef6d727cadda54cab9adf0c33eb2fd129d3dd01b0d8ef7c9580af4a69aba93ca",
+    "DEVELOPMENT_PROTOCOL.md": "905c7a2330ab1bff2f71592e775831ab922bf8c638dc8340f9ed42306cebf619",
+    "FEATURE_CONTRACT.yaml": "43440d49bff0dab61b4a2efcfe8c4c46408bc917b155c56e77e57df649a2b25d",
+    "INCIDENTS.jsonl": "31813cf32e1c1a277f29d1f4c304f151ae743e87bd370309a0db4a41fd64fce6",
+    "PROJECT_MEMORY.yaml": "463fd02564917491fde33c477a3a8729eeede473edf7c96f8992f18727f50acd",
+    "RELEASE_LEDGER.jsonl": "b6da1c9df4c6b0c10fb6f5d1477ed013214dfdc63009c5cd07dd0975250f3d3e",
+    "TEST_MATRIX.yaml": "506bcc8931b84f9b43895e13ba0404ca9b5c5ecd438096fa30f874b121feabb2",
+    "legacy_handovers_full.txt": "335a6d4a757077053654ed0cd3dcfb947487bfe161459d965f0131f8f3ff5876"
+  }
+}
