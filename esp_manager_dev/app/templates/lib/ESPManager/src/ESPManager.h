@@ -21,15 +21,19 @@
 #ifndef ESPMANAGER_OTA_TOKEN
 #define ESPMANAGER_OTA_TOKEN ""
 #endif
+#ifndef ESPMANAGER_WIFI_RECONNECT_INTERVAL
+#define ESPMANAGER_WIFI_RECONNECT_INTERVAL 15000UL
+#endif
+#ifndef ESPMANAGER_WIFI_RECOVERY_RESTART_AFTER
+#define ESPMANAGER_WIFI_RECOVERY_RESTART_AFTER 900000UL
+#endif
 #define ESPM_LOG(message) ESPManager.log(String(message))
 class ESPManagerClass {
 public:
-  void begin(); void loop(); void log(const String&);
-  void publishSensor(const char*,double); void openWifiPortal();
-  void handleCommand(const String&,const String&);
+ void begin(); void loop(); void log(const String&); void publishSensor(const char*,double); void openWifiPortal(); void handleCommand(const String&,const String&);
 private:
-  void ensureMqtt(); void publishStatus(); void startFallbackPortal();
-  unsigned long lastStatus=0,lastMqttRetry=0,disconnectedSince=0,webPortalUntil=0;
-  bool configPortalActive=false,webPortalActive=false;
+ void ensureMqtt(); void publishStatus(); void startFallbackPortal();
+ unsigned long lastStatus=0,lastMqttRetry=0,disconnectedSince=0,lastWifiRetry=0,webPortalUntil=0;
+ bool configPortalActive=false,webPortalActive=false;
 };
 extern ESPManagerClass ESPManager;

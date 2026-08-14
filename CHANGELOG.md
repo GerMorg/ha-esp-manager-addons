@@ -1,15 +1,18 @@
 # Changelog
 
 ## Stable 0.7.3
-- Unverändert und eingefroren.
+- Bleibt unverändert. Dieses Paket ersetzt ausschließlich `esp_manager_dev`.
 
-## Dev 0.8.4
-- Robuste WLAN-Wiederherstellung im ESP-Agenten.
-- ESP32-Autoreconnect wird aktiviert.
-- Alle 15 Sekunden wird bei Trennung aktiv `WiFi.reconnect()` versucht.
-- Captive-Portal-Fallback nach 60 Sekunden bleibt erhalten.
-- Kontrollierter Neustart nach standardmäßig 15 Minuten erfolgloser Wiederherstellung.
-- Intervalle über Add-on-Optionen konfigurierbar.
-- Gerätekarten sind anklickbar.
-- Geräte-Detailansicht zeigt Firmware, IP, RSSI, Uptime und Heap.
-- Die letzten 50 Verlaufseinträge werden sichtbar angezeigt.
+## Dev 0.9.0 clean
+- Entwicklungszweig ohne historische Patchkette vollständig neu konsolidiert.
+- Projekt-, Datei-, Backup-, Import-/Export- und Buildfunktionen in einer einzelnen `main.py`.
+- Mehrchip-USB-Manifest und vollständiges ESP32-Initial-Image.
+- Serieller Monitor mit sauberem Reader-/Port-Abschluss.
+- MQTT-Geräteübersicht mit Online-/Offline-Zustand und Verlauf.
+- Gerät löschen, retained Daten entfernen und erneute Aufnahme bei neuer Statusmeldung.
+- OTA mit Buildauswahl, Token, SHA256, MD5-Header, Fortschritt und Versionsbestätigung.
+- Persistente OTA-Aufträge und begrenzter Geräteverlauf.
+- Build-Anheften, Löschen und konfigurierbare Aufbewahrung.
+- Aktive WLAN-Wiederverbindung, Fallback-Portal und kontrollierter Recovery-Neustart.
+- Keine `patch_v*.py`-Dateien mehr.
+- Docker-Build prüft Python-Syntax, tatsächlich ausgeliefertes JavaScript und API-Smoke-Tests.

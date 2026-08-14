@@ -1,5 +1,5 @@
-# ESP Manager 0.6.2
+# ESP Manager Dev 0.9.0 clean
 
-Korrektur und vollständige Prüfung des USB-/Manifest-Workflows.
+Vollständiger Ersatz ausschließlich für den Ordner `esp_manager_dev`. Stable 0.7.3 bleibt unverändert.
 
-Nach dem Öffnen von `USB & Status` muss vor dem Flashen `Bereit: <Name> <Version> / <Chipfamilie>` erscheinen.
+Keine Patchkette mehr. Der Image-Build prüft Python, ausgeliefertes JavaScript und zentrale API-Workflows automatisch.

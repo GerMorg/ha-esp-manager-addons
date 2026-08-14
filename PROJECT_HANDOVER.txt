@@ -1,43 +1,64 @@
-ESP MANAGER PROJEKTUEBERGABE
-============================
-Stable: 0.7.3
-Dev: 0.8.4-dev
+ESP MANAGER PROJEKTÜBERGABE
+===========================
+Stable: 0.7.3, unverändert
+Dev: 0.9.0-dev clean
 
-BESTÄTIGTER STAND
-- Grundfunktionen, Build-Aufbewahrung, OTA und Abschlussbestätigung funktionieren.
-- Online-/Offline-Anzeige und Gerätelöschung funktionieren.
-- Nach einem mehrminütigen WLAN-Ausfall verband sich der ESP nicht zuverlässig neu; manueller Reset stellte die Verbindung wieder her.
+WARUM EINE SAUBERE VERSION
+Die Dev-Version war über viele aufeinander aufbauende Patchskripte entstanden. Mehrfach scheiterten Builds, weil spätere Patches exakte Textfragmente früherer Patches erwarteten. 0.9.0 ersetzt ausschließlich den Dev-Ordner durch eine konsolidierte Codebasis ohne Patchkette.
 
-WLAN-WIEDERHERSTELLUNG 0.8.4
-- WiFi.setAutoReconnect(true) und persistente WLAN-Konfiguration.
-- Bei WL_DISCONNECTED alle `wifi_reconnect_interval` Millisekunden aktiver Reconnect.
-- Nach 60 Sekunden bleibt der bestehende Fallback-AP aktiv.
-- Nach `wifi_recovery_restart_after` erfolgt ein kontrollierter Neustart als letzte Wiederherstellungsstufe.
-- Standard: Retry 15 Sekunden, Neustart nach 15 Minuten.
-- Die Werte werden beim Build in die Firmware eingebettet. Änderung erfordert Neubau und OTA/USB-Installation.
+DATENKOMPATIBILITÄT
+Der Datenpfad bleibt `/config/esp_manager_dev`. Bestehende Projekte, Firmware-Builds, Backups, `ota_jobs.json` und `device_history.jsonl` bleiben erhalten. Beim Bauen werden verwaltete Wrapperdateien aktualisiert; `src/device.cpp` bleibt Benutzerdatei.
 
-GERÄTE-DETAILSEITE
-- Gerätekarte auf der Hauptseite anklicken.
-- Anzeige von Online-Zustand, Firmware, IP, RSSI, Uptime und freiem Heap.
-- Die letzten 50 bereits persistent gespeicherten Status-/OTA-Ereignisse werden dargestellt.
+ENTHALTENE WORKFLOWS
+- Projekte anlegen, öffnen, ändern und löschen
+- Benutzerdateien lesen, speichern, anlegen und löschen
+- Backup, Export und ZIP-Import
+- PlatformIO-Build, Liveprotokoll, Abbruch und Buildhistorie
+- Build-Anheften, Löschen und automatische Aufbewahrung
+- USB-Erstinstallation ohne Slash-Redirect
+- Ingress-kompatible Manifest- und API-Pfade
+- Serieller Monitor mit echtem Portschluss
+- WLAN-Captive-Portal, aktiver Reconnect und Recovery-Neustart
+- Getrennte MQTT-Transporte und Gerätezugangsdaten
+- Geräteübersicht, Online-/Offline-Zustand, Löschen und Verlauf
+- OTA-Auftrag, eigener HTTP-Client, Integritätsprüfung, Fortschritt, Neustart und Versionsbestätigung
 
-TESTPLAN
-1. Dev aktualisieren und Projekt neu bauen.
-2. 0.8.4-Agent per OTA installieren.
-3. Router/WLAN mindestens mehrere Minuten abschalten.
-4. Nach Rückkehr des WLANs muss der ESP ohne manuellen Reset wieder online werden.
-5. Seriell optional auf `WLAN getrennt, erneuter Verbindungsversuch` prüfen.
-6. Gerät auf Hauptseite anklicken und Verlauf prüfen.
+BEIBEHALTENE ERKENNTNISSE
+- `core-mosquitto` ist nur für das Add-on; ESP-Geräte benötigen LAN-IP oder erreichbaren Hostnamen.
+- PubSubClient benötigt für OTA-Kommandos einen größeren Puffer.
+- MQTT und HTTPUpdate dürfen nicht denselben WiFiClient verwenden.
+- Ingress-Pfade werden aus dem realen Browserpfad gebildet.
+- Serielle Streams müssen vor `port.close()` entsperrt werden.
+- OTA-Erfolg wird durch die neue Firmwareversion nach Neustart bestätigt.
+- Frische Statusdaten sind der maßgebliche Online-Nachweis.
+- Leere retained MQTT-Payloads dürfen keine Phantomgeräte erzeugen.
+- Servergeneriertes JavaScript muss in seiner tatsächlich ausgelieferten Form geprüft werden.
 
-NÄCHSTE GROSSE SCHRITTE
-- Smartmeter-Wrapperprojekt bauen und per USB testen.
-- MQTT-Discovery für Messwerte ergänzen, ohne bestehende HA-Namen zu ändern.
-- OTA-Job-Historie mit eindeutigen Job-IDs.
-- Rollbackfähige ESP32-Partitionierung praktisch validieren.
-- Gerätekonfiguration und Geheimnisse aus dem Quellcode in geschützte Projektparameter verschieben.
+WLAN-RECOVERY
+- AutoReconnect aktiv
+- aktiver `WiFi.reconnect()` im konfigurierten Intervall
+- Fallback-Portal nach 60 Sekunden
+- kontrollierter Neustart nach konfigurierter Dauer
+Die Werte werden in die Firmware eingebaut und erfordern nach Änderung einen Neubau.
 
-ENTWICKLUNGSREGELN
-- Stable 0.7.3 bleibt unverändert.
-- Keine Funktionen ungefragt entfernen.
-- Änderungen zuerst in Dev und auf Hardware testen.
-- Fertige main.py im Docker-Build kompilieren.
+AUTOMATISCHE PRÜFUNGEN
+- `python3 -m py_compile app/main.py`
+- tatsächliches Hauptseiten- und Hardwareseiten-JavaScript mit `node --check`
+- FastAPI-TestClient-Smoke-Tests für Startseite, Projektanlage, Dateiworkflow, Gerätepräsenz, Löschen und Hardwaretemplate
+- ZIP-Integrität
+
+BEWUSSTE GRENZEN
+- Hardware, PlatformIO-Abhängigkeiten und reale OTA-/WLAN-Abläufe können nur auf dem echten ESP abschließend bestätigt werden.
+- Rollback hängt von ESP32-Partitionierung und Bootloaderkonfiguration ab.
+- Smartmeter-AES-GCM-Tagprüfung benötigt noch die genaue Telegrammspezifikation.
+
+INSTALLATION
+Nur den Ordner `esp_manager_dev` im Repository durch den neuen Ordner ersetzen. `esp_manager` Stable 0.7.3 nicht verändern. Danach Repository neu laden und ausschließlich ESP Manager Dev aktualisieren.
+
+ERSTER HARDWARETEST
+1. Vorhandene Projekte und Builds prüfen.
+2. Blinkprojekt neu bauen.
+3. USB-Seite, Manifest und seriellen Monitor prüfen.
+4. 0.9.0-Agent per OTA installieren.
+5. WLAN mehrere Minuten abschalten und Rückkehr ohne manuellen Reset prüfen.
+6. Danach Smartmeter-Projekt kompilieren und zuerst per USB testen.
