@@ -1,3 +1,3 @@
-ESP Manager Dev 0.8.3.1 Startup-Fix
+ESP Manager Dev 0.8.4 WLAN-Recovery und Geräte-Details
 
-Overlay für ein Repository mit 0.8.3. patch_v083.py muss erhalten bleiben. Stable bleibt 0.7.3.
+Overlay für Repository mit Dev 0.8.3.1. Frühere Dateien und Patches müssen erhalten bleiben. Stable bleibt 0.7.3.

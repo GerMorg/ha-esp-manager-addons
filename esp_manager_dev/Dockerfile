@@ -18,6 +18,7 @@ RUN python3 app/patch_v0821.py && rm app/patch_v0821.py
 RUN python3 app/patch_v082.py && rm app/patch_v082.py
 RUN python3 app/patch_v0831.py && rm app/patch_v0831.py
 RUN python3 app/patch_v083.py && rm app/patch_v083.py
+RUN python3 app/patch_v084.py && rm app/patch_v084.py
 RUN python3 -m py_compile app/main.py
 COPY run.sh /run.sh
 RUN chmod +x /run.sh

@@ -1,17 +1,43 @@
 ESP MANAGER PROJEKTUEBERGABE
 ============================
 Stable: 0.7.3
-Dev: 0.8.3.1-dev
+Dev: 0.8.4-dev
 
-FEHLER 0.8.3
-Die App startete nicht. `main.py` enthielt in der serverseitigen Python-f-String-Oberfläche JavaScript-Template-Ausdrücke wie `${x.online?...}` mit einfachen geschweiften Klammern. Python interpretierte diese als eigene f-String-Ausdrücke und meldete SyntaxError.
+BESTÄTIGTER STAND
+- Grundfunktionen, Build-Aufbewahrung, OTA und Abschlussbestätigung funktionieren.
+- Online-/Offline-Anzeige und Gerätelöschung funktionieren.
+- Nach einem mehrminütigen WLAN-Ausfall verband sich der ESP nicht zuverlässig neu; manueller Reset stellte die Verbindung wieder her.
 
-LÖSUNG 0.8.3.1
-`patch_v0831.py` korrigiert `patch_v083.py` vor dessen Ausführung. JavaScript-Blöcke und `${...}`-Ausdrücke werden im Python-Quelltext mit doppelten Klammern ausgegeben. Nach allen Patches führt der Docker-Build `python3 -m py_compile app/main.py` aus, damit ein solcher Fehler künftig bereits beim Image-Build auffällt.
+WLAN-WIEDERHERSTELLUNG 0.8.4
+- WiFi.setAutoReconnect(true) und persistente WLAN-Konfiguration.
+- Bei WL_DISCONNECTED alle `wifi_reconnect_interval` Millisekunden aktiver Reconnect.
+- Nach 60 Sekunden bleibt der bestehende Fallback-AP aktiv.
+- Nach `wifi_recovery_restart_after` erfolgt ein kontrollierter Neustart als letzte Wiederherstellungsstufe.
+- Standard: Retry 15 Sekunden, Neustart nach 15 Minuten.
+- Die Werte werden beim Build in die Firmware eingebettet. Änderung erfordert Neubau und OTA/USB-Installation.
 
-TEST
-1. Nur Dev aktualisieren.
-2. App muss starten.
-3. Eingeschaltetes Gerät muss nach einer Statusmeldung grün Online sein.
-4. Ausschalten und länger als device_offline_after warten: rot Offline.
-5. Stable 0.7.3 bleibt unverändert.
+GERÄTE-DETAILSEITE
+- Gerätekarte auf der Hauptseite anklicken.
+- Anzeige von Online-Zustand, Firmware, IP, RSSI, Uptime und freiem Heap.
+- Die letzten 50 bereits persistent gespeicherten Status-/OTA-Ereignisse werden dargestellt.
+
+TESTPLAN
+1. Dev aktualisieren und Projekt neu bauen.
+2. 0.8.4-Agent per OTA installieren.
+3. Router/WLAN mindestens mehrere Minuten abschalten.
+4. Nach Rückkehr des WLANs muss der ESP ohne manuellen Reset wieder online werden.
+5. Seriell optional auf `WLAN getrennt, erneuter Verbindungsversuch` prüfen.
+6. Gerät auf Hauptseite anklicken und Verlauf prüfen.
+
+NÄCHSTE GROSSE SCHRITTE
+- Smartmeter-Wrapperprojekt bauen und per USB testen.
+- MQTT-Discovery für Messwerte ergänzen, ohne bestehende HA-Namen zu ändern.
+- OTA-Job-Historie mit eindeutigen Job-IDs.
+- Rollbackfähige ESP32-Partitionierung praktisch validieren.
+- Gerätekonfiguration und Geheimnisse aus dem Quellcode in geschützte Projektparameter verschieben.
+
+ENTWICKLUNGSREGELN
+- Stable 0.7.3 bleibt unverändert.
+- Keine Funktionen ungefragt entfernen.
+- Änderungen zuerst in Dev und auf Hardware testen.
+- Fertige main.py im Docker-Build kompilieren.

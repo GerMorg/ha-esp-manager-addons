@@ -1,6 +1,6 @@
 name: ESP Manager Dev
 description: Arduino and PlatformIO ESP device manager development branch
-version: 0.8.3.1-dev
+version: 0.8.4-dev
 slug: esp_manager_dev
 init: false
 arch: [amd64, aarch64, armv7]
@@ -25,6 +25,8 @@ options:
   public_base_url: http://homeassistant.local:8100
   build_retention: 5
   device_offline_after: 75
+  wifi_reconnect_interval: 15000
+  wifi_recovery_restart_after: 900000
 schema:
   mqtt_host: str
   mqtt_port: port
@@ -37,5 +39,7 @@ schema:
   public_base_url: str
   build_retention: int(1,50)
   device_offline_after: int(35,600)
+  wifi_reconnect_interval: int(5000,120000)
+  wifi_recovery_restart_after: int(120000,3600000)
 ports:
   8100/tcp: 8100
