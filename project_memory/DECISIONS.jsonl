@@ -1,5 +1,2 @@
-{"id":"dec-0001","status":"active","decision":"Stable 0.7.3 bleibt eingefroren; Entwicklung nur in Dev."}
-{"id":"dec-0002","status":"active","decision":"Funktionsvertrag ist Release-Gate; API, UI und Tests müssen vorhanden sein."}
-{"id":"dec-0003","status":"active","decision":"Projektgedächtnis wird in jedem Repository mitgeführt und nur erweitert."}
-{"id":"dec-0004","status":"active","decision":"Keine lange Text-Patchkette; vollständige, modulare Dateien und Regressionstests."}
-{"id":"dec-0005","status":"active","decision":"Im Add-on-Image wird nur die kanonische Contract-Suite tests/test_contract.py gesammelt; ersetzte Tests werden nicht implizit weiter ausgeführt."}
+{"id":"dec-0001","status":"active","decision":"Stable 0.7.3 bleibt eingefroren."}
+{"id":"dec-0002","status":"active","decision":"Hardware-JavaScript wird inline ausgeliefert, damit relative Static-Pfade unter Ingress nicht brechen."}

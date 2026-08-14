@@ -1,3 +1,3 @@
-# ESP Manager Add-ons
+# ESP Manager Dev 0.10.1
 
-Dieses Paket ist ein sauberes Dev-Update. Der vorhandene Ordner `esp_manager` Stable 0.7.3 bleibt beim Einspielen unverändert. Ersetze `esp_manager_dev` vollständig und kopiere `project_memory` in den Repository-Stamm.
+Sauberes Dev-Update mit vollständig überarbeiteter Hardwareseite. Beim Einspielen `esp_manager_dev` vollständig ersetzen und `project_memory` in den Repository-Stamm kopieren. Der vorhandene Stable-Ordner `esp_manager` 0.7.3 bleibt unverändert.

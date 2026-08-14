@@ -1,10 +1,1 @@
-ESP MANAGER PROJEKTÜBERGABE
-===========================
-Stable: 0.7.3, unverändert
-Dev: 0.10.0.1-dev
-
-0.10.0 scheiterte beim Docker-Test, weil im GitHub-Arbeitsbaum eine alte tests/test_smoke.py erhalten blieb. Diese importierte die früheren, in der modularen Oberfläche nicht mehr vorhandenen Python-Konstanten APP_JS und HARDWARE.
-
-0.10.0.1 führt im Docker-Build ausdrücklich nur tests/test_contract.py aus. Zusätzlich begrenzt pytest.ini die Sammlung auf diese kanonische Testsuite. Das schützt auch dann, wenn ein Overlay alte Testdateien nicht entfernt.
-
-Das kanonische und append-only Projektgedächtnis liegt unter project_memory. Stable 0.7.3 bleibt unverändert.
+ESP Manager: Stable 0.7.3 unverändert, Dev 0.10.1. Kanonische Dokumentation unter project_memory.

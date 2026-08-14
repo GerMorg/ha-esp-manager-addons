@@ -6,22 +6,23 @@ from typing import Any
 import io,json,time,threading,subprocess,shutil,zipfile,hashlib,secrets,re
 import paho.mqtt.client as mqtt
 from .core import *
-app=FastAPI(title='ESP Manager Dev 0.10.0.1');STATIC=Path(__file__).parent/'static';app.mount('/static',StaticFiles(directory=STATIC),name='static');JOBS={};PROCS={};DEVICES={};MQTT=None;OTA_FILE=ROOT/'ota_jobs.json';HISTORY=ROOT/'device_history.jsonl'
+app=FastAPI(title='ESP Manager Dev 0.10.1');STATIC=Path(__file__).parent/'static';app.mount('/static',StaticFiles(directory=STATIC),name='static');JOBS={};PROCS={};DEVICES={};MQTT=None;OTA_FILE=ROOT/'ota_jobs.json';HISTORY=ROOT/'device_history.jsonl'
 def fail(e):
+ if isinstance(e,HTTPException):raise e
  if isinstance(e,FileNotFoundError):raise HTTPException(404,str(e))
- if isinstance(e,(PermissionError,ValueError)):raise HTTPException(400,str(e))
+ if isinstance(e,(PermissionError,ValueError,zipfile.BadZipFile)):raise HTTPException(400,str(e))
  raise e
-def load_ota():
- try:return json.loads(OTA_FILE.read_text())
- except Exception:return {}
-OTA=load_ota()
+def load_json(p,default):
+ try:return json.loads(p.read_text())
+ except Exception:return default
+OTA=load_json(OTA_FILE,{})
 def save_ota():OTA_FILE.write_text(json.dumps(OTA,indent=2))
 def hist(dev,event,data):
  with HISTORY.open('a') as f:f.write(json.dumps({'ts':int(time.time()),'device_id':dev,'event':event,'data':data})+'\n')
 def on_connect(c,u,f,reason,properties=None):
  for t in ('espmanager/+/status','espmanager/+/availability','espmanager/+/log','espmanager/+/ota/progress'):c.subscribe(t)
 def on_message(c,u,msg):
- parts=msg.topic.split('/');
+ parts=msg.topic.split('/')
  if len(parts)<3:return
  dev,kind=parts[1],parts[2];text=msg.payload.decode(errors='replace')
  if not msg.payload:DEVICES.pop(dev,None);return
@@ -39,7 +40,7 @@ def on_message(c,u,msg):
 @app.on_event('startup')
 def startup():
  global MQTT
- c=mqtt.Client(mqtt.CallbackAPIVersion.VERSION2,client_id='esp-manager-dev-010')
+ c=mqtt.Client(mqtt.CallbackAPIVersion.VERSION2,client_id='esp-manager-dev-0101')
  if OPT['mqtt_username']:c.username_pw_set(OPT['mqtt_username'],OPT['mqtt_password'])
  c.on_connect=on_connect;c.on_message=on_message
  try:c.connect(OPT['mqtt_host'],int(OPT['mqtt_port']),60);c.loop_start();MQTT=c
@@ -88,7 +89,7 @@ async def import_project(name:str=Form(...),archive:UploadFile=File(...)):
  try:
   n=clean(name);dst=pdir(n,False)
   if dst.exists():raise HTTPException(409,'Projekt existiert')
-  blob=await archive.read();z=zipfile.ZipFile(io.BytesIO(blob));tmp=ROOT/f'.import-{secrets.token_hex(5)}';tmp.mkdir()
+  z=zipfile.ZipFile(io.BytesIO(await archive.read()));tmp=ROOT/f'.import-{secrets.token_hex(5)}';tmp.mkdir()
   for i in z.infolist():
    if not i.is_dir() and '..' not in Path(i.filename).parts:
     f=tmp/i.filename;f.parent.mkdir(parents=True,exist_ok=True);f.write_bytes(z.read(i))
@@ -99,19 +100,18 @@ async def import_project(name:str=Form(...),archive:UploadFile=File(...)):
 @app.post('/api/projects/{name}/import-arduino')
 async def import_arduino(name,archive:UploadFile=File(...)):
  try:
-  backup(name,'before-arduino-import');z=zipfile.ZipFile(io.BytesIO(await archive.read()));p=pdir(name)
+  backup(name,'before-arduino-import');z=zipfile.ZipFile(io.BytesIO(await archive.read()))
   for i in z.infolist():
    if i.is_dir() or '..' in Path(i.filename).parts:continue
    ext=Path(i.filename).suffix.lower()
-   if ext not in ('.ino','.cpp','.c','.h','.hpp'):continue
+   if ext not in('.ino','.cpp','.c','.h','.hpp'):continue
    target=('include/' if ext in('.h','.hpp') else 'src/')+Path(i.filename).name;data=z.read(i).decode(errors='replace')
-   if ext=='.ino':data=re.sub(r'\bvoid\s+setup\s*\(', 'void setupDevice(',data,count=1);data=re.sub(r'\bvoid\s+loop\s*\(', 'void loopDevice(',data,count=1);target='src/'+Path(i.filename).stem+'.cpp'
-   safe(name,target,False).write_text(data)
+   if ext=='.ino':data=re.sub(r'\bvoid\s+setup\s*\(','void setupDevice(',data,count=1);data=re.sub(r'\bvoid\s+loop\s*\(','void loopDevice(',data,count=1);target='src/'+Path(i.filename).stem+'.cpp'
+   f=safe(name,target,False);f.parent.mkdir(parents=True,exist_ok=True);f.write_text(data)
   return{'ok':True}
  except Exception as e:fail(e)
 @app.post('/api/projects/{name}/platformio-import')
-async def pio_import(name,ini:UploadFile=File(...)):
- backup(name,'before-platformio-import');(pdir(name)/'platformio.imported.ini').write_bytes(await ini.read());return{'ok':True,'note':'Datei gespeichert; Einstellungen manuell prüfen'}
+async def pio_import(name,ini:UploadFile=File(...)):backup(name,'before-platformio-import');(pdir(name)/'platformio.imported.ini').write_bytes(await ini.read());return{'ok':True}
 @app.get('/api/projects/{name}/files')
 def file_list(name):
  p=pdir(name);return sorted(f.relative_to(p).as_posix() for r in('src','include','lib') for f in(p/r).rglob('*') if f.is_file() and f.relative_to(p).as_posix()!='src/main.cpp' and not f.relative_to(p).as_posix().startswith('lib/ESPManager/'))
@@ -147,7 +147,7 @@ def worker(jid):
  j=JOBS[jid];name=j['project'];p=pdir(name);m=meta(name);system_copy(p);render_pio(p,m);j['status']='running'
  try:
   proc=subprocess.Popen(['/opt/esp_manager/venv/bin/pio','run'],cwd=p,stdout=subprocess.PIPE,stderr=subprocess.STDOUT,text=True);PROCS[jid]=proc
-  for line in proc.stdout or []:j['log']=(j['log']+line)[-150000:]
+  for line in proc.stdout or[]:j['log']=(j['log']+line)[-150000:]
   if proc.wait():j['status']='failed';return
   src=p/'.pio/build'/m['board']/'firmware.bin';bid=time.strftime('%Y%m%d-%H%M%S');out=FIRMWARE/name/bid;out.mkdir(parents=True);shutil.copy2(src,out/'firmware.bin');initial_image(p,m,out);blob=src.read_bytes();rec={'id':bid,'version':m['version'],'board':m['board'],'chip_family':BOARDS[m['board']][0],'built_at':int(time.time()),'size':len(blob),'sha256':hashlib.sha256(blob).hexdigest(),'pinned':False};(out/'manifest.json').write_text(json.dumps(rec,indent=2));removed=prune(name);j['log']+=f'\nAufbewahrung: {len(removed)} entfernt\n';j.update(status='success',build=rec)
  except Exception as e:j['status']='failed';j['log']+='\n'+repr(e)
@@ -197,12 +197,14 @@ def device_delete(dev):
 @app.get('/api/devices/{dev}/history')
 def device_history(dev,limit:int=100):
  out=[]
- for line in HISTORY.read_text().splitlines() if HISTORY.exists() else []:
+ for line in HISTORY.read_text().splitlines() if HISTORY.exists() else[]:
   try:
    x=json.loads(line)
    if x.get('device_id')==clean(dev):out.append(x)
-  except:pass
+  except Exception:pass
  return out[-min(max(limit,1),500):]
+@app.get('/api/mqtt/status')
+def mqtt_status():return{'connected':bool(MQTT and MQTT.is_connected()),'devices':len(DEVICES),'host':OPT['mqtt_host'],'port':OPT['mqtt_port']}
 def find_build(name,bid):
  b=next((x for x in builds(name) if x['id']==bid),None)
  if not b:raise HTTPException(404,'Build fehlt')
@@ -224,11 +226,15 @@ def firmware(name,bid,token:str):
  return FileResponse(fw,headers={'x-MD5':hashlib.md5(blob).hexdigest(),'X-Firmware-SHA256':b['sha256'],'Cache-Control':'no-store'})
 @app.get('/usb/{name}',response_class=HTMLResponse,include_in_schema=False)
 @app.get('/usb/{name}/',response_class=HTMLResponse)
-def hardware(name):pdir(name);return FileResponse(STATIC/'hardware.html')
+def hardware(name):
+ pdir(name);html=(STATIC/'hardware.html').read_text();js=(STATIC/'hardware.js').read_text();return HTMLResponse(html.replace('__PROJECT__',clean(name)).replace('__HARDWARE_JS__',js))
 @app.get('/usb/{name}/manifest.json')
 def manifest(name):
  bs=builds(name)
- if not bs:raise HTTPException(404,'Kein Build')
+ if not bs:raise HTTPException(404,'Kein erfolgreicher Build vorhanden')
  b=bs[0];return{'name':meta(name)['display_name'],'version':b['version'],'new_install_prompt_erase':True,'builds':[{'chipFamily':b['chip_family'],'parts':[{'path':'initial_firmware.bin','offset':0}]}]}
 @app.get('/usb/{name}/initial_firmware.bin')
-def initial(name):return FileResponse(builds(name)[0]['_dir']/'initial_firmware.bin')
+def initial(name):
+ bs=builds(name)
+ if not bs:raise HTTPException(404,'Kein erfolgreicher Build vorhanden')
+ return FileResponse(bs[0]['_dir']/'initial_firmware.bin')
