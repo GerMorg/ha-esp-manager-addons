@@ -23,6 +23,7 @@ options:
   device_mqtt_username: ""
   device_mqtt_password: ""
   public_base_url: http://homeassistant.local:8099
+  build_retention: 5
 schema:
   mqtt_host: str
   mqtt_port: port
@@ -33,5 +34,6 @@ schema:
   device_mqtt_username: str?
   device_mqtt_password: password?
   public_base_url: str
+  build_retention: int(1,50)
 ports:
   8099/tcp: 8099

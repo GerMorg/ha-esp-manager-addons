@@ -1,47 +1,69 @@
-ESP MANAGER PROJEKTUEBERGABE - VERSION 0.7.3
-=============================================
+ESP MANAGER PROJEKTUEBERGABE
+============================
+Stable: 0.7.3
+Dev: 0.8.0-dev
 
-BESTÄTIGTER HARDWARESTATUS
-- USB-Flash funktioniert.
-- WLAN und MQTT funktionieren.
-- Gerätestatus wird regelmäßig angezeigt.
-- OTA lädt und installiert die neue Firmware erfolgreich.
-- Das neue Blinkintervall wird nach OTA ausgeführt und das Gerät meldet sich wieder online.
-- Die Oberfläche blieb bisher bei 99 Prozent stehen.
+STABLE-ENTSCHEIDUNG
+Version 0.7.3 ist die stabile Referenz. Weitere Entwicklung erfolgt ausschließlich in esp_manager_dev. Stable wird erst nach bestätigten Hardwaretests gezielt aktualisiert.
 
-URSACHE DER 99-PROZENT-ANZEIGE
-Der Fortschrittscallback kann zuletzt einen Wert knapp unter 100 melden. Direkt nach erfolgreichem Schreiben startet HTTPUpdate standardmäßig neu. Die abschließende MQTT-Meldung kann dadurch verloren gehen, obwohl die neue Firmware bereits korrekt installiert wurde.
+BESTÄTIGTER STABLE-FUNKTIONSUMFANG
+- Projekt- und Dateiverwaltung
+- PlatformIO-Build und Buildhistorie
+- USB-Erstinstallation für definierte ESP-Profile
+- Serieller Monitor
+- WLAN-Captive-Portal und Router-Fallback
+- MQTT-Verbindung, Geräteübersicht und regelmäßiger Status
+- OTA-Auftrag, Download, Installation, Neustart und Versionsbestätigung
+- Buildlöschung, Anheften und automatische Aufbewahrung
+- Gerät aus Übersicht vergessen
 
-LÖSUNG 0.7.3
-1. HTTPUpdate erhält `rebootOnUpdate(false)`.
-2. Bei HTTP_UPDATE_OK sendet der Agent explizit `finished` mit 100 Prozent.
-3. Der Agent ruft MQTT noch kurz weiter auf, damit die Meldung übertragen werden kann.
-4. Danach startet der Agent kontrolliert mit ESP.restart().
-5. Das Backend speichert beim Auftrag Zielversion und Ziel-Build im Gerätestatus.
-6. Nach dem Neustart vergleicht der ESP Manager die neue gemeldete firmware_version mit der Zielversion.
-7. Bei Übereinstimmung wird unabhängig von einer verlorenen finished-Meldung `confirmed`, 100 Prozent und Erfolg gesetzt.
-8. Nach drei Minuten ohne Bestätigung zeigt die UI eine Zeitüberschreitung.
+DEV 0.8.0
+1. OTA-Aufträge persistent:
+   - Datei `/config/esp_manager_dev/ota_jobs.json`
+   - Zielversion, Build, SHA256, Zeit und Zustand bleiben bei Neustart erhalten.
+2. Geräteverlauf:
+   - Datei `/config/esp_manager_dev/device_history.jsonl`
+   - Speichert Statusereignisse und OTA-Ereignisse.
+   - Begrenzung auf die letzten 2000 Datensätze insgesamt.
+3. Neue APIs:
+   - `/api/ota/jobs`
+   - `/api/devices/<device_id>/history`
+4. Build-Aufbewahrung:
+   - Add-on-Option `build_retention`, zulässig 1 bis 50.
+   - Angeheftete Builds bleiben weiterhin geschützt.
+5. ESP32-Bootbestätigung:
+   - Prüft nach erfolgreicher WLAN-/MQTT-Verbindung, ob eine OTA-App auf Bestätigung wartet.
+   - Ruft dann `esp_ota_mark_app_valid_cancel_rollback()` auf.
+   - Automatisches Rollback selbst funktioniert nur, wenn es im verwendeten ESP32-Bootloader aktiviert ist.
 
-TESTABLAUF
-Die Agentänderung muss zunächst einmal auf das Gerät gelangen. Da 0.7.2-OTA bereits praktisch funktioniert, kann 0.7.3 voraussichtlich per OTA installiert werden.
-1. 0.7.3 einspielen und Dev-App aktualisieren.
-2. Projektversion erhöhen und neu bauen.
-3. 0.7.3 per OTA installieren.
-4. Danach erneut Version und Blinkintervall ändern und einen weiteren OTA-Test durchführen.
-5. Erwartet: finished oder spätestens nach Wiederanmeldung confirmed mit 100 Prozent.
-6. Gerätestatus muss die neue firmware_version zeigen.
+SICHERHEIT UND INTEGRITÄT
+- Server prüft SHA256 vor OTA-Auftrag und Auslieferung.
+- HTTPUpdate prüft die Übertragung zusätzlich über x-MD5.
+- Eine unabhängige geräteseitige SHA256-Neuberechnung bleibt offen.
+- ESP8266 besitzt nicht denselben ESP32-Rollbackmechanismus; dort gelten weiterhin die Sicherheitsmechanismen des ESP8266-Core.
+
+TESTPLAN DEV 0.8.0
+1. Stable 0.7.3 nicht verändern.
+2. Dev-Overlay einspielen und Dev-App aktualisieren.
+3. build_retention testweise auf 3 setzen und mehrere Builds erstellen.
+4. Prüfen, dass angeheftete Builds erhalten bleiben.
+5. OTA auf neue Version durchführen.
+6. Dev-App während oder nach OTA neu starten.
+7. `/api/ota/jobs` und Geräteverlauf prüfen.
+8. Seriell prüfen, ob bei passender ESP32-Konfiguration `OTA-Boot bestätigt` erscheint.
+9. Erst nach erfolgreichen Tests über eine neue Stable-Version entscheiden.
 
 NÄCHSTE SCHRITTE
-1. OTA-Aufträge persistent speichern, damit ein Add-on-Neustart die Zielversion nicht verliert.
-2. Boot-Bestätigung und Rollback-Konzept entwickeln.
-3. Geräteseitige SHA256-Neuberechnung ergänzen.
-4. Geräte-Detailseite mit Verlauf von Version, Neustarts, Signalstärke und OTA-Ergebnissen.
-5. Aufbewahrungszahl für Builds konfigurierbar machen.
-6. Gemeinsamen MQTT-Gerätebenutzer beibehalten; projektbezogene Zugangsdaten und Topic-ACLs erst später ergänzen.
-7. Danach Sagemcom/M-Bus-Anwendung importieren und auf der bestätigten Infrastruktur testen.
+- Geräte-Detailseite für Verlauf und OTA-Aufträge in der UI.
+- OTA-Aufträge mit eindeutiger Job-ID statt nur pro Gerät.
+- Rollback-fähige ESP32-Partitionierung und Bootloaderkonfiguration explizit testen.
+- Geräteseitige SHA256-Prüfung.
+- Konfigurierbare Verlaufslänge.
+- Anschließend Sagemcom/M-Bus-Projekt in Dev importieren.
 
 ENTWICKLUNGSREGELN
-- Erfolgreiches OTA nicht nur aus dem letzten Fortschrittswert ableiten, sondern durch Firmwareversion nach Neustart bestätigen.
-- Keine vorhandenen Funktionen ungefragt entfernen.
+- Stable 0.7.3 bleibt eingefroren.
+- Keine Funktionen ungefragt entfernen.
+- Änderungen zuerst in Dev und auf Hardware testen.
 - CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
 - PROJECT_HANDOVER.txt bei jeder Version vollständig aktualisieren.
