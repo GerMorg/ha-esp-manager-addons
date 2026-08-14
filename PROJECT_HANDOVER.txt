@@ -1,51 +1,20 @@
 ESP MANAGER PROJEKTUEBERGABE
 ============================
 Stable: 0.7.3
-Dev: 0.8.2-dev
+Dev: 0.8.2.1-dev
 
-BESTÄTIGTER TESTSTAND 0.8.1
-- Build-Aufbewahrung funktioniert.
-- OTA funktioniert.
-- Abschluss wird als confirmed mit 100 Prozent erkannt.
-- Fertigmeldung wird nicht mehr wiederholt.
-- Geräteübersicht zeigte keinen verständlichen Online-/Offline-Zustand.
-- Nach Gerät löschen blieb der Name in Listen erhalten.
+BUILD-FEHLER 0.8.2
+Supervisor-Ausgabe:
+`main device card renderer missing`
 
-URSACHE DER PHANTOMGERÄTE
-Beim Löschen wurden retained MQTT-Themen mit leerer Payload veröffentlicht. Der bisherige MQTT-Handler erzeugte DEVICES jedoch bereits vor Prüfung der Payload mit setdefault(). Dadurch konnte gerade die Löschmeldung das Gerät sofort wieder als leeren Eintrag anlegen. Zusätzlich blieben OTA_JOBS und Projektzuordnung bestehen.
+URSACHE
+patch_v082.py erwartete für die Gerätekarte einen exakt formatierten JavaScript-Text. Die bestehende main.py enthielt nach den vorherigen Patches eine abweichende Formatierung. Der Patch brach deshalb absichtlich mit SystemExit ab, obwohl die Backend- und Hardwareseitenänderungen unabhängig davon anwendbar waren.
 
-LÖSUNG 0.8.2
-- Leere MQTT-Payloads werden vor setdefault verarbeitet und erzeugen kein Gerät.
-- Gerät löschen entfernt DEVICES-Eintrag, persistenten OTA-Job, retained Status/Availability/OTA-Fortschritt und Projektzuordnung.
-- Die UI leert Auswahl und Detailstatus sofort.
-- Ein eingeschaltetes Gerät darf später wieder erscheinen, sobald es eine neue echte Statusmeldung sendet.
+LÖSUNG
+patch_v0821.py verändert vor dem Ausführen von patch_v082.py dessen strikte Abbruchbedingung. Wenn nur das optionale Hauptseiten-Fragment nicht gefunden wird, wird ein Hinweis ausgegeben und der restliche Patch weiter angewendet.
 
-ONLINE-/OFFLINE-LOGIK
-- Availability muss `online` sein.
-- Letzte Statusmeldung darf nicht älter als `device_offline_after` sein.
-- Standardwert 75 Sekunden bei Statusintervall von ungefähr 30 Sekunden.
-- Ergebnisfelder: online, presence und last_seen_age.
-- Übersicht: grüner Punkt für online, roter Punkt für offline.
-
-TESTPLAN 0.8.2
-1. Stable 0.7.3 nicht aktualisieren.
-2. Dev-App auf 0.8.2 aktualisieren.
-3. Eingeschaltetes Gerät muss grün als Online erscheinen.
-4. Gerät ausschalten; nach Ablauf von device_offline_after muss es rot als Offline erscheinen.
-5. Gerät wieder einschalten; es muss grün werden.
-6. Gerät ausschalten und anschließend löschen; der Name muss aus Übersicht und Auswahl verschwinden.
-7. Dev-App neu starten; gelöschtes ausgeschaltetes Gerät darf nicht wieder erscheinen.
-8. Gerät einschalten; mit neuer Statusmeldung darf es wieder aufgenommen werden.
-
-NÄCHSTE SCHRITTE NACH BESTÄTIGUNG
-- Gerätekarten anklickbar machen und Verlauf anzeigen.
-- OTA-Jobs mit eigener Job-ID und Historie.
-- Smartmeter-Code in Dev-Projekt kompilieren und zunächst per USB testen.
-- Rollbackfähige Partitionierung praktisch prüfen.
-
-ENTWICKLUNGSREGELN
-- Stable 0.7.3 bleibt eingefroren.
-- MQTT-Löschpayloads vor Geräteerzeugung behandeln.
-- Keine Funktionen ungefragt entfernen.
-- CHANGELOG.md in Wurzel und beiden Add-on-Ordnern.
-- PROJECT_HANDOVER.txt bei jeder Version aktualisieren.
+TEST
+1. Nur Dev aktualisieren.
+2. Docker-Build muss die Schritte patch_v0821.py und patch_v082.py erfolgreich abschließen.
+3. Danach Online-/Offline-Logik und Gerät löschen testen.
+4. Stable 0.7.3 bleibt unverändert.

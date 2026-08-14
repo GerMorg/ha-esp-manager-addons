@@ -1,0 +1,306 @@
+#include <Arduino.h>
+#include <Crypto.h>
+#include <AES.h>
+#include <GCM.h>
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include <HardwareSerial.h>
+#include <string.h> // Für memset
+
+#define MAX_PLAINTEXT_LEN 300
+
+// WiFi-Zugangsdaten
+char wifi_ssid[] = "Morgenbesser";
+char wifi_password[] = "5E53345ECD";
+
+// MQTT Broker-Konfiguration
+const char* mqtt_server = "192.168.0.2";
+
+// Globaler Restart-Zähler für Wiederverbindungsversuche
+int restart_count = 0;
+
+// MQTT-Client-Setup
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+// Timing-Variablen
+unsigned long timeSinceLastData = 0;
+unsigned long serial_time = 0;
+bool processDataFlag = false;
+
+// Serielle Schnittstelle (UART2: Pins 16 und 17)
+HardwareSerial MySerial(2);
+
+// Struktur für AES-128 GCM
+struct Vector_GCM {
+  const char *name;
+  byte keysize;
+  unsigned int datasize;
+  byte authsize;
+  byte ivsize;
+  byte tagsize;
+  uint8_t key[16];
+  byte plaintext[MAX_PLAINTEXT_LEN];
+  byte ciphertext[MAX_PLAINTEXT_LEN];
+  byte authdata[17];
+  byte iv[12];
+  byte tag[12];
+};
+
+// Struktur für eingehende Daten
+struct IncomingData {
+  int year, month, day, hour, minutes, seconds;
+  unsigned long wirkenergiePlus;
+  unsigned long wirkenergieMinus;
+  unsigned long momentanleistungPlus;
+  unsigned long momentanleistungMinus;
+  float uL1, uL2, uL3;
+  float iL1, iL2, iL3;
+  float powerF;
+};
+
+IncomingData aktuelleDaten;
+
+// Globaler Vektor für Verschlüsselungs-/Entschlüsselungsdaten
+Vector_GCM datenMbus = {
+  .name       = "AES-128 GCM",
+  .keysize    = 16,
+  .datasize   = 297,
+  .authsize   = 17,
+  .ivsize     = 12,
+  .tagsize    = 12,
+  .key        = {0x74, 0xD5, 0x79, 0xF1, 0x46, 0x9C, 0x7A, 0x3C, 0x87, 0x82, 0xC1, 0x08, 0x70, 0xE6, 0xDE, 0xE2},
+  .plaintext  = {0},
+  .ciphertext = {0},
+  .authdata   = {0},
+  .iv         = {0},
+  .tag        = {0},
+};
+
+int byteNumber = 0; // Aktuelle Position im Empfangspuffer
+
+// Führt die Entschlüsselung mit AES-128 GCM durch
+void decrypt_text(Vector_GCM &vect) {
+  GCM<AES128> gcmaes128; // Allokation auf dem Stack
+  gcmaes128.setKey(vect.key, gcmaes128.keySize());
+  gcmaes128.setIV(vect.iv, vect.ivsize);
+  gcmaes128.decrypt(vect.plaintext, vect.ciphertext, vect.datasize);
+}
+
+// Versucht, MQTT und WLAN wiederherzustellen
+void reconnect() {
+  while (!client.connected()) {
+    restart_count++;
+    Serial.println("Attempting MQTT connection...");
+    if (client.connect("smartmeter_esp", "smartmeter", "admin")) {
+      Serial.println("MQTT connected");
+      // Kurze Test-Subscriptions und Publish
+      client.subscribe("esp32/output");
+      client.unsubscribe("esp32/output");
+      client.publish("test", "Erste Testnachricht");
+    } else {
+      Serial.print("MQTT connection failed, rc=");
+      Serial.println(client.state());
+      Serial.println("Retrying in 5 seconds");
+      delay(5000); // Wartezeit vor dem erneuten Versuch
+    }
+    if (restart_count >= 3) {
+      Serial.println("Resetting WiFi connection...");
+      WiFi.disconnect();
+      WiFi.mode(WIFI_STA);
+      WiFi.begin(wifi_ssid, wifi_password);
+      while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+        Serial.println("WiFi Connection Failed! Rebooting...");
+        delay(500);
+        ESP.restart();
+      }
+    }
+    if (restart_count >= 5) {
+      Serial.println("Restart count exceeded. Restarting ESP...");
+      ESP.restart();
+      delay(1000);
+    }
+  }
+}
+
+// Verarbeitet die empfangenen seriellen Daten: IV extrahieren, Header entfernen, entschlüsseln und MQTT-Publish
+void processIncomingData() {
+  // IV extrahieren: 8 Byte ab Offset 11 und 4 Byte ab Offset 22
+  for (int i = 0; i < 8; i++) {
+    datenMbus.iv[i] = datenMbus.ciphertext[i + 11];
+  }
+  for (int i = 0; i < 4; i++) {
+    datenMbus.iv[i + 8] = datenMbus.ciphertext[i + 22];
+  }
+  
+  // Header (26 Bytes) aus dem Ciphertext entfernen (Verschiebung des Arrays)
+  for (unsigned int i = 0; i < datenMbus.datasize - 26; i++) {
+    datenMbus.ciphertext[i] = datenMbus.ciphertext[i + 26];
+  }
+  
+  // Restlichen Puffer (ab datasize - 26) auf 0 setzen
+  memset(datenMbus.ciphertext + (datenMbus.datasize - 26), 0,
+         MAX_PLAINTEXT_LEN - (datenMbus.datasize - 26));
+  
+  // Entschlüsselung durchführen
+  decrypt_text(datenMbus);
+  
+  // Parsen der entschlüsselten Daten
+  aktuelleDaten.year = ((datenMbus.plaintext[6] << 8) | datenMbus.plaintext[7]) - 2000;
+  aktuelleDaten.month = datenMbus.plaintext[8];
+  aktuelleDaten.day = datenMbus.plaintext[9];
+  aktuelleDaten.hour = datenMbus.plaintext[11];
+  aktuelleDaten.minutes = datenMbus.plaintext[12];
+  aktuelleDaten.seconds = datenMbus.plaintext[13];
+  aktuelleDaten.wirkenergiePlus = ((unsigned long)datenMbus.plaintext[43] << 24) |
+                                  ((unsigned long)datenMbus.plaintext[44] << 16) |
+                                  ((unsigned long)datenMbus.plaintext[45] << 8) |
+                                  (unsigned long)datenMbus.plaintext[46];
+  aktuelleDaten.wirkenergieMinus = ((unsigned long)datenMbus.plaintext[62] << 24) |
+                                   ((unsigned long)datenMbus.plaintext[63] << 16) |
+                                   ((unsigned long)datenMbus.plaintext[64] << 8) |
+                                   (unsigned long)datenMbus.plaintext[65];
+  aktuelleDaten.momentanleistungPlus = ((unsigned long)datenMbus.plaintext[81] << 24) |
+                                       ((unsigned long)datenMbus.plaintext[82] << 16) |
+                                       ((unsigned long)datenMbus.plaintext[83] << 8) |
+                                       (unsigned long)datenMbus.plaintext[84];
+  aktuelleDaten.momentanleistungMinus = ((unsigned long)datenMbus.plaintext[100] << 24) |
+                                        ((unsigned long)datenMbus.plaintext[101] << 16) |
+                                        ((unsigned long)datenMbus.plaintext[102] << 8) |
+                                        (unsigned long)datenMbus.plaintext[103];
+  aktuelleDaten.uL1 = float((datenMbus.plaintext[119] << 8) | datenMbus.plaintext[120]) / 10.0;
+  aktuelleDaten.uL2 = float((datenMbus.plaintext[136] << 8) | datenMbus.plaintext[137]) / 10.0;
+  aktuelleDaten.uL3 = float((datenMbus.plaintext[153] << 8) | datenMbus.plaintext[154]) / 10.0;
+  aktuelleDaten.iL1 = float((datenMbus.plaintext[170] << 8) | datenMbus.plaintext[171]) / 100.0;
+  aktuelleDaten.iL2 = float((datenMbus.plaintext[187] << 8) | datenMbus.plaintext[188]) / 100.0;
+  aktuelleDaten.iL3 = float((datenMbus.plaintext[204] << 8) | datenMbus.plaintext[205]) / 100.0;
+  aktuelleDaten.powerF = float((datenMbus.plaintext[221] << 8) | datenMbus.plaintext[222]) / 1000.0;
+  
+  // Konvertierung in Strings zur Übertragung via MQTT
+  char tag[10], monat[10], jahr[10], stunde[10], minute[10], sekunde[10];
+  char Stand_in[10], Stand_out[10], p_in[10], p_out[10], p_saldo[10], W_Faktor[10];
+  char u1[10], u2[10], u3[10], i1[10], i2[10], i3[10];
+  
+  dtostrf(aktuelleDaten.day, 1, 0, tag);
+  dtostrf(aktuelleDaten.month, 1, 0, monat);
+  dtostrf(aktuelleDaten.year, 1, 0, jahr);
+  dtostrf(aktuelleDaten.hour, 1, 0, stunde);
+  dtostrf(aktuelleDaten.minutes, 1, 0, minute);
+  dtostrf(aktuelleDaten.seconds, 1, 0, sekunde);
+  dtostrf(aktuelleDaten.wirkenergiePlus, 1, 0, Stand_in);
+  dtostrf(aktuelleDaten.wirkenergieMinus, 1, 0, Stand_out);
+  dtostrf(aktuelleDaten.momentanleistungPlus, 1, 0, p_in);
+  dtostrf(aktuelleDaten.momentanleistungMinus, 1, 0, p_out);
+  dtostrf(aktuelleDaten.momentanleistungPlus - aktuelleDaten.momentanleistungMinus, 1, 0, p_saldo);
+  dtostrf(aktuelleDaten.powerF, 1, 2, W_Faktor);
+  dtostrf(aktuelleDaten.uL1, 1, 1, u1);
+  dtostrf(aktuelleDaten.uL2, 1, 1, u2);
+  dtostrf(aktuelleDaten.uL3, 1, 1, u3);
+  dtostrf(aktuelleDaten.iL1, 1, 2, i1);
+  dtostrf(aktuelleDaten.iL2, 1, 2, i2);
+  dtostrf(aktuelleDaten.iL3, 1, 2, i3);
+
+  Serial.println(Stand_in); // Debug-Ausgabe des positiven Zählerstandes
+  
+  // Validierung der Daten
+  if (aktuelleDaten.wirkenergiePlus < 999999999UL && aktuelleDaten.wirkenergieMinus < 999999999UL &&
+      aktuelleDaten.momentanleistungPlus < 99999UL && aktuelleDaten.momentanleistungMinus < 99999UL) {
+    client.publish("Smartmeter/Tag", tag, true);
+    client.publish("Smartmeter/Monat", monat, true);
+    client.publish("Smartmeter/Jahr", jahr, true);
+    client.publish("Smartmeter/Stunde", stunde, true);
+    client.publish("Smartmeter/Minute", minute, true);
+    client.publish("Smartmeter/Sekunde", sekunde, true);
+    client.publish("Smartmeter/Zaehlerstand_positiv", Stand_in, true);
+    client.publish("Smartmeter/Zaehlerstand_negativ", Stand_out, true);
+    client.publish("Smartmeter/Leistung_positiv", p_in, true);
+    client.publish("Smartmeter/Leistung_negativ", p_out, true);
+    client.publish("Smartmeter/Leistungsfaktor", W_Faktor, true);
+    client.publish("Smartmeter/Spannung Phase 1", u1, true);
+    client.publish("Smartmeter/Spannung Phase 2", u2, true);
+    client.publish("Smartmeter/Spannung Phase 3", u3, true);
+    client.publish("Smartmeter/Strom Phase 1", i1, true);
+    client.publish("Smartmeter/Strom Phase 2", i2, true);
+    client.publish("Smartmeter/Strom Phase 3", i3, true);
+  } else {
+    Serial.println("Datenvalidierung fehlgeschlagen.");
+  }
+  
+  // Puffer für die nächste Runde löschen
+  memset(datenMbus.plaintext, 0, MAX_PLAINTEXT_LEN);
+  memset(datenMbus.ciphertext, 0, MAX_PLAINTEXT_LEN);
+  
+  processDataFlag = false;
+  byteNumber = 0;
+}
+
+void setup() {
+  // LED-Pin initialisieren (Anzeige des Verbindungsstatus)
+  pinMode(2, OUTPUT);
+  
+  // Puffer leeren
+  memset(datenMbus.plaintext, 0, MAX_PLAINTEXT_LEN);
+  memset(datenMbus.ciphertext, 0, MAX_PLAINTEXT_LEN);
+  
+  // Bluetooth deaktivieren (falls aktiv)
+  btStop();
+  
+  // Serielle Schnittstellen initialisieren
+  MySerial.begin(2400, SERIAL_8N1, 16, 17);
+  Serial.begin(9600);
+  while (!MySerial) {
+    ; // Warten, bis die serielle Schnittstelle bereit ist (falls nötig)
+  }
+  
+  // WLAN initialisieren
+  WiFi.mode(WIFI_STA);
+  WiFi.begin(wifi_ssid, wifi_password);
+  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+    Serial.println("WiFi Connection Failed! Rebooting...");
+    delay(500);
+    ESP.restart();
+  }
+  
+  // MQTT konfigurieren
+  client.setServer(mqtt_server, 1883);
+  client.setKeepAlive(20);  // Erhöhter Keep-Alive-Wert für mehr Stabilität
+  client.setSocketTimeout(5);
+}
+
+void loop() {
+  // MQTT-Client-Loop zur Bearbeitung von Hintergrundaufgaben
+  client.loop();
+  
+  // Prüfen, ob MQTT oder WLAN verloren ging, und gegebenenfalls wieder verbinden
+  if (!client.connected() || WiFi.status() != WL_CONNECTED || client.state() != MQTT_CONNECTED) {
+    Serial.println("Fehlerhafte Verbindung");
+    Serial.println(client.state());
+    digitalWrite(2, LOW);
+    reconnect();
+    digitalWrite(2, HIGH);
+    restart_count = 0;
+  }
+  
+  // Periodischer Neustart nach 15 Minuten zur Vermeidung von Speicherfragmentierung
+  if (millis() >= 900000) { // 900.000 ms = 15 Minuten
+    client.disconnect();
+    WiFi.disconnect();
+    ESP.restart();
+  }
+  
+  // Serielle Daten einlesen
+  serial_time = millis();
+  while (MySerial.available() > 0 && (millis() - serial_time) < 2500) {
+    if (byteNumber < MAX_PLAINTEXT_LEN) {
+      datenMbus.ciphertext[byteNumber] = MySerial.read();
+      byteNumber++;
+    }
+    timeSinceLastData = millis();
+    processDataFlag = true;
+  }
+  
+  // Verarbeite die Daten, wenn für 2500 ms keine weiteren seriellen Daten eingegangen sind
+  if (processDataFlag && (millis() - timeSinceLastData >= 2500)) {
+    processIncomingData();
+  }
+}
