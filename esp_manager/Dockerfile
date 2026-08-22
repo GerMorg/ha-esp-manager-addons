@@ -10,8 +10,11 @@ COPY tests tests
 COPY pytest.ini pytest.ini
 RUN python3 -m py_compile app/*.py
 RUN node --check app/static/app.js && node --check app/static/hardware.js
-RUN . venv/bin/activate && pytest -q tests/test_contract.py
+RUN . venv/bin/activate && pytest -q
 COPY run.sh /run.sh
 RUN chmod +x /run.sh
 EXPOSE 8099
 CMD ["/run.sh"]
+
+
+

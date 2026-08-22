@@ -57,3 +57,6 @@ def initial_image(p,m,out):
  if bootapp.exists():parts[4:4]=['0xe000',str(bootapp)]
  r=subprocess.run([sys.executable,str(tool),'--chip',chip,'merge_bin','-o',str(target),'--flash_mode','dio','--flash_freq','40m','--flash_size','4MB']+parts,capture_output=True,text=True)
  if r.returncode:raise RuntimeError(r.stdout+r.stderr)
+
+
+

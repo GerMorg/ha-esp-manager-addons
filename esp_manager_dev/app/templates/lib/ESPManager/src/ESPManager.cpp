@@ -22,3 +22,6 @@ httpUpdate.rebootOnUpdate(false);auto r=httpUpdate.update(otaNet,u);
 #endif
 if(r==HTTP_UPDATE_OK)ESP.restart();}}
 void ESPManagerClass::status(){lastStatus=millis();JsonDocument d;d["device_id"]=ESPMANAGER_DEVICE_ID;d["firmware_version"]=ESPMANAGER_FW_VERSION;d["ip"]=WiFi.localIP().toString();d["rssi"]=WiFi.RSSI();String o;serializeJson(d,o);mq.publish((base()+"/status").c_str(),o.c_str(),true);}void ESPManagerClass::log(const String&s){Serial.println(s);if(mq.connected())mq.publish((base()+"/log").c_str(),s.c_str());}
+
+
+

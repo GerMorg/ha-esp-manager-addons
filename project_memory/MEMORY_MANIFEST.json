@@ -16,5 +16,9 @@
     "öffentlich auffindbare GitHub-Repositorydateien",
     "praktisch bestätigte Ergebnisse aus der laufenden Entwicklung"
   ],
+  "repository_baseline": "Stable 0.12.2; Dev 0.13.0-dev mit direkt integrierter grafischer Entitätenverwaltung",
   "limitation": "Ältere einzelne Project-Memory-Dateien waren über die verfügbaren GitHub-Suchzugriffe nicht vollständig abrufbar; ihr Inhalt wurde deshalb aus der vollständigen historischen Projektübergabe rekonstruiert und konsolidiert."
 }
+
+
+

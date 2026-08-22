@@ -3,3 +3,6 @@
 extern void setupDevice(); extern void loopDevice();
 void setup(){ESPManager.begin();setupDevice();}
 void loop(){ESPManager.loop();loopDevice();}
+
+
+

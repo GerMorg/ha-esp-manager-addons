@@ -53,3 +53,6 @@ Maximal 24 Sensoren können pro Firmware registriert werden. Die Discovery-Konfi
 Bei `device_id=smartmeter` registriert der Agent automatisch die elf bisherigen Sensoren mit unveränderten `unique_id`-Werten. Der funktionierende Decoder bleibt unverändert und verwendet weiterhin `publishSensor()`.
 
 Die manuelle MQTT-YAML erst entfernen, nachdem in Home Assistant geprüft wurde, dass die bisherigen Entity-IDs weiterverwendet werden. Bei Duplikaten die neuen Discovery-Entitäten deaktivieren und die YAML vorerst behalten.
+
+
+

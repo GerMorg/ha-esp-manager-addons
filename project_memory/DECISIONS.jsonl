@@ -19,3 +19,7 @@
 {"id":"dec-0019","status":"active","decision":"Steuerbare Entitäten liefern Befehle über onCommand(); das Benutzerprogramm bestätigt den tatsächlichen Zustand mit publishState()."}
 {"id":"dec-0020","status":"active","decision":"Lieferungen bestehen aus vollständigen fertigen Repository-Dateien; keine Update-, Apply- oder Promotion-Werkzeuge."}
 {"id":"dec-0021","status":"active","decision":"Project Memory, Feature Contract, Test Matrix sowie append-only Entscheidungen, Vorfälle und Releases werden in jedem Repository mitgeführt."}
+
+
+
+{"id":"dec-0130-clean-01","status":"active","decision":"Dev 0.13.0 integriert die grafische MQTT-Entitätenverwaltung direkt in core.py, main.py, index.html und app.js; keine Laufzeit-Patchwerkzeuge."}

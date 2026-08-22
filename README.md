@@ -1,17 +1,12 @@
-# ESP Manager Dev 0.13.0 – Grafische MQTT-Entitätenverwaltung
+# ESP Manager Add-ons
 
-## Einspielen
+Sauber konsolidiertes Repository ohne Update-, Patch- oder Promotion-Werkzeuge.
 
-Inhalt in den Repository-Stamm kopieren und anschließend ausführen:
+- **Stable 0.12.2**: letzter wiederhergestellter Stable-Stand mit allgemeiner MQTT Discovery.
+- **Dev 0.13.0-dev**: Stable-Funktionsumfang plus direkt integrierte grafische MQTT-Discovery-Entitätenverwaltung.
 
-```bash
-python3 esp_manager_dev/tools/apply_mqtt_entity_ui_v0_13_0.py .
-```
+## Dev: grafische MQTT Discovery
 
-Danach die Inhalte aus `CHANGELOG_ADDENDUM.md`, `PROJECT_HANDOVER_ADDENDUM.txt` und `project_memory_append/` append-only in die bestehenden Projektdateien übernehmen, committen und nur **ESP Manager Dev** aktualisieren.
+Projekt öffnen und im Abschnitt **MQTT Discovery – Entitäten** Sensoren, Binärsensoren, Schalter, Numbers und Covers verwalten. Die Definitionen werden in `espmanager.yaml` gespeichert und beim Build als `include/ESPManagerEntities.h` erzeugt.
 
-## Bedienung
-
-In der App erscheint unten rechts **MQTT Discovery**. Dort Projekt und Entitäten konfigurieren, speichern und anschließend das Projekt neu kompilieren.
-
-Stable 0.12.2 wird durch dieses Paket nicht verändert.
+`unique_id` nach der ersten Veröffentlichung nicht mehr ändern, sofern bestehende Home-Assistant-Entitäten und Historie erhalten bleiben sollen.

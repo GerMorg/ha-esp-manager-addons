@@ -22,3 +22,7 @@
 {"id":"inc-0022","status":"closed","title":"ESP verband sich nach längerem WLAN-Ausfall nicht neu","cause":"AutoReconnect allein unzureichend","resolution":"Aktive Reconnect-Versuche, Fallback-Portal und Recovery-Neustart"}
 {"id":"inc-0023","status":"closed","title":"Smartmeter-Migration veränderte stabile Empfangslogik","cause":"Telegrammgrenzen und Pufferlogik wurden trotz funktionierender Referenz geändert","resolution":"Zur ursprünglichen funktionierenden Decoderlogik zurückgekehrt und eingefroren"}
 {"id":"inc-0024","status":"closed","title":"Unvollständige Project-Memory-Neubasis","cause":"Historische Entscheidungen und Vorfälle wurden bei Konsolidierung verkürzt","resolution":"Allumfassendes Project Memory aus vollständiger historischer Übergabe und bestätigten Hardwareergebnissen rekonstruiert"}
+
+
+
+{"id":"inc-0130-tools-01","status":"closed","title":"Repository enthielt fehlerhafte Update- und Promotion-Werkzeuge","resolution":"Werkzeuge, zugehörige Tests, Cache- und Addendum-Dateien entfernt; Funktion direkt integriert."}

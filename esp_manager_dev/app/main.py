@@ -6,7 +6,7 @@ from typing import Any
 import io,json,time,threading,subprocess,shutil,zipfile,hashlib,secrets,re
 import paho.mqtt.client as mqtt
 from .core import *
-app=FastAPI(title='ESP Manager Dev 0.10.1');STATIC=Path(__file__).parent/'static';app.mount('/static',StaticFiles(directory=STATIC),name='static');JOBS={};PROCS={};DEVICES={};MQTT=None;OTA_FILE=ROOT/'ota_jobs.json';HISTORY=ROOT/'device_history.jsonl'
+app=FastAPI(title='ESP Manager Dev 0.13.0-dev');STATIC=Path(__file__).parent/'static';app.mount('/static',StaticFiles(directory=STATIC),name='static');JOBS={};PROCS={};DEVICES={};MQTT=None;OTA_FILE=ROOT/'ota_jobs.json';HISTORY=ROOT/'device_history.jsonl'
 def fail(e):
  if isinstance(e,HTTPException):raise e
  if isinstance(e,FileNotFoundError):raise HTTPException(404,str(e))
@@ -56,6 +56,15 @@ async def create(data:dict[str,Any]):
   if p.exists():raise HTTPException(409,'Projekt existiert')
   for d in('src','include','lib'):(p/d).mkdir(parents=True,exist_ok=True)
   m=migrate({'name':name,'board':data.get('board','esp32dev')});(p/'espmanager.yaml').write_text(__import__('yaml').safe_dump(m,sort_keys=False));shutil.copytree(T/'src',p/'src',dirs_exist_ok=True);system_copy(p);render_pio(p,m);return public(m)
+ except Exception as e:fail(e)
+@app.get('/api/projects/{name}/mqtt-entities')
+def mqtt_entities_get(name):
+ try:return {'project':clean(name),'entities':meta(name).get('mqtt_entities',[])}
+ except Exception as e:fail(e)
+@app.put('/api/projects/{name}/mqtt-entities')
+async def mqtt_entities_put(name,data:dict[str,Any]):
+ try:
+  items=data.get('entities',data) if isinstance(data,dict) else data;m=meta(name);m['mqtt_entities']=validate_entities(items);backup(name,'before-mqtt-entities');save_meta(name,m);render_entities(pdir(name),m);return {'ok':True,'count':len(m['mqtt_entities']),'entities':m['mqtt_entities']}
  except Exception as e:fail(e)
 @app.get('/api/projects/{name}')
 def get_project(name):
@@ -238,3 +247,6 @@ def initial(name):
  bs=builds(name)
  if not bs:raise HTTPException(404,'Kein erfolgreicher Build vorhanden')
  return FileResponse(bs[0]['_dir']/'initial_firmware.bin')
+
+
+

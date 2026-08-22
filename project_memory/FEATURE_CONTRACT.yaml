@@ -37,3 +37,6 @@ prohibited_regressions:
   - Änderung eingefrorener Smartmeter-Decoderlogik
   - Änderung veröffentlichter unique_id-Werte ohne Migration
   - Update-/Patchskripte als Lieferformat
+
+
+

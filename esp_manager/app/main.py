@@ -6,7 +6,7 @@ from typing import Any
 import io,json,time,threading,subprocess,shutil,zipfile,hashlib,secrets,re
 import paho.mqtt.client as mqtt
 from .core import *
-app=FastAPI(title='ESP Manager 0.10.1');STATIC=Path(__file__).parent/'static';app.mount('/static',StaticFiles(directory=STATIC),name='static');JOBS={};PROCS={};DEVICES={};MQTT=None;OTA_FILE=ROOT/'ota_jobs.json';HISTORY=ROOT/'device_history.jsonl'
+app=FastAPI(title='ESP Manager 0.12.2');STATIC=Path(__file__).parent/'static';app.mount('/static',StaticFiles(directory=STATIC),name='static');JOBS={};PROCS={};DEVICES={};MQTT=None;OTA_FILE=ROOT/'ota_jobs.json';HISTORY=ROOT/'device_history.jsonl'
 def fail(e):
  if isinstance(e,HTTPException):raise e
  if isinstance(e,FileNotFoundError):raise HTTPException(404,str(e))
@@ -238,3 +238,6 @@ def initial(name):
  bs=builds(name)
  if not bs:raise HTTPException(404,'Kein erfolgreicher Build vorhanden')
  return FileResponse(bs[0]['_dir']/'initial_firmware.bin')
+
+
+

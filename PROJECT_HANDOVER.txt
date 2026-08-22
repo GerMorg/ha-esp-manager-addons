@@ -1,3 +1,34 @@
-Stable 0.7.3 bleibt unverändert. Dev 0.12.1 erweitert den ESPManager-Agenten allgemein um MQTT Discovery und bidirektionale HA-Steuerung. WLAN-Recovery und Smartmeter MQTT Discovery sind praktisch bestätigt. Der Smartmeter-Decoder bleibt unverändert.
+ESP MANAGER PROJEKTÜBERGABE
+===========================
+Stable: 0.12.2
+Dev: 0.13.0-dev
 
-0.12.2 Stable: Dev-Stand vollst�ndig nach esp_manager promoviert; Stable-Datenpfad /config/esp_manager und Port 8099 bleiben getrennt. WLAN-Recovery und HA-Steuerung sind hardwarebest�tigt.
+AUSGANGSBASIS
+Das Repository wurde aus dem wiederhergestellten Repository-Snapshot und der vollständigen historischen Übergabe bis 0.11.1 konsolidiert. Update-, Patch- und Promotion-Werkzeuge sowie Cache-Dateien wurden entfernt.
+
+STABLE 0.12.2
+Enthält Projekt-/Dateiverwaltung, Build und Historie, USB-Erstinstallation, Web Serial, WLAN-Recovery, MQTT-Geräteverwaltung, OTA, allgemeine MQTT Discovery und bidirektionale Entitäten-API.
+
+DEV 0.13.0-dev
+Ergänzt eine direkt integrierte grafische Entitätenverwaltung. Definitionen liegen projektspezifisch als mqtt_entities in espmanager.yaml. Beim Speichern und vor jedem Build wird include/ESPManagerEntities.h erzeugt. Der Wrapper registriert diese Entitäten zusätzlich zu manuell in setupDevice() registrierten Entitäten.
+
+ENTITÄTSTYPEN
+- sensor
+- binary_sensor
+- switch
+- number
+- cover
+
+NOCH PRAKTISCH ZU TESTEN
+- Speichern und Neuladen der Entitäten-UI
+- Firmware-Build mit generiertem Header
+- Discovery aller fünf Entitätstypen in Home Assistant
+- Befehlsrundlauf für switch, number und cover
+
+REGELN
+- Keine Funktionen ungefragt entfernen.
+- Keine Update-/Patchwerkzeuge als Lieferformat.
+- Stable/Dev, Ports und Datenpfade getrennt halten.
+- Öffentliche Agent-API einschließlich publishSensor erhalten.
+- Smartmeter-Decoderlogik nicht ungefragt verändern.
+- Project Memory und Ledgers vollständig mitführen.

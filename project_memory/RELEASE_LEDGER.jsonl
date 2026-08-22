@@ -31,3 +31,7 @@
 {"version":"0.11.x-dev","channel":"dev","status":"hardware-confirmed","summary":"Smartmeter MQTT Discovery ohne manuelle YAML-Konfiguration praktisch bestätigt"}
 {"version":"0.12.x-dev","channel":"dev","status":"development","summary":"Allgemeine Discovery- und Befehls-API; LED-/Zahlenwert-Test vorbereitet"}
 {"version":"0.13.0","channel":"clean-baseline","status":"repository-rebuilt","summary":"Vollständige saubere Ausgangsbasis mit grafischer Entitätenverwaltung; Hardwaretest der GUI ausständig"}
+
+
+
+{"version":"0.13.0-dev-clean","channel":"dev","status":"automated-validation-pending-hardware","summary":"Saubere Rekonstruktion mit direkt integrierter grafischer MQTT-Discovery-Konfiguration"}

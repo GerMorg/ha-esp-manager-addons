@@ -18,8 +18,8 @@ channels:
     data_path: /config/esp_manager_dev
     policy: Neue Funktionen zuerst hier implementieren und testen.
 current_baseline:
-  repository_generation: 0.13.0-clean
-  note: Vollständig konsolidierte Ausgangsbasis ohne Update-, Apply- oder Promotion-Werkzeuge.
+  repository_generation: 0.13.0-dev-clean-reconstructed
+  note: Aus wiederhergestelltem Repository-Snapshot und Legacy-Handover konsolidiert; ohne Update-, Apply- oder Promotion-Werkzeuge.
 confirmed_hardware:
   boards:
     - ESP32-WROOM-32D / esp32dev
@@ -133,3 +133,6 @@ open_priorities:
   - Geräte-Detailseite und Historie weiter ausbauen.
   - Backup-Liste und Wiederherstellung in der UI ergänzen.
   - Sonderboardprofile dynamisch aus PlatformIO-Metadaten ableiten.
+
+
+

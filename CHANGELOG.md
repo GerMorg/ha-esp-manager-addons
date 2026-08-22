@@ -1,14 +1,12 @@
 # Changelog
-## 0.12.1-dev
-- Smartmeter MQTT Discovery praktisch bestÃ¤tigt: Alle manuellen MQTT-Konfigurationen entfernt; nach Neustart von HA und ESP erschienen alle Werte weiterhin.
-- Allgemeine Discovery fÃ¼r Sensor, BinÃ¤rsensor, Schalter, Zahlenwert und Cover.
-- HA-Befehle Ã¼ber `onCommand`; ZustandsbestÃ¤tigung Ã¼ber `publishState`.
-- `publishSensor`, OTA und bestÃ¤tigte WLAN-Recovery bleiben erhalten.
-- Smartmeter-Empfangslogik bleibt unverÃ¤ndert.
+
+## 0.13.0-dev
+- Repository aus wiederhergestelltem Stand sauber konsolidiert.
+- Grafische MQTT-Discovery-EntitÃ¤tenverwaltung direkt in Dev integriert.
+- Projektbezogene Speicherung und C++-Headergenerierung fÃ¼r Sensor, BinÃ¤rsensor, Schalter, Number und Cover.
+- Update-, Patch-, Promotion-Tools und Cache-Dateien entfernt.
+- Tests an die tatsÃ¤chlich enthaltene Architektur angeglichen.
 
 ## 0.12.2
-- Hardwarebestätigten Dev-Stand in den Stable-Pfad übernommen.
-- MQTT Discovery für Sensor, Binärsensor, Schalter, Number und Cover übernommen.
-- Home-Assistant-Steuerung praktisch bestätigt.
-- WLAN-Recovery praktisch bestätigt.
-- Korrekte C++-Defaultparameter-Syntax in ESPManager.h vorausgesetzt und geprüft.
+- Allgemeine MQTT Discovery und bidirektionale Home-Assistant-Steuerung in Stable.
+- WLAN-Recovery und bestehende Projekt-, Build-, USB-, MQTT- und OTA-Funktionen erhalten.
