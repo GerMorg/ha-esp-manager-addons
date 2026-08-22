@@ -1,1 +1,2 @@
-{"version":"0.12.0-dev","channel":"dev","status":"generated","purpose":"Allgemeine MQTT Discovery und bidirektionale HA-Steuerung","hardware_validation":"pending"}
+{"version":"0.11.0-dev","channel":"dev","status":"generated","purpose":"Allgemeine MQTT Discovery mit Smartmeter-Rückwärtskompatibilität","hardware_validation":"pending"}
+{"version":"0.11.0-dev","channel":"dev","status":"repository-content-ready","purpose":"Allgemeine MQTT Discovery mit Smartmeter-Rückwärtskompatibilität","automated_validation":"passed","hardware_validation":"pending"}

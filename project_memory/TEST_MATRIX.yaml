@@ -1,3 +1,13 @@
 schema_version: 1
-automated: [all_entity_types_generate, duplicate_unique_id_rejected, python_compile, zip_integrity]
-hardware: {wifi_recovery_0_10_2: confirmed, generic_discovery_0_12_0: pending, cover_control: pending}
+automated:
+  - generic_discovery_api
+  - legacy_unique_ids
+  - retained_discovery
+  - reconnect_publish
+  - availability_topic
+  - wifi_recovery_contract
+  - zip_integrity
+hardware:
+  wifi_recovery_0_10_2: confirmed
+  smartmeter_original_decoder: confirmed
+  mqtt_discovery_0_11_0: pending

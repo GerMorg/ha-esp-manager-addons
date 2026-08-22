@@ -1,9 +1,12 @@
 # Changelog
 
-## 0.10.2-dev
-- WLAN-Recovery als explizite Zustandsmaschine.
-- Fallback-Portal wird nur einmal gestartet.
-- STA-Verbindungsversuche laufen parallel zum Portal alle `wifi_reconnect_interval` Millisekunden.
-- Bei erfolgreicher Verbindung werden Portal und SoftAP beendet, STA-Modus und MQTT wiederhergestellt.
-- Standard-Neustart nach 15 Minuten Gesamtausfall; letzte Minute nur STA-Verbindungsversuche.
-- Serielle Meldungen für alle Zustandswechsel.
+## 0.11.0-dev
+- Allgemeine `ESPManager.registerSensor()`-API für MQTT Discovery.
+- Discovery-Konfiguration retained und nach jeder MQTT-Neuverbindung erneut veröffentlicht.
+- Availability-Topic und gemeinsame Gerätezuordnung.
+- Rückwärtskompatible Smartmeter-Entitäten mit bisherigen `unique_id`-Werten.
+- Bisherige kWh-Umrechnung per Value-Template erhalten.
+- Bestehende `publishSensor()`-API unverändert.
+- Hardwarebestätigte WLAN-Recovery aus 0.10.2 erhalten.
+- Funktionierenden ursprünglichen Smartmeter-Decoder ausdrücklich nicht verändert.
+- Project Memory, Feature Contract, Testmatrix und Ledgers aktualisiert.

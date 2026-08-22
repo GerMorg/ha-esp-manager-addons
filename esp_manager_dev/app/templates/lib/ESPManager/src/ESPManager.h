@@ -31,11 +31,13 @@
 class ESPManagerClass {
 public:
   void begin(); void loop(); void log(const String&); void publishSensor(const char*,double); void handleCommand(const String&,const String&);
+  bool registerSensor(const char* key,const char* name,const char* uniqueId,const char* unit="",const char* deviceClass="",const char* stateClass="measurement",const char* valueTemplate="",bool forceUpdate=false);
 private:
-  enum WifiRecoveryState : uint8_t { WIFI_OK, WIFI_RETRY, WIFI_PORTAL, WIFI_FINAL_RETRY };
-  WifiRecoveryState wifiState=WIFI_RETRY;
-  unsigned long lastStatus=0,lastMqtt=0,wifiLostAt=0,lastWifiRetry=0,finalRetryAt=0;
-  bool portalActive=false;
+  enum WifiRecoveryState:uint8_t{WIFI_OK,WIFI_RETRY,WIFI_PORTAL,WIFI_FINAL_RETRY};
+  struct SensorDef{String key,name,uniqueId,unit,deviceClass,stateClass,valueTemplate;bool forceUpdate=false;};
+  static const uint8_t MAX_DISCOVERY_SENSORS=24; SensorDef sensors[MAX_DISCOVERY_SENSORS]; uint8_t sensorCount=0;
+  WifiRecoveryState wifiState=WIFI_RETRY; unsigned long lastStatus=0,lastMqtt=0,wifiLostAt=0,lastWifiRetry=0; bool portalActive=false;
   void mqttConnect(); void status(); void beginWifiRecovery(); void startFallbackPortal(); void stopFallbackPortal(); void tryWifiReconnect(const char*); void wifiRecovered();
+  void registerLegacySmartmeter(); void publishDiscovery(); void publishDiscovery(const SensorDef&); String slug(const String&)const;
 };
 extern ESPManagerClass ESPManager;

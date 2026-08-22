@@ -1,2 +1,2 @@
 # Entwicklungsprotokoll
-Ledgers nur ergänzen. API, UI, Agent und Tests gemeinsam ändern. Hardwareergebnisse als bestätigt, fehlgeschlagen oder ausstehend festhalten.
+Vor Änderungen Feature Contract und Tests prüfen. Ledgers nur ergänzen. Stable nicht verändern. Hardwarebefunde ausdrücklich festhalten.

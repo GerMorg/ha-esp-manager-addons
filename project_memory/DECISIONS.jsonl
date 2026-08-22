@@ -1,2 +1,5 @@
-{"id":"dec-0012","status":"active","decision":"Discovery-Konfiguration wird projektbezogen gespeichert und beim Build als C++-Header erzeugt."}
-{"id":"dec-0013","status":"active","decision":"Steuerbefehle werden an einen Benutzer-Callback geliefert; das Benutzerprogramm bestätigt den Zustand explizit."}
+{"id":"dec-0010","status":"active","decision":"MQTT Discovery wird über eine allgemeine registerSensor-API bereitgestellt."}
+{"id":"dec-0011","status":"active","decision":"Smartmeter verwendet weiterhin exakt die bisherigen unique_id-Werte."}
+{"id":"dec-0012","status":"active","decision":"Der funktionierende ursprüngliche Smartmeter-Empfangscode wird nicht verändert."}
+{"id":"dec-0013","status":"active","decision":"Allgemeine MQTT Discovery wird in Projektcode durch registerSensor definiert; publishSensor bleibt für Zustandswerte zuständig."}
+{"id":"dec-0014","status":"active","decision":"Manuelle HA-YAML wird erst nach bestätigter Entity-ID-Übernahme entfernt."}

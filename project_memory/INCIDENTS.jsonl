@@ -1,1 +1,3 @@
-{"id":"inc-0012","status":"closed","title":"Smartmeter-Empfangsexperiment zurückgenommen","decision":"Funktionierende ursprüngliche Decoderlogik bleibt eingefroren"}
+{"id":"inc-0010","status":"closed","title":"WLAN-Recovery nach Routerausfall","result":"Hardwaretest erfolgreich"}
+{"id":"inc-0011","status":"closed","title":"Alternative 297-Byte-Smartmeter-Grenzlogik funktionierte nicht","prevention":"Ursprüngliche funktionierende Empfangslogik eingefroren"}
+{"id":"inc-0012","status":"closed","title":"Smartmeter-Alternative mit unmittelbarer 297-Byte-Verarbeitung funktionierte nicht","prevention":"Ursprüngliche funktionierende Empfangslogik als Hardware-Referenz einfrieren"}

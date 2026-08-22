@@ -1,5 +1,8 @@
 schema_version: 1
 required:
-  discovery: [sensor, binary_sensor, switch, number, cover, retained_config, availability, stable_unique_id]
-  control: [command_callback, command_topics, state_confirmation, cover_position]
-  compatibility: [publishSensor, wifi_recovery]
+  agent_api: [begin, loop, log, publishSensor, handleCommand, registerSensor]
+  discovery: [generic_sensor_registration, stable_unique_id, retained_config, reconnect_republish, availability, device_grouping, unit, device_class, state_class, value_template, force_update]
+  compatibility: [legacy_smartmeter_unique_ids, kwh_conversion, unchanged_publishSensor, manual_yaml_fallback]
+  wifi_recovery: [portal_once, ap_sta_retry, periodic_retry, portal_shutdown, mqtt_reconnect, final_sta_window, controlled_restart]
+limits:
+  discovery_sensors_per_device: 24
