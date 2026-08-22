@@ -1,2 +1,1 @@
-{"id":"inc-0014","status":"closed","title":"Smartmeter MQTT Discovery Validierung","result":"Nach Entfernung manueller MQTT-Konfigurationen und Neustart blieben alle Werte verfÃ¼gbar"}
-{"id":"inc-0122-header-01","status":"closed","title":"Ungültige Defaultparameter-Syntax im generierten ESPManager.h","resolution":"Manuelle Minimalreparatur bestätigt; Promotion prüft und blockiert const char*= Regressionen"}
+{"id":"inc-0130-01","status":"closed","title":"UnzuverlÃ¤ssige Update-Werkzeuge","resolution":"VollstÃ¤ndiges Repository neu erstellt; keine Update-Werkzeuge enthalten"}

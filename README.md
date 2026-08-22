@@ -1,21 +1,14 @@
-# ESP Manager 0.12.2
+# ESP Manager – saubere Ausgangsbasis
 
-Ausgangsbasis: Commit `c841129a51998a4dd3c102211a1f5929d11f650b`.
+Vollständiges Repository ohne Update-, Apply- oder Promotion-Werkzeuge.
 
-## Änderungen
+- Stable `0.13.0`
+- Dev `0.13.1-dev`
+- Projektverwaltung und Editor
+- PlatformIO-Build
+- grafische MQTT-Discovery-Entitätenverwaltung
+- Sensor, Binärsensor, Schalter, Number und Cover
+- bidirektionale Befehle über `onCommand()` / `publishState()`
+- WLAN-Fallback und MQTT-Verbindung
 
-- Die letzte getestete Dev-Version wird vollständig nach Stable übernommen.
-- Der nächste Dev-Schritt ergänzt ein LED-/Zahlenwert-Hardwaretestprojekt unter `esp_manager_dev/examples/led_number_test`.
-- Keine ausführbare Datei liegt im Repository-Stamm.
-
-## Ausführung
-
-Die Werkzeuge bleiben ausschließlich unter `esp_manager_dev/tools`. Ausführung aus diesem Ordner:
-
-```bash
-cd esp_manager_dev/tools
-python3 promote_dev_to_stable_v0_12_2.py ../..
-python3 validate_v0_12_2_promotion.py ../..
-```
-
-Danach `git diff` prüfen. Stable-Laufzeitdaten unter `/config/esp_manager` werden nicht verändert.
+Den gesamten Inhalt direkt in ein leeres Repository kopieren und committen.

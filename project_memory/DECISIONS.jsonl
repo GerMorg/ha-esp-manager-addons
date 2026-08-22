@@ -1,2 +1,1 @@
-{"id":"dec-0014","status":"active","decision":"Allgemeine Entitäten werden im Projektcode registriert; Befehle laufen über einen Callback und Zustände werden explizit bestätigt."}
-{"id":"dec-0122-stable-01","status":"active","decision":"Der hardwarebest�tigte 0.12.2-Dev-Stand wird vollst�ndig nach esp_manager promoviert; Stable-Datenpfad und Port bleiben isoliert."}
+{"id":"dec-0130-01","status":"active","decision":"Repository als vollständige saubere Ausgangsbasis ohne Update-Werkzeuge neu konsolidiert."}

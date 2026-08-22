@@ -1,5 +1,2 @@
 schema_version: 1
-required:
-  discovery: [sensor, binary_sensor, switch, number, cover, retained_config, availability]
-  control: [command_callback, state_confirmation, cover_position]
-  compatibility: [publishSensor, ota, wifi_recovery]
+required: [project_crud, editor, platformio_build, mqtt_discovery_gui, sensor, binary_sensor, switch, number, cover, command_callback, state_publish, wifi_recovery]

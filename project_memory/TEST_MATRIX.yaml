@@ -1,3 +1,3 @@
 schema_version: 1
-automated: [generic_api, topic_contract, compatibility_contract, late_registration]
-hardware: {wifi_recovery_0_10_2: confirmed, smartmeter_mqtt_discovery: confirmed, generic_control_0_12_1: pending}
+automated: [python_compile, entity_validation, generated_header, stable_dev_isolation, no_update_tools, zip_integrity]
+hardware: {wifi_recovery: confirmed, smartmeter_discovery: confirmed, gui_entities: pending}

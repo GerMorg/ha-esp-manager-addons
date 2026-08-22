@@ -1,3 +1,14 @@
-Stable 0.7.3 bleibt unverändert. Dev 0.12.1 erweitert den ESPManager-Agenten allgemein um MQTT Discovery und bidirektionale HA-Steuerung. WLAN-Recovery und Smartmeter MQTT Discovery sind praktisch bestätigt. Der Smartmeter-Decoder bleibt unverändert.
+# ESP Manager – saubere Ausgangsbasis
 
-0.12.2 Stable: Dev-Stand vollst�ndig nach esp_manager promoviert; Stable-Datenpfad /config/esp_manager und Port 8099 bleiben getrennt. WLAN-Recovery und HA-Steuerung sind hardwarebest�tigt.
+Vollständiges Repository ohne Update-, Apply- oder Promotion-Werkzeuge.
+
+- Stable `0.13.0`
+- Dev `0.13.1-dev`
+- Projektverwaltung und Editor
+- PlatformIO-Build
+- grafische MQTT-Discovery-Entitätenverwaltung
+- Sensor, Binärsensor, Schalter, Number und Cover
+- bidirektionale Befehle über `onCommand()` / `publishState()`
+- WLAN-Fallback und MQTT-Verbindung
+
+Den gesamten Inhalt direkt in ein leeres Repository kopieren und committen.

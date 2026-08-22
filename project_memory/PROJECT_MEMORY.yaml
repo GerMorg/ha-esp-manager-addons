@@ -1,6 +1,10 @@
 schema_version: 1
 project_id: esp-manager
-stable: {version: 0.7.3, frozen: true}
-dev: {version: 0.12.1-dev}
-hardware_facts: {wifi_recovery_0_10_2: confirmed, smartmeter_mqtt_discovery: confirmed}
-invariants: [Smartmeter-Empfangslogik bleibt unverändert, unique_id nach Veröffentlichung stabil halten, steuerbare Entitäten bestätigen ihren Zustand]
+stable: {version: 0.13.0}
+dev: {version: 0.13.1-dev}
+hardware_confirmed: {wifi_recovery: true, smartmeter_mqtt_discovery: true}
+invariants:
+  - Keine Update- oder Promotion-Werkzeuge.
+  - Keine Funktionen ungefragt entfernen.
+  - unique_id stabil halten.
+  - Smartmeter-Empfangslogik nicht verändern.
