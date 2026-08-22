@@ -28,16 +28,4 @@
 #define ESPMANAGER_WIFI_RECOVERY_RESTART_AFTER 900000UL
 #endif
 #define ESPM_LOG(x) ESPManager.log(String(x))
-class ESPManagerClass {
-public:
-  void begin(); void loop(); void log(const String&); void publishSensor(const char*,double); void handleCommand(const String&,const String&);
-  bool registerSensor(const char* key,const char* name,const char* uniqueId,const char* unit="",const char* deviceClass="",const char* stateClass="measurement",const char* valueTemplate="",bool forceUpdate=false);
-private:
-  enum WifiRecoveryState:uint8_t{WIFI_OK,WIFI_RETRY,WIFI_PORTAL,WIFI_FINAL_RETRY};
-  struct SensorDef{String key,name,uniqueId,unit,deviceClass,stateClass,valueTemplate;bool forceUpdate=false;};
-  static const uint8_t MAX_DISCOVERY_SENSORS=24; SensorDef sensors[MAX_DISCOVERY_SENSORS]; uint8_t sensorCount=0;
-  WifiRecoveryState wifiState=WIFI_RETRY; unsigned long lastStatus=0,lastMqtt=0,wifiLostAt=0,lastWifiRetry=0; bool portalActive=false;
-  void mqttConnect(); void status(); void beginWifiRecovery(); void startFallbackPortal(); void stopFallbackPortal(); void tryWifiReconnect(const char*); void wifiRecovered();
-  void registerLegacySmartmeter(); void publishDiscovery(); void publishDiscovery(const SensorDef&); String slug(const String&)const;
-};
-extern ESPManagerClass ESPManager;
+class ESPManagerClass{public:typedef void(*CommandHandler)(const String&,const String&);struct E{String type,id,name,uid,unit,dc,sc,vt;float lo=0,hi=100,step=1;bool pos=true;};void begin();void loop();void log(const String&);void publishSensor(const char*,double);void handleCommand(const String&,const String&);void onCommand(CommandHandler);void registerSensor(const char*,const char*,const char*,const char*="",const char*="",const char*="measurement",const char*="");void registerBinarySensor(const char*,const char*,const char*,const char*="");void registerSwitch(const char*,const char*,const char*);void registerNumber(const char*,const char*,const char*,float,float,float,const char*="");void registerCover(const char*,const char*,const char*,bool=true);bool publishState(const char*,const String&,bool=true);private:E es[32];uint8_t ec=0;CommandHandler cb=nullptr;enum W:uint8_t{OK,RETRY,PORTAL,FINAL};W ws=RETRY;unsigned long lastStatus=0,lastMqtt=0,lost=0,lastRetry=0;bool portal=false;void mqttConnect();void status();void discovery();void entityCommand(const String&,const String&);void startPortal();void stopPortal();void reconnect();void recovered();};extern ESPManagerClass ESPManager;

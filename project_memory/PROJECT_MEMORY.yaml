@@ -1,21 +1,6 @@
 schema_version: 1
 project_id: esp-manager
-repository: https://github.com/GerMorg/ha-esp-manager-addons.git
-stable:
-  version: 0.7.3
-  frozen: true
-  data_path: /config/esp_manager
-dev:
-  version: 0.11.0-dev
-  data_path: /config/esp_manager_dev
-hardware_facts:
-  wifi_recovery_0_10_2: confirmed
-  smartmeter_original_decoder: confirmed
-  mqtt_discovery_0_11_0: pending
-invariants:
-  - Keine bestehende Funktion ungefragt entfernen.
-  - Stable 0.7.3 nicht verändern.
-  - Funktionierenden ursprünglichen Smartmeter-Decoder nicht verändern.
-  - Bestehende Smartmeter unique_id-Werte stabil halten.
-  - publishSensor API kompatibel halten.
-  - Project Memory vollständig mitführen und Ledgers nur ergänzen.
+stable: {version: 0.7.3, frozen: true}
+dev: {version: 0.12.1-dev}
+hardware_facts: {wifi_recovery_0_10_2: confirmed, smartmeter_mqtt_discovery: confirmed}
+invariants: [Smartmeter-Empfangslogik bleibt unverändert, unique_id nach Veröffentlichung stabil halten, steuerbare Entitäten bestätigen ihren Zustand]

@@ -1,2 +1,2 @@
 # Entwicklungsprotokoll
-Vor Änderungen Feature Contract und Tests prüfen. Ledgers nur ergänzen. Stable nicht verändern. Hardwarebefunde ausdrücklich festhalten.
+Stable nicht verändern. Ledgers nur ergänzen. Keine Funktionen ungefragt entfernen. Agent, Tests, Changelog und Handover gemeinsam aktualisieren.

@@ -1,14 +1,1 @@
-ESP MANAGER PROJEKTÜBERGABE
-===========================
-Stable: 0.7.3, unverändert
-Dev: 0.11.0-dev
-
-0.11.0 ergänzt eine allgemeine MQTT-Discovery-API für zukünftige Projekte. Sensoren werden mit registerSensor() beschrieben und weiterhin mit publishSensor() veröffentlicht. Discovery-Nachrichten werden retained und nach jeder MQTT-Neuverbindung gesendet.
-
-Für device_id smartmeter registriert der Agent elf rückwärtskompatible Sensoren mit den bisherigen unique_id-Werten. Der funktionierende ursprüngliche Smartmeter-Decoder wird nicht verändert. Die alternative 297-Byte-Grenzlogik bleibt verworfen.
-
-WLAN-Recovery 0.10.2 ist praktisch bestätigt und bleibt enthalten. Stable 0.7.3 bleibt eingefroren.
-
-Vor Entfernung der manuellen Home-Assistant-MQTT-YAML müssen die bestehenden Entity-IDs kontrolliert werden. Bei Duplikaten wird die YAML beibehalten und die neue Entität deaktiviert, bis eine sichere Migration möglich ist.
-
-Das kanonische Projektgedächtnis liegt unter project_memory.
+Stable 0.7.3 bleibt unverändert. Dev 0.12.1 erweitert den ESPManager-Agenten allgemein um MQTT Discovery und bidirektionale HA-Steuerung. WLAN-Recovery und Smartmeter MQTT Discovery sind praktisch bestätigt. Der Smartmeter-Decoder bleibt unverändert.

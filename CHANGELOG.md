@@ -1,12 +1,7 @@
 # Changelog
-
-## 0.11.0-dev
-- Allgemeine `ESPManager.registerSensor()`-API für MQTT Discovery.
-- Discovery-Konfiguration retained und nach jeder MQTT-Neuverbindung erneut veröffentlicht.
-- Availability-Topic und gemeinsame Gerätezuordnung.
-- Rückwärtskompatible Smartmeter-Entitäten mit bisherigen `unique_id`-Werten.
-- Bisherige kWh-Umrechnung per Value-Template erhalten.
-- Bestehende `publishSensor()`-API unverändert.
-- Hardwarebestätigte WLAN-Recovery aus 0.10.2 erhalten.
-- Funktionierenden ursprünglichen Smartmeter-Decoder ausdrücklich nicht verändert.
-- Project Memory, Feature Contract, Testmatrix und Ledgers aktualisiert.
+## 0.12.1-dev
+- Smartmeter MQTT Discovery praktisch bestätigt: Alle manuellen MQTT-Konfigurationen entfernt; nach Neustart von HA und ESP erschienen alle Werte weiterhin.
+- Allgemeine Discovery für Sensor, Binärsensor, Schalter, Zahlenwert und Cover.
+- HA-Befehle über `onCommand`; Zustandsbestätigung über `publishState`.
+- `publishSensor`, OTA und bestätigte WLAN-Recovery bleiben erhalten.
+- Smartmeter-Empfangslogik bleibt unverändert.

@@ -1,13 +1,3 @@
 schema_version: 1
-automated:
-  - generic_discovery_api
-  - legacy_unique_ids
-  - retained_discovery
-  - reconnect_publish
-  - availability_topic
-  - wifi_recovery_contract
-  - zip_integrity
-hardware:
-  wifi_recovery_0_10_2: confirmed
-  smartmeter_original_decoder: confirmed
-  mqtt_discovery_0_11_0: pending
+automated: [generic_api, topic_contract, compatibility_contract, late_registration]
+hardware: {wifi_recovery_0_10_2: confirmed, smartmeter_mqtt_discovery: confirmed, generic_control_0_12_1: pending}
