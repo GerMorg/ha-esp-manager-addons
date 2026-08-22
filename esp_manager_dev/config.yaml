@@ -1,6 +1,6 @@
 name: ESP Manager Dev
 description: Zentrale Arduino-C++-ESP-Projektverwaltung
-version: 0.12.1-dev
+version: 0.12.1.1-dev
 slug: esp_manager_dev
 init: false
 arch: [amd64, aarch64, armv7]
