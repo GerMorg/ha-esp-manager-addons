@@ -1,3 +1,2 @@
-{"id":"dec-0001","status":"active","decision":"Stable 0.7.3 bleibt eingefroren."}
-{"id":"dec-0002","status":"active","decision":"WLAN-Neustartgrenze ist wifi_recovery_restart_after seit Ausfallbeginn; Standard 15 Minuten."}
-{"id":"dec-0003","status":"active","decision":"Eine Minute vor Neustart wird das Portal geschlossen und nur STA-Recovery versucht."}
+{"id":"dec-0012","status":"active","decision":"Discovery-Konfiguration wird projektbezogen gespeichert und beim Build als C++-Header erzeugt."}
+{"id":"dec-0013","status":"active","decision":"Steuerbefehle werden an einen Benutzer-Callback geliefert; das Benutzerprogramm bestätigt den Zustand explizit."}

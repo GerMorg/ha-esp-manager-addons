@@ -1,4 +1,5 @@
 schema_version: 1
 required:
-  wifi_recovery: [retry_saved_credentials, portal_once, ap_sta_parallel, periodic_retry, stop_portal_on_success, disable_softap_on_success, mqtt_reconnect, final_sta_window, controlled_restart, serial_diagnostics]
-  agent_api: [begin, loop, log, publishSensor, handleCommand]
+  discovery: [sensor, binary_sensor, switch, number, cover, retained_config, availability, stable_unique_id]
+  control: [command_callback, command_topics, state_confirmation, cover_position]
+  compatibility: [publishSensor, wifi_recovery]

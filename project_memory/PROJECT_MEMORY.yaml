@@ -1,10 +1,9 @@
 schema_version: 1
 project_id: esp-manager
-repository: https://github.com/GerMorg/ha-esp-manager-addons.git
 stable: {version: 0.7.3, frozen: true}
-dev: {version: 0.10.2-dev}
+dev: {version: 0.12.0-dev}
+hardware_facts: {wifi_recovery_0_10_2: confirmed}
 invariants:
-  - Keine bestehende Funktion ohne Zustimmung entfernen.
-  - project_memory vollständig mitführen und nur erweitern.
-  - Fallback-Portal darf aktive STA-Wiederverbindung nicht verhindern.
-  - Kontrollierter Neustart folgt wifi_recovery_restart_after seit Ausfallbeginn.
+  - Smartmeter-Empfangslogik bleibt unverändert.
+  - unique_id wird nach Veröffentlichung nicht automatisch verändert.
+  - Steuerbare Entitäten benötigen Zustandsbestätigung des Benutzerprogramms.

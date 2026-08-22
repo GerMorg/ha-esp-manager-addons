@@ -1,1 +1,1 @@
-{"id":"inc-0001","status":"open-for-hardware-validation","title":"ESP blieb nach Routerrückkehr im Fallback-Portal","observed":"Fallback-AP aktiv, keine selbstständige WLAN-Rückkehr, Reset stellte Verbindung her","prevention":"Portal nur einmal starten, AP_STA verwenden, parallele WiFi.begin-Versuche, Portal bei Erfolg stoppen, letzte reine STA-Phase und kontrollierter Neustart"}
+{"id":"inc-0012","status":"closed","title":"Smartmeter-Empfangsexperiment zurückgenommen","decision":"Funktionierende ursprüngliche Decoderlogik bleibt eingefroren"}

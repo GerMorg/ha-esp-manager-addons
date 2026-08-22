@@ -1,2 +1,1 @@
-{"version":"0.7.3","channel":"stable","status":"frozen"}
-{"version":"0.10.2-dev","channel":"dev","status":"generated","purpose":"WLAN-Recovery-Zustandsmaschine","hardware_validation":"pending"}
+{"version":"0.12.0-dev","channel":"dev","status":"generated","purpose":"Allgemeine MQTT Discovery und bidirektionale HA-Steuerung","hardware_validation":"pending"}

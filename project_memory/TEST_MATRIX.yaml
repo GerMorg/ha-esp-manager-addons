@@ -1,5 +1,3 @@
 schema_version: 1
-automated: [wifi_state_machine_contract, portal_single_start, parallel_sta_retry, clean_portal_shutdown, restart_timing]
-hardware:
-  wifi_recovery_0_10_1: failed
-  wifi_recovery_0_10_2: pending
+automated: [all_entity_types_generate, duplicate_unique_id_rejected, python_compile, zip_integrity]
+hardware: {wifi_recovery_0_10_2: confirmed, generic_discovery_0_12_0: pending, cover_control: pending}
