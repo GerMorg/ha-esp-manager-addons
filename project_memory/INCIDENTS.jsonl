@@ -26,3 +26,4 @@
 
 
 {"id":"inc-0130-tools-01","status":"closed","title":"Repository enthielt fehlerhafte Update- und Promotion-Werkzeuge","resolution":"Werkzeuge, zugehörige Tests, Cache- und Addendum-Dateien entfernt; Funktion direkt integriert."}
+{"id":"inc-0130-ui-01","status":"closed","title":"Experimentelle 0.13.0-Oberfläche beschädigte die App und zeigte 0.10.1","resolution":"Konsolidierte direkte Integration in index.html, app.js, main.py und core.py; Version explizit auf 0.13.1-dev gesetzt"}

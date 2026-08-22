@@ -6,7 +6,7 @@ from typing import Any
 import io,json,time,threading,subprocess,shutil,zipfile,hashlib,secrets,re
 import paho.mqtt.client as mqtt
 from .core import *
-app=FastAPI(title='ESP Manager Dev 0.13.0-dev');STATIC=Path(__file__).parent/'static';app.mount('/static',StaticFiles(directory=STATIC),name='static');JOBS={};PROCS={};DEVICES={};MQTT=None;OTA_FILE=ROOT/'ota_jobs.json';HISTORY=ROOT/'device_history.jsonl'
+app=FastAPI(title='ESP Manager Dev 0.13.1-dev');STATIC=Path(__file__).parent/'static';app.mount('/static',StaticFiles(directory=STATIC),name='static');JOBS={};PROCS={};DEVICES={};MQTT=None;OTA_FILE=ROOT/'ota_jobs.json';HISTORY=ROOT/'device_history.jsonl'
 def fail(e):
  if isinstance(e,HTTPException):raise e
  if isinstance(e,FileNotFoundError):raise HTTPException(404,str(e))

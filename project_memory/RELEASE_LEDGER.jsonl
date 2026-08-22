@@ -35,3 +35,4 @@
 
 
 {"version":"0.13.0-dev-clean","channel":"dev","status":"automated-validation-pending-hardware","summary":"Saubere Rekonstruktion mit direkt integrierter grafischer MQTT-Discovery-Konfiguration"}
+{"version":"0.13.1-dev","channel":"dev","status":"complete-repository-ready","purpose":"Grafische MQTT-Discovery-Entitätenverwaltung in bestehender Projektansicht","automated_validation":"passed","hardware_validation":"pending"}

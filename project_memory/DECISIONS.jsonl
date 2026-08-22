@@ -23,3 +23,4 @@
 
 
 {"id":"dec-0130-clean-01","status":"active","decision":"Dev 0.13.0 integriert die grafische MQTT-Entitätenverwaltung direkt in core.py, main.py, index.html und app.js; keine Laufzeit-Patchwerkzeuge."}
+{"id":"dec-0131-ui-01","status":"active","decision":"Die grafische MQTT-Entitätenverwaltung wird direkt in die bestehende Projektkonfiguration integriert, ohne zusätzliche Middleware oder separate schwebende Oberfläche."}

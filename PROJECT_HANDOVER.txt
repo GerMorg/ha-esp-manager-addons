@@ -32,3 +32,5 @@ REGELN
 - Öffentliche Agent-API einschließlich publishSensor erhalten.
 - Smartmeter-Decoderlogik nicht ungefragt verändern.
 - Project Memory und Ledgers vollständig mitführen.
+
+0.13.1-dev: Die grafische MQTT-Discovery-Entitätenverwaltung ist direkt in die bestehende Projektansicht integriert. Sie unterstützt Sensor, Binärsensor, Schalter, Zahlenwert und Cover; Definitionen liegen in mqtt_entities des jeweiligen espmanager.yaml und werden beim Build in ESPManagerEntities.h umgesetzt. Die sichtbare Dev-Version wurde auf 0.13.1-dev korrigiert. Stable 0.12.2 bleibt unverändert.

@@ -10,3 +10,8 @@
 ## 0.12.2
 - Allgemeine MQTT Discovery und bidirektionale Home-Assistant-Steuerung in Stable.
 - WLAN-Recovery und bestehende Projekt-, Build-, USB-, MQTT- und OTA-Funktionen erhalten.
+
+## 0.13.1-dev
+- Versionsanzeige korrigiert.
+- Grafische MQTT-Discovery-Entitätenverwaltung in der Projektansicht.
+- Speicherung in espmanager.yaml und automatische Registrierung beim Build.

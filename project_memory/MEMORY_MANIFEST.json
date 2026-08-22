@@ -1,24 +1,13 @@
 {
-  "schema_version": 2,
-  "purpose": "Allumfassendes, konsolidiertes ESP-Manager-Projektgedächtnis für Repository 0.13.0",
-  "files": [
-    "PROJECT_MEMORY.yaml",
-    "FEATURE_CONTRACT.yaml",
-    "TEST_MATRIX.yaml",
-    "DECISIONS.jsonl",
-    "INCIDENTS.jsonl",
-    "RELEASE_LEDGER.jsonl",
-    "DEVELOPMENT_PROTOCOL.md",
-    "MEMORY_MANIFEST.json"
-  ],
-  "source_basis": [
-    "Historische vollständige Projektübergabe zusammen.txt",
-    "öffentlich auffindbare GitHub-Repositorydateien",
-    "praktisch bestätigte Ergebnisse aus der laufenden Entwicklung"
-  ],
-  "repository_baseline": "Stable 0.12.2; Dev 0.13.0-dev mit direkt integrierter grafischer Entitätenverwaltung",
-  "limitation": "Ältere einzelne Project-Memory-Dateien waren über die verfügbaren GitHub-Suchzugriffe nicht vollständig abrufbar; ihr Inhalt wurde deshalb aus der vollständigen historischen Projektübergabe rekonstruiert und konsolidiert."
+  "schema_version": 1,
+  "files": {
+    "DECISIONS.jsonl": "bf5fc904b2dabf37c97b0da46b69e8d92a4cb436c0162b4102d203c062b2bec8",
+    "DEVELOPMENT_PROTOCOL.md": "51c1b4867a983771083af1fa9d3b1f61195b5c53998c5b5cda3689eaf7d3f789",
+    "FEATURE_CONTRACT.yaml": "f71535ccad9527fa3dd3d52ecd4ca9d33c1406ad110a50783413897028e37b42",
+    "INCIDENTS.jsonl": "c5031e8d2c827dea31d977bbb896e93df06d1d059b7cf010fefca8a6bc435a95",
+    "PROJECT_MEMORY.yaml": "234612c3cdbd1d7da961df7a6b14f3bf45e0c0f773723a74ba7edc32a4fe0ffa",
+    "RELEASE_LEDGER.jsonl": "eeca5d12f211f622b8b1249eb57b706e7594df9183d0e3241afed22eb1a12323",
+    "TEST_MATRIX.yaml": "adb3b2a3c709852d2f89c2eabc81c2cb25707435adf36eb4fbbf3f8ad58550c9",
+    "legacy_handovers_full.txt": "335a6d4a757077053654ed0cd3dcfb947487bfe161459d965f0131f8f3ff5876"
+  }
 }
-
-
-
