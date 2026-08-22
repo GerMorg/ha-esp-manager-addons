@@ -1,0 +1,20 @@
+{
+  "schema_version": 2,
+  "purpose": "Allumfassendes, konsolidiertes ESP-Manager-Projektgedächtnis für Repository 0.13.0",
+  "files": [
+    "PROJECT_MEMORY.yaml",
+    "FEATURE_CONTRACT.yaml",
+    "TEST_MATRIX.yaml",
+    "DECISIONS.jsonl",
+    "INCIDENTS.jsonl",
+    "RELEASE_LEDGER.jsonl",
+    "DEVELOPMENT_PROTOCOL.md",
+    "MEMORY_MANIFEST.json"
+  ],
+  "source_basis": [
+    "Historische vollständige Projektübergabe zusammen.txt",
+    "öffentlich auffindbare GitHub-Repositorydateien",
+    "praktisch bestätigte Ergebnisse aus der laufenden Entwicklung"
+  ],
+  "limitation": "Ältere einzelne Project-Memory-Dateien waren über die verfügbaren GitHub-Suchzugriffe nicht vollständig abrufbar; ihr Inhalt wurde deshalb aus der vollständigen historischen Projektübergabe rekonstruiert und konsolidiert."
+}

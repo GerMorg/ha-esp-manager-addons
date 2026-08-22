@@ -1,2 +1,39 @@
-schema_version: 1
-required: [project_crud, editor, platformio_build, mqtt_discovery_gui, sensor, binary_sensor, switch, number, cover, command_callback, state_publish, wifi_recovery]
+schema_version: 2
+contract_id: esp-manager-feature-contract
+must_preserve:
+  project_management: [create, open, configure, duplicate, backup, export, import, delete]
+  file_management: [tree, open, save, create, rename, delete, upload]
+  build: [platformio, live_log, cancel, history, sha256, retention, pin, delete]
+  install: [usb_initial_installation, web_serial, manifest_validation, multi_chip_profiles]
+  connectivity: [wifi_manager, captive_portal, router_fallback, active_reconnect, recovery_restart]
+  mqtt: [status, availability, logs, device_list, online_offline, forget_device]
+  ota: [token, dedicated_client, progress, restart, version_confirmation, persistent_jobs]
+  home_assistant_discovery: [sensor, binary_sensor, switch, number, cover, stable_unique_id]
+  bidirectional_control: [command_topic, onCommand, state_topic, publishState]
+  compatibility: [publishSensor, setupDevice, loopDevice]
+mandatory_isolation:
+  stable: {path: esp_manager, data: /config/esp_manager, port: 8099}
+  dev: {path: esp_manager_dev, data: /config/esp_manager_dev, port: 8100}
+mandatory_security:
+  - OTA-Token prüfen.
+  - Firmware serverseitig unmittelbar vor Auftrag und Auslieferung gegen SHA256 prüfen.
+  - Gerätezugangsdaten nicht mit add-on-internem core-mosquitto verwechseln.
+  - Projekt- und Dateipfade gegen Traversal schützen.
+mandatory_validation:
+  - Python-Syntaxprüfung
+  - gerendertes Hauptseiten-JavaScript
+  - gerendertes Hardwareseiten-JavaScript
+  - API-Smoke-Tests
+  - Agent-API-Kompatibilität
+  - Manifest- und Build-Artefakte
+  - ZIP-Integrität
+prohibited_regressions:
+  - Entfernen öffentlicher Agent-Methoden
+  - Verlust von Datei-Löschen, Buildabbruch, Historie, OTA oder Hardwareseite
+  - Änderung bestehender Datenpfade
+  - Verwendung absoluter Ingress-API-Pfade
+  - Teilen eines WiFiClient zwischen MQTT und HTTPUpdate
+  - Erzeugen von Geräten aus leeren retained MQTT-Payloads
+  - Änderung eingefrorener Smartmeter-Decoderlogik
+  - Änderung veröffentlichter unique_id-Werte ohne Migration
+  - Update-/Patchskripte als Lieferformat

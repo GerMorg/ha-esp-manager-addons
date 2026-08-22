@@ -1,2 +1,33 @@
-{"version":"0.13.0","channel":"stable","status":"clean-baseline"}
-{"version":"0.13.1-dev","channel":"dev","status":"next-development"}
+{"version":"0.3.0","channel":"stable-dev","status":"historical","summary":"Wrapper, Live-Build, Editor, MQTT/OTA-Prototyp, Stable/Dev-Isolation"}
+{"version":"0.4.0","channel":"stable-dev","status":"historical","summary":"Dateibaum, Upload, ZIP-Import, geschützte Systemdateien"}
+{"version":"0.5.0","channel":"stable-dev","status":"historical","summary":"Projektparameter, Bibliotheken, Buildflags, Abbruch, Historie, Backup und Export/Import"}
+{"version":"0.5.1","channel":"stable-dev","status":"historical","summary":"publishSensor und Datei-Löschen wiederhergestellt"}
+{"version":"0.5.2","channel":"stable-dev","status":"historical","summary":"Robuster Projekt-ZIP-Import"}
+{"version":"0.5.3","channel":"stable-dev","status":"historical","summary":"Nicht blockierendes WiFiManager-Portal und Router-Fallback"}
+{"version":"0.5.4","channel":"stable-dev","status":"historical","summary":"USB- und Statusseite, NodeMCU-Profil"}
+{"version":"0.5.5","channel":"stable-dev","status":"historical","summary":"Mehrchip-Profile und Initial-Images"}
+{"version":"0.5.6","channel":"stable-dev","status":"historical","summary":"Hardwareseiten-500 behoben"}
+{"version":"0.5.7","channel":"stable-dev","status":"historical","summary":"Manifestpfad-Diagnose"}
+{"version":"0.5.8","channel":"stable-dev","status":"historical","summary":"Ingress-sichere Hardwareseitenrouten"}
+{"version":"0.6.0","channel":"stable-dev","status":"historical","summary":"Saubere Architektur und getrennte Geräte-MQTT-Konfiguration"}
+{"version":"0.6.1","channel":"stable-dev","status":"historical","summary":"Hauptseiten-JavaScript korrigiert"}
+{"version":"0.6.2","channel":"stable-dev","status":"historical","summary":"Hardwareseiten-JavaScript und Manifestworkflow korrigiert"}
+{"version":"0.6.3","channel":"dev","status":"historical","summary":"Serieller Portschluss; MQTT-Authentifizierungsdiagnose"}
+{"version":"0.6.4","channel":"dev","status":"hardware-confirmed","summary":"MQTT-Verbindung und ingress-sichere Geräteauswahl"}
+{"version":"0.7.0","channel":"dev","status":"historical","summary":"OTA-Workflow, Gerätezuordnung und Serverintegrität"}
+{"version":"0.7.1","channel":"dev","status":"historical","summary":"Größerer MQTT-Puffer für OTA-Kommandos"}
+{"version":"0.7.2","channel":"dev","status":"hardware-confirmed","summary":"Separater OTA-Netzwerkclient; OTA praktisch erfolgreich"}
+{"version":"0.7.3","channel":"stable","status":"hardware-confirmed-reference","summary":"OTA 100 Prozent und Versionsbestätigung"}
+{"version":"0.8.0-dev","channel":"dev","status":"historical","summary":"Persistente OTA-Jobs, Geräteverlauf, Build-Retention, ESP32-Bootbestätigung"}
+{"version":"0.8.1-dev","channel":"dev","status":"hardware-confirmed","summary":"OTA-Persistenz, Bestätigung, Protokolldeduplizierung und Retention korrigiert"}
+{"version":"0.8.2-dev","channel":"dev","status":"historical","summary":"Gerät löschen und Online-/Offline-Logik"}
+{"version":"0.8.2.1-dev","channel":"dev","status":"historical","summary":"Fragilen Gerätekarte-Patch toleriert"}
+{"version":"0.8.3-dev","channel":"dev","status":"historical","summary":"Frischer Status als Online-Nachweis"}
+{"version":"0.8.3.1-dev","channel":"dev","status":"historical","summary":"JavaScript-f-String-Syntax korrigiert"}
+{"version":"0.8.4-dev","channel":"dev","status":"hardware-confirmed","summary":"WLAN-Recovery und Gerätedetailseite"}
+{"version":"0.9.0-dev","channel":"dev","status":"clean-consolidation","summary":"Dev-Codebasis ohne historische Patchkette"}
+{"version":"0.9.0.1-dev","channel":"dev","status":"historical","summary":"PYTHONPATH für Container-Smoke-Tests"}
+{"version":"0.10.2-dev","channel":"dev","status":"hardware-confirmed","summary":"WLAN-Recovery praktisch bestätigt"}
+{"version":"0.11.x-dev","channel":"dev","status":"hardware-confirmed","summary":"Smartmeter MQTT Discovery ohne manuelle YAML-Konfiguration praktisch bestätigt"}
+{"version":"0.12.x-dev","channel":"dev","status":"development","summary":"Allgemeine Discovery- und Befehls-API; LED-/Zahlenwert-Test vorbereitet"}
+{"version":"0.13.0","channel":"clean-baseline","status":"repository-rebuilt","summary":"Vollständige saubere Ausgangsbasis mit grafischer Entitätenverwaltung; Hardwaretest der GUI ausständig"}

@@ -1,12 +1,17 @@
 name: ESP Manager Dev
-version: 0.13.1-dev
+description: Zentrale Arduino-C++-ESP-Projektverwaltung
+version: 0.12.1.1-dev
 slug: esp_manager_dev
-description: Arduino-C++ ESP-Projektverwaltung mit MQTT Discovery
+init: false
 arch: [amd64, aarch64, armv7]
 startup: services
 boot: auto
 ingress: true
-ingress_port: 8000
+ingress_port: 8100
 panel_icon: mdi:chip
 panel_title: ESP Manager Dev
+host_network: true
 map: [config:rw]
+options: {mqtt_host: core-mosquitto, mqtt_port: 1883, mqtt_username: "", mqtt_password: "", device_mqtt_host: homeassistant.local, device_mqtt_port: 1883, device_mqtt_username: "", device_mqtt_password: "", public_base_url: "http://homeassistant.local:8100", build_retention: 5, device_offline_after: 75, wifi_reconnect_interval: 15000, wifi_recovery_restart_after: 900000}
+schema: {mqtt_host: str, mqtt_port: port, mqtt_username: "str?", mqtt_password: "password?", device_mqtt_host: str, device_mqtt_port: port, device_mqtt_username: "str?", device_mqtt_password: "password?", public_base_url: str, build_retention: "int(1,50)", device_offline_after: "int(35,600)", wifi_reconnect_interval: "int(5000,120000)", wifi_recovery_restart_after: "int(120000,3600000)"}
+ports: {8100/tcp: 8100}

@@ -1,3 +1,50 @@
-schema_version: 1
-automated: [python_compile, entity_validation, generated_header, stable_dev_isolation, no_update_tools, zip_integrity]
-hardware: {wifi_recovery: confirmed, smartmeter_discovery: confirmed, gui_entities: pending}
+schema_version: 2
+status_values: [pending, automated_pass, hardware_confirmed, failed, not_applicable]
+checks:
+  repository_layout: automated_pass
+  no_update_tools: automated_pass
+  stable_dev_isolation: automated_pass
+  python_compile: required_each_release
+  rendered_main_js: required_each_release
+  rendered_hardware_js: required_each_release
+  api_smoke: required_each_release
+  zip_integrity: required_each_release
+  project_crud: previously_confirmed
+  file_crud: previously_confirmed
+  export_import_roundtrip: previously_confirmed
+  build_live_log: previously_confirmed
+  build_cancel: previously_confirmed
+  build_history: previously_confirmed
+  build_retention: hardware_confirmed
+  pin_and_delete_build: hardware_confirmed
+  usb_flash_esp32: hardware_confirmed
+  web_serial: hardware_confirmed
+  captive_portal: hardware_confirmed
+  mqtt_connection: hardware_confirmed
+  device_online_offline: hardware_confirmed
+  forget_device: hardware_confirmed
+  wifi_recovery: hardware_confirmed
+  ota_download_install_reboot: hardware_confirmed
+  ota_version_confirmation_100_percent: hardware_confirmed
+  smartmeter_decoder: hardware_confirmed
+  smartmeter_discovery_without_manual_yaml: hardware_confirmed
+  general_discovery_gui: pending
+  switch_command_and_confirmation: pending
+  number_command_and_confirmation: pending
+  cover_command_position_confirmation: pending
+  led_number_example: pending
+  fallback_ap_password: pending
+  device_side_sha256: pending
+  esp32_rollback_partition: pending
+hardware_test_sequences:
+  led_number:
+    - ESP Manager Dev aktualisieren.
+    - Testprojekt bauen und installieren.
+    - Prüfen, dass Schalter und Number automatisch erscheinen.
+    - LED über Home Assistant schalten.
+    - Intervall setzen und bestätigten Zustand prüfen.
+    - ESP, Home Assistant und WLAN nacheinander neu starten beziehungsweise unterbrechen.
+  smartmeter_regression:
+    - Funktionierende ursprüngliche Decoderdatei verwenden.
+    - Werteempfang, Entschlüsselung und Veröffentlichung prüfen.
+    - Bestehende Entitäts-IDs, Automationen, Dashboards und Historie kontrollieren.

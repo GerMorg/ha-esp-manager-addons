@@ -1,10 +1,135 @@
-schema_version: 1
+schema_version: 2
 project_id: esp-manager
-stable: {version: 0.13.0}
-dev: {version: 0.13.1-dev}
-hardware_confirmed: {wifi_recovery: true, smartmeter_mqtt_discovery: true}
-invariants:
-  - Keine Update- oder Promotion-Werkzeuge.
-  - Keine Funktionen ungefragt entfernen.
-  - unique_id stabil halten.
-  - Smartmeter-Empfangslogik nicht verändern.
+project_name: ESP Manager Add-ons
+repository: https://github.com/GerMorg/ha-esp-manager-addons
+purpose: >-
+  Home-Assistant-Add-on zur zentralen Verwaltung von Arduino-C++-ESP-Projekten.
+  Benutzerlogik bleibt in setupDevice()/loopDevice(); der verwaltete Agent übernimmt
+  WLAN-Provisioning und Recovery, MQTT, Status, Logs, Home-Assistant-Discovery und OTA.
+channels:
+  stable:
+    directory: esp_manager
+    ingress_port: 8099
+    data_path: /config/esp_manager
+    policy: Nur praktisch bestätigte Dev-Stände übernehmen.
+  dev:
+    directory: esp_manager_dev
+    ingress_port: 8100
+    data_path: /config/esp_manager_dev
+    policy: Neue Funktionen zuerst hier implementieren und testen.
+current_baseline:
+  repository_generation: 0.13.0-clean
+  note: Vollständig konsolidierte Ausgangsbasis ohne Update-, Apply- oder Promotion-Werkzeuge.
+confirmed_hardware:
+  boards:
+    - ESP32-WROOM-32D / esp32dev
+    - NodeMCU ESP8266MOD / nodemcuv2 als vorgesehenes Testprofil
+  usb_browser_flash: confirmed_on_esp32
+  web_serial: confirmed
+  wifi_captive_portal: confirmed
+  mqtt_connection: confirmed
+  mqtt_device_status: confirmed
+  ota_installation_and_reboot: confirmed
+  ota_version_confirmation: confirmed
+  wifi_recovery_after_outage: confirmed
+  smartmeter_mqtt_discovery_without_manual_yaml: confirmed
+  smartmeter_values_in_home_assistant: confirmed
+smartmeter:
+  meter: Sagemcom T210-D, Netz Niederösterreich
+  interface: P1/M-Bus
+  serial: 2400 baud, 8N1, UART2, RX GPIO16, TX GPIO17
+  encryption: AES-128-GCM
+  status: Funktionierende ursprüngliche Empfangs- und Decoderlogik eingefroren.
+  invariant: >-
+    UART-Einstellungen, Empfangslogik, 2500-ms-Ruhezeit, Schlüssel, IV-Aufbau,
+    Headerlänge, Datenlänge, Offsets und Validierung nicht ungefragt verändern.
+  mqtt_discovery: >-
+    Praktisch bestätigt: Nach Sicherung und Entfernung aller manuellen MQTT-Sensoren
+    sowie Neustart von Home Assistant und ESP erschienen die Smartmeter-Werte weiterhin.
+architecture:
+  backend: FastAPI
+  build_system: PlatformIO
+  container: Debian/Python slim, da Alpine mit ESP32-Toolchain scheiterte
+  project_layout:
+    metadata: espmanager.yaml
+    user_files: [src/device.cpp, src/*.cpp, include/*.h, eigene_libs]
+    generated_files: [src/main.cpp, platformio.ini, lib/ESPManager]
+    build_artifacts: [firmware.bin, initial_firmware.bin, manifest.json]
+  wrapper_order:
+    setup: [ESPManager.begin, registerManagedEntities, setupDevice]
+    loop: [ESPManager.loop, loopDevice]
+mqtt:
+  internal_broker_host: core-mosquitto
+  device_broker_host: LAN-IP oder erreichbarer Hostname, typischerweise homeassistant.local
+  base_topic: espmanager/<device_id>
+  status_topics: [status, availability, log, ota/progress]
+  command_topics: [cmd/restart, cmd/ota, cmd/wifi_portal, cmd/entity/<id>]
+  discovery_topic: homeassistant/<component>/<device_id>/<id>/config
+  state_topic: espmanager/<device_id>/state/<id>
+  rules:
+    - Interne Add-on-MQTT-Daten und Geräte-MQTT-Daten getrennt halten.
+    - PubSubClient-Puffer für lange OTA-Kommandos ausreichend groß konfigurieren.
+    - MQTT und HTTPUpdate niemals denselben WiFiClient verwenden.
+    - Leere retained Löschpayloads vor Geräteerzeugung behandeln.
+    - Frische Statusmeldungen sind maßgeblicher Online-Nachweis.
+    - unique_id nach erster Veröffentlichung nicht verändern.
+discovery_api:
+  types: [sensor, binary_sensor, switch, number, cover]
+  registration: [registerSensor, registerBinarySensor, registerSwitch, registerNumber, registerCover]
+  command_callback: onCommand
+  state_confirmation: publishState
+  legacy_publish: publishSensor
+ota:
+  confirmed_flow: [received, validating, started, progress, finished, reboot, confirmed]
+  integrity:
+    server_sha256: implemented
+    transfer_md5: implemented_via_HTTPUpdate
+    device_sha256_recalculation: open
+  transport: Dedicated otaNet, getrennt von MQTT net.
+  success_rule: Erfolg durch gemeldete Firmwareversion nach Neustart bestätigen.
+  rollback:
+    esp32_boot_confirmation: implemented_in_dev_history
+    partition_and_bootloader_validation: open_hardware_task
+wifi_recovery:
+  auto_reconnect: true
+  active_retry_default_ms: 15000
+  fallback_portal_after_ms: 60000
+  controlled_restart_default_ms: 900000
+  hardware_status: confirmed
+build_retention:
+  pinned_builds_protected: true
+  default_unpinned_count: 5
+  configurable_option: build_retention
+  tested: true
+persistence:
+  ota_jobs: ota_jobs.json
+  device_history: device_history.jsonl
+  history_limit: 2000
+  device_offline_after_default_seconds: 75
+development_rules:
+  - Keine Funktionen bei Neugenerierung ungefragt entfernen.
+  - Öffentliche Agent-API rückwärtskompatibel halten, insbesondere publishSensor().
+  - Stable und Dev einschließlich Ports und Datenpfaden strikt getrennt halten.
+  - Keine Update-, Apply- oder Promotion-Werkzeuge im Repository bereitstellen.
+  - Fertige Repository-Dateien direkt in passende Pfade liefern.
+  - CHANGELOG.md in Wurzel, esp_manager und esp_manager_dev pflegen.
+  - PROJECT_HANDOVER.txt bei jeder Version vollständig aktualisieren.
+  - PROJECT_MEMORY.yaml, FEATURE_CONTRACT.yaml und TEST_MATRIX.yaml mitführen.
+  - Entscheidungs-, Fehler- und Release-Ledger append-only pflegen.
+  - Python mit py_compile prüfen.
+  - Tatsächlich gerendertes JavaScript von Haupt- und Hardwareseite mit node --check prüfen.
+  - ZIP-Integrität prüfen.
+  - Hardwareabhängige Aussagen erst nach echtem Test als bestätigt markieren.
+  - Ingress-Pfade aus dem tatsächlichen Browserpfad ableiten; keine Slash-Redirects voraussetzen.
+  - Serielle Reader vor port.close() abbrechen und entsperren.
+  - Netzwerkclients verschiedener Protokolle nicht teilen.
+open_priorities:
+  - Grafische MQTT-Discovery-Entitätenverwaltung praktisch testen und härten.
+  - Allgemeine switch/number/cover-Steuerung mit LED-/Zahlenwert-Projekt hardwaretesten.
+  - Geräteseitige SHA256-Neuberechnung ergänzen.
+  - Rollbackfähige ESP32-Partitionierung und Bootloaderkonfiguration praktisch validieren.
+  - Fallback-AP gerätespezifisch absichern.
+  - OTA-Job-Historie mit eindeutigen Job-IDs erweitern.
+  - Geräte-Detailseite und Historie weiter ausbauen.
+  - Backup-Liste und Wiederherstellung in der UI ergänzen.
+  - Sonderboardprofile dynamisch aus PlatformIO-Metadaten ableiten.

@@ -1,1 +1,21 @@
-{"id":"dec-0130-01","status":"active","decision":"Repository als vollständige saubere Ausgangsbasis ohne Update-Werkzeuge neu konsolidiert."}
+{"id":"dec-0001","status":"active","decision":"Arduino-C++ Benutzerlogik wird über setupDevice()/loopDevice() vom verwalteten Agenten getrennt."}
+{"id":"dec-0002","status":"active","decision":"Stable und Dev verwenden getrennte Add-on-Ordner, Ports und Datenpfade."}
+{"id":"dec-0003","status":"active","decision":"Debian/Python-slim wird statt Alpine verwendet, weil die ESP32-PlatformIO-Toolchain unter Alpine scheiterte."}
+{"id":"dec-0004","status":"active","decision":"Systemdateien main.cpp, platformio.ini und ESPManager-Agent werden beim Build verwaltet; Benutzerdateien bleiben getrennt."}
+{"id":"dec-0005","status":"active","decision":"Home-Assistant-Ingress-Pfade werden relativ beziehungsweise aus location.pathname erzeugt; Slash-Redirects werden nicht vorausgesetzt."}
+{"id":"dec-0006","status":"active","decision":"Öffentliche Agent-API, insbesondere publishSensor(), bleibt rückwärtskompatibel."}
+{"id":"dec-0007","status":"active","decision":"Add-on-interner MQTT-Host und aus dem LAN erreichbarer Geräte-MQTT-Host werden getrennt konfiguriert."}
+{"id":"dec-0008","status":"active","decision":"OTA-Kommandos verwenden einen vergrößerten MQTT-Puffer und kompakte Payloads."}
+{"id":"dec-0009","status":"active","decision":"MQTT und HTTPUpdate erhalten getrennte WiFiClient-Instanzen."}
+{"id":"dec-0010","status":"active","decision":"OTA-Erfolg wird nach Neustart über die gemeldete Firmwareversion bestätigt."}
+{"id":"dec-0011","status":"active","decision":"Angeheftete Builds sind vor automatischer und manueller Löschung geschützt; normale Builds unterliegen einem konfigurierbaren Limit."}
+{"id":"dec-0012","status":"active","decision":"Frische Statusmeldungen sind der maßgebliche Online-Nachweis; Availability bleibt Diagnosefeld."}
+{"id":"dec-0013","status":"active","decision":"Leere retained MQTT-Payloads werden vor Geräteerzeugung behandelt, um Phantomgeräte zu verhindern."}
+{"id":"dec-0014","status":"active","decision":"WLAN-Recovery besteht aus AutoReconnect, aktivem Retry, Fallback-Portal und kontrolliertem Neustart."}
+{"id":"dec-0015","status":"active","decision":"Stable 0.7.3 wurde als bestätigte Referenz eingefroren; spätere Promotionen erfordern Hardwarebestätigung."}
+{"id":"dec-0016","status":"active","decision":"Smartmeter-Empfangs- und Decoderlogik wird als funktionierende Referenz eingefroren und nicht ungefragt modernisiert."}
+{"id":"dec-0017","status":"active","decision":"Smartmeter MQTT Discovery verwendet rückwärtskompatible unique_id-Werte, um Entitäten und Historie zu erhalten."}
+{"id":"dec-0018","status":"active","decision":"Allgemeine MQTT Discovery unterstützt Sensor, Binärsensor, Schalter, Number und Cover."}
+{"id":"dec-0019","status":"active","decision":"Steuerbare Entitäten liefern Befehle über onCommand(); das Benutzerprogramm bestätigt den tatsächlichen Zustand mit publishState()."}
+{"id":"dec-0020","status":"active","decision":"Lieferungen bestehen aus vollständigen fertigen Repository-Dateien; keine Update-, Apply- oder Promotion-Werkzeuge."}
+{"id":"dec-0021","status":"active","decision":"Project Memory, Feature Contract, Test Matrix sowie append-only Entscheidungen, Vorfälle und Releases werden in jedem Repository mitgeführt."}

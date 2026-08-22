@@ -1,0 +1,15 @@
+schema_version: 1
+release: 0.13.0-dev
+automated:
+  patch_syntax: passed
+  patch_idempotence: passed
+  route_presence: passed
+  all_entity_types: passed
+  generated_registration_hook: passed
+  dev_version_bump: passed
+hardware:
+  addon_ui: pending
+  project_save_reload: pending
+  firmware_build: pending
+  home_assistant_discovery: pending
+  command_roundtrip: pending
