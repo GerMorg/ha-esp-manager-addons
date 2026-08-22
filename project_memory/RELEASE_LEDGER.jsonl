@@ -1,1 +1,2 @@
 {"version":"0.12.1-dev","channel":"dev","status":"generated","purpose":"Allgemeine MQTT Discovery und HA-Steuerung","hardware_validation":"pending for generic control"}
+{"version":"0.12.2","channel":"stable","status":"promoted","evidence":["project_compile_confirmed","home_assistant_control_confirmed","wifi_recovery_confirmed"]}

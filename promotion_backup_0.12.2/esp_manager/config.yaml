@@ -1,0 +1,17 @@
+name: ESP Manager
+description: Arduino and PlatformIO ESP device manager
+version: 0.7.3
+slug: esp_manager
+init: false
+arch: [amd64, aarch64, armv7]
+startup: services
+boot: auto
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:chip
+panel_title: ESP Manager
+host_network: true
+map:
+  - config:rw
+options: {}
+schema: {}

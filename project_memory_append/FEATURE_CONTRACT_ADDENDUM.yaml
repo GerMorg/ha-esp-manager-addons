@@ -1,0 +1,21 @@
+schema_version: 1
+release: 0.12.2
+promotion_contract:
+  source: esp_manager_dev
+  target: esp_manager
+  copy_scope: complete_addon
+  preserve:
+    - general_mqtt_discovery
+    - sensor_binary_sensor_switch_number_cover
+    - command_callback
+    - wifi_recovery
+    - ota
+    - project_file_build_backup_import_export_workflows
+  stable_identity:
+    slug: esp_manager
+    ingress_port: 8099
+    data_path: /config/esp_manager
+  dev_identity:
+    slug: esp_manager_dev
+    ingress_port: 8100
+    data_path: /config/esp_manager_dev

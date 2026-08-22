@@ -1,14 +1,14 @@
 # Changelog
+## 0.12.1-dev
+- Smartmeter MQTT Discovery praktisch bestätigt: Alle manuellen MQTT-Konfigurationen entfernt; nach Neustart von HA und ESP erschienen alle Werte weiterhin.
+- Allgemeine Discovery für Sensor, Binärsensor, Schalter, Zahlenwert und Cover.
+- HA-Befehle über `onCommand`; Zustandsbestätigung über `publishState`.
+- `publishSensor`, OTA und bestätigte WLAN-Recovery bleiben erhalten.
+- Smartmeter-Empfangslogik bleibt unverändert.
 
-## Stable 0.7.3
-- Bleibt unverändert und eingefroren.
-
-## Dev 0.8.2
-- Geräteübersicht zeigt wieder einen grünen Online- beziehungsweise roten Offline-Punkt.
-- Online-Zustand berücksichtigt Availability und Alter der letzten Statusmeldung.
-- `device_offline_after` ist zwischen 35 und 600 Sekunden konfigurierbar.
-- Geräte werden online zuerst und danach alphabetisch sortiert.
-- Leere retained MQTT-Löschmeldungen erzeugen kein Phantomgerät mehr.
-- Gerät löschen entfernt zusätzlich persistenten OTA-Auftrag und gespeicherte Projektzuordnung.
-- Gelöschter Gerätename wird unmittelbar aus der Hardwareauswahl entfernt.
-- Ein aktives Gerät erscheint erst mit einer neuen echten Statusmeldung wieder.
+## 0.12.2
+- Hardwarebest�tigten Dev-Stand in den Stable-Pfad �bernommen.
+- MQTT Discovery f�r Sensor, Bin�rsensor, Schalter, Number und Cover �bernommen.
+- Home-Assistant-Steuerung praktisch best�tigt.
+- WLAN-Recovery praktisch best�tigt.
+- Korrekte C++-Defaultparameter-Syntax in ESPManager.h vorausgesetzt und gepr�ft.

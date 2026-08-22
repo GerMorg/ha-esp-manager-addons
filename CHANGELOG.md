@@ -5,3 +5,10 @@
 - HA-Befehle Ã¼ber `onCommand`; ZustandsbestÃ¤tigung Ã¼ber `publishState`.
 - `publishSensor`, OTA und bestÃ¤tigte WLAN-Recovery bleiben erhalten.
 - Smartmeter-Empfangslogik bleibt unverÃ¤ndert.
+
+## 0.12.2
+- Hardwarebestätigten Dev-Stand in den Stable-Pfad übernommen.
+- MQTT Discovery für Sensor, Binärsensor, Schalter, Number und Cover übernommen.
+- Home-Assistant-Steuerung praktisch bestätigt.
+- WLAN-Recovery praktisch bestätigt.
+- Korrekte C++-Defaultparameter-Syntax in ESPManager.h vorausgesetzt und geprüft.
